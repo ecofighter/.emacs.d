@@ -1,0 +1,6 @@
+elpa/
+autosavelist
+*~
+*.elc
+*.bak
+network-security.data
