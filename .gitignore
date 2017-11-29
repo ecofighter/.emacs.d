@@ -4,3 +4,8 @@ autosavelist
 *.elc
 *.bak
 network-security.data
+*#*#
+recentf
+irony/
+eshell/
+bookmarks
