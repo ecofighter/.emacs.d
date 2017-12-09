@@ -1,4 +1,5 @@
 (setup-include "recentf")
+
 (add-hook 'after-init-hook #'recentf-mode)
 (setq-default fill-column 80)
 (add-hook 'text-mode-hook #'turn-on-auto-fill)
@@ -9,4 +10,5 @@
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 2)
 (defalias 'c-basic-offset 'tab-width)
+
 (provide-file)
