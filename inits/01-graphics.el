@@ -2,8 +2,8 @@
 (install-when-compile 'nlinum)
 (install-when-compile 'hl-line)
 
-(add-to-list 'default-frame-alist '(font . "Ricty-12.0"))
-(set-face-attribute 'default t :font "Ricty-12.0")
+(add-to-list 'default-frame-alist '(font . "Ricty-10.5"))
+(set-face-attribute 'default t :font "Ricty-10.5")
 (setq inhibit-startup-screen t)
 (add-hook 'after-init-hook #'(lambda ()
                                (progn
