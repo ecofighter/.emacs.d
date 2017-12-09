@@ -7,13 +7,12 @@
                                         ("Level" 8 flycheck-error-list-entry-level-<)
                                         ("ID" 20 t)
                                         ("Message (Checker)" 0 t)])
-  (add-to-list 'display-buffer-alist
-               `(,(rx bos "*Flycheck errors*" eos)
-                 (display-buffer-reuse-window)
-                 (side            . bottom)
-                 (window-height   . 0.33)))
   (global-flycheck-mode)
   (evil-leader/set-key
     "e l" 'flycheck-list-errors))
+
+(setup-expecting "flycheck"
+  (setup-expecting "shackle"
+    (add-to-list 'shackle-rules '("*Flycheck errors*" :align below :ratio 0.2))))
 
 (provide-file)
