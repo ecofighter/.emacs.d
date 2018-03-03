@@ -7,6 +7,9 @@
 (install-when-compile 'flycheck-irony)
 (install-when-compile 'clang-format)
 
+
+(add-hook 'c-mode-hook #'yas-minor-mode-on)
+(add-hook 'c-mode-hook #'flycheck-mode-on-safe)
 (add-hook 'c++-mode-hook #'yas-minor-mode-on)
 (add-hook 'c++-mode-hook #'flycheck-mode-on-safe)
 

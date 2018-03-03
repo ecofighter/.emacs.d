@@ -1,5 +1,5 @@
 (setup-include "recentf")
-
+(setq make-backup-files nil)
 (add-hook 'after-init-hook #'recentf-mode)
 (setq-default fill-column 80)
 (add-hook 'text-mode-hook #'turn-on-auto-fill)

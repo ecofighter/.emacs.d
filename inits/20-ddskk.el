@@ -4,11 +4,11 @@
   (setq default-input-method "japanese-skk"))
 
 (setup-lazy '(skk-mode) "skk"
-  (setq skk-kutouten-type 'en)
-  (setq skk-use-azik t)
-  (setq skk-user-directory "~/.skk-jisyo")
-  (setq skk-server-host "127.0.0.1")
-  (setq skk-server-portnum 1178))
+  (setq-default skk-kutouten-type '("．" . "，"))
+  (setq-default skk-use-azik t)
+  (setq-default skk-user-directory "~/.skk-jisyo")
+  (setq-default skk-server-host "127.0.0.1")
+  (setq-default skk-server-portnum 1178))
 
 (setup-after "skk"
   (setup "context-skk")
