@@ -5,9 +5,14 @@
 ;; (install-when-compile 'lsp-haskell)
 ;; (install-when-compile 'company-lsp)
 
-(add-hook 'haskell-mode-hook #'(lambda ()
-                                 (setq tab-width 2)
-                                 (setq indent-tabs-mode nil)))
+(add-hook 'haskell-mode-hook
+          #'(lambda ()
+              (setq tab-width 2)
+              (setq indent-tabs-mode nil)
+              (add-hook 'before-save-hook #'(lambda ()
+                                              (setup-expecting "hindent"
+                                                (hindent-reformat-buffer))
+                                              (haskell-mode-stylish-buffer)))))
 (add-hook 'haskell-mode-hook #'haskell-indentation-mode)
 
 (defun haskell-evil-open-above ()
