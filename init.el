@@ -71,6 +71,7 @@
 (setup-include "30-c++")
 (setup-include "30-bison")
 (setup-include "30-latex")
+(setup-include "30-org")
 (setup-include "30-common-lisp")
 (setup-include "30-haskell")
 (setup-include "30-agda")
