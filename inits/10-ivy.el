@@ -12,6 +12,7 @@
     (setup "avy-migemo-e.g.swiper"
       (avy-migemo-mode 1)))
   (evil-leader/set-key
+    "i i" 'counsel-imenu
     "i f" 'counsel-find-file
     "i r" 'counsel-recentf
     "i b" 'ivy-switch-buffer
