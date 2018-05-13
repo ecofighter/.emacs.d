@@ -4,6 +4,7 @@
 (install-when-compile 'ocp-indent)
 (install-when-compile 'utop)
 
+
 (setup-lazy '(tuareg-mode) "tuareg")
 (setup-expecting "tuareg"
   (add-to-list 'auto-mode-alist '("\\.ml\\'" . tuareg-mode))
@@ -33,4 +34,7 @@
 
 (setup-lazy '(ocp-setup-indent) "ocp-indent")
 (add-hook 'tuareg-mode-hook #'ocp-setup-indent)
+
+(setup-after "smartparens"
+  (sp-local-pair '(tuareg-mode) "'" "'" :actions nil))
 (provide-file)
