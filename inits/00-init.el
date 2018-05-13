@@ -1,3 +1,4 @@
+(setenv "LANG" "C")
 (setup-include "recentf")
 (setq make-backup-files nil)
 (add-hook 'after-init-hook #'recentf-mode)
