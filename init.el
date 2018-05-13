@@ -80,6 +80,7 @@
 (setup-include "30-markdown")
 (setup-include "30-rust")
 (setup-include "30-cmake")
+(setup-include "30-coq")
 
 (install-when-compile 'package-utils)
 (eval-when-compile
