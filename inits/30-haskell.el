@@ -2,17 +2,18 @@
 (install-when-compile 'intero)
 (install-when-compile 'hindent)
 ;; (install-when-compile 'lsp-mode)
+;; (install-when-compile 'lsp-ui)
 ;; (install-when-compile 'lsp-haskell)
 ;; (install-when-compile 'company-lsp)
 
 (add-hook 'haskell-mode-hook
           #'(lambda ()
               (setq tab-width 2)
-              (setq indent-tabs-mode nil)
-              (add-hook 'before-save-hook #'(lambda ()
-                                              (setup-expecting "hindent"
-                                                (hindent-reformat-buffer))
-                                              (haskell-mode-stylish-buffer)))))
+              (setq indent-tabs-mode nil)))
+              ;; (add-hook 'before-save-hook #'(lambda ()
+              ;;                                 (setup-expecting "hindent"
+              ;;                                   (hindent-reformat-buffer))
+              ;;                                 (haskell-mode-stylish-buffer)))))
 (add-hook 'haskell-mode-hook #'haskell-indentation-mode)
 
 (defun haskell-evil-open-above ()
@@ -58,12 +59,11 @@
 ;; (setup-expecting "lsp-haskell"
 ;;   (add-hook 'haskell-mode-hook #'(lambda ()
 ;;                                    (setup "lsp-mode"
+;;                                      (setup-expecting "lsp-ui"
+;;                                        (add-hook 'lsp-mode-hook #'lsp-ui-mode))
 ;;                                      (setup-after "company"
 ;;                                        (setup "company-lsp"
-;;                                          (setf company-backends (cons #'company-lsp (delete #'company-capf company-backends)))))
-;;                                      (setup-after "flycheck"
-;;                                        (setup "lsp-flycheck"
-;;                                          (lsp-enable-flycheck))))
+;;                                          (setf company-backends (cons #'company-lsp (delete #'company-capf company-backends))))))
 ;;                                    (setup "lsp-haskell")
 ;;                                    (lsp-haskell-enable))))
 
