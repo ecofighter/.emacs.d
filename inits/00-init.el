@@ -12,4 +12,6 @@
 (setq-default tab-width 2)
 (defalias 'c-basic-offset 'tab-width)
 
+(setq vc-handled-backends '())
+
 (provide-file)
