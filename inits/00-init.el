@@ -1,4 +1,4 @@
-(setenv "LANG" "C")
+(setenv "LANG" "ja-JP.utf-8")
 (setup-include "recentf")
 (setq make-backup-files nil)
 (add-hook 'after-init-hook #'recentf-mode)

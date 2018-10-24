@@ -28,7 +28,7 @@
 (setup-include "hl-line"
   (add-hook 'after-init-hook #'global-hl-line-mode 1))
 
-(setup-include "gruvbox-theme"
+(setup-expecting "gruvbox-theme"
   (load-theme 'gruvbox-dark-soft t)
   (enable-theme 'gruvbox-dark-soft))
 

@@ -1,11 +1,8 @@
 (install-when-compile 'ddskk)
 
 (setup-expecting "skk"
-  (setup-include "skk-autoloads")
   (global-set-key (kbd "C-x j") 'skk-mode)
-  (global-set-key (kbd "C-x J") 'skk-auto-fill-mode)
-  ;; (setq default-input-method "japanese-skk")
-  )
+  (global-set-key (kbd "C-x J") 'skk-auto-fill-mode))
 
 (setup-after "skk"
   (setq-default skk-kutouten-type '("．" . "，"))

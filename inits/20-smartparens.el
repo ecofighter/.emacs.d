@@ -1,10 +1,11 @@
 (install-when-compile 'smartparens)
 (install-when-compile 'evil-smartparens)
 
-(setup-include "smartparens-config"
-  (smartparens-global-mode 1))
+(setup-expecting "smartparens"
+  (add-hook 'after-init-hook #'smartparens-global-mode)
+  (setup-expecting "evil-smartparens"
+    (setup-after "evil"
+      (evil-smartparens-mode 1))))
 
-(setup-include "evil-smartparens"
-  (evil-smartparens-mode 1))
 
 (provide-file)

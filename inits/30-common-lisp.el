@@ -1,7 +1,7 @@
 (install-when-compile 'slime)
 (install-when-compile 'slime-company)
 
-(setup-lazy '(slime slime-connect slime-setup slime-repl-mode) "slime"
+(setup-after "slime"
   (setf slime-lisp-implementations
         `((sbcl    ("sbcl" "--dynamic-space-size" "2000"))
           (roswell ("ros" "-Q" "run"))))
@@ -15,12 +15,12 @@
   (slime-setup '(slime-repl slime-fancy slime-company)))
 
 (setup-expecting "slime"
-  (setup-expecting "shackle"
+  (setup-after "shackle"
     (add-to-list 'shackle-rules '("\\`\\*slime.*?\\*\\'" :regexp t :popup t))
     ;; (add-to-list 'shackle-rules '("*inferior-lisp*" :noselect t :align bottom))
     (add-to-list 'shackle-rules '("*slime-repl-help*" :popup t))))
 
-(with-eval-after-load 'evil-leader
+(setup-after "evil-leader"
   (evil-leader/set-key-for-mode 'lisp-mode
     "m '" 'slime))
 

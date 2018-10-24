@@ -33,15 +33,12 @@
   "o" 'haskell-evil-open-below
   "O" 'haskell-evil-open-above)
 
-(setup-lazy '(intero-mode) "intero")
 (setup-expecting "intero"
   (add-hook 'haskell-mode-hook #'intero-mode))
 (setup-expecting "flycheck"
   (add-hook 'intero-mode-hook #'(lambda ()
                                   (flycheck-add-next-checker 'intero '(warning . haskell-hlint)))))
 
-(setup-lazy '(hindent-mode) "hindent"
-  (setq hindent-extra-args '()))
 (setup-expecting "hindent"
   (add-hook 'haskell-mode-hook #'hindent-mode))
 

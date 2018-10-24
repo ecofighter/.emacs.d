@@ -18,7 +18,6 @@
   `(dolist (mode '(c++-mode c-mode))
      ,@body))
 
-(setup-lazy '(cmake-ide-setup) "cmake-ide")
 (setup-expecting "cmake-ide"
   (dolist (hook '(c++-mode-hook c-mode-hook))
     (add-hook hook #'(lambda ()
@@ -42,11 +41,9 @@
    (evil-leader/set-key-for-mode mode
      "m r r" 'rtags-find-references-at-point)))
 
-(setup-lazy '(irony-mode) "irony"
-  (setup-after "cmake-ide"
-    (irony-cdb-autosetup-compile-options)))
-
 (setup-expecting "irony"
+  (setup-after "cmake-ide"
+    (irony-cdb-autosetup-compile-options))
   (dolist (hook '(c++-mode-hook c-mode-hook))
     (add-hook hook #'irony-mode)))
 
@@ -67,11 +64,9 @@
                 #'(lambda ()
                     (add-to-list 'company-backends 'company-irony-c-headers))))))
 
-(setup-lazy '(flycheck-irony-setup) "flycheck-irony")
 (setup-after "flycheck"
   (add-hook 'irony-mode-hook #'flycheck-irony-setup))
 
-(setup-lazy '(clang-format-buffer) "clang-format")
 (do-c-and-c++-mode
  (evil-leader/set-key-for-mode mode
    "m =" 'clang-format-buffer))
