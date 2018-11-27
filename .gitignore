@@ -8,4 +8,5 @@ network-security.data
 recentf
 irony/
 eshell/
+.cache/
 bookmarks
