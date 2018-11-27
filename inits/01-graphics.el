@@ -26,7 +26,7 @@
   (setq nlinum-format "%4d"))
 
 (setup-include "hl-line"
-  (add-hook 'after-init-hook #'global-hl-line-mode 1))
+  (add-hook 'after-init-hook #'global-hl-line-mode))
 
 (setup-expecting "gruvbox-theme"
   (load-theme 'gruvbox-dark-soft t)

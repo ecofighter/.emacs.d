@@ -1,4 +1,4 @@
-(setenv "LANG" "ja-JP.utf-8")
+;; (setenv "LANG" "en_US.UTF-8")
 (setup-include "recentf")
 (setq make-backup-files nil)
 (add-hook 'after-init-hook #'recentf-mode)
@@ -13,5 +13,7 @@
 (defalias 'c-basic-offset 'tab-width)
 
 (setq vc-handled-backends '())
+
+(add-to-list 'load-path "~/.emacs.d/dev")
 
 (provide-file)

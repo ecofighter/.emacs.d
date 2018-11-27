@@ -1,5 +1,5 @@
 (install-when-compile 'rg)
-(setup-expecting "ripgrep"
+(setup-expecting "rg"
   (evil-leader/set-key
     "g r" 'rgrep
     "g p" 'rg-project

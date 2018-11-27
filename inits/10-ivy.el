@@ -8,10 +8,9 @@
   (ivy-mode 1)
   (setq ivy-use-virtual-buffers t)
   (setq enable-recursive-minibuffers t)
-  (setup-expecting "avy-migemo"
-    (setup-in-idle "avy-migemo-e.g.swiper")
-    (setup-after "avy-migemo-e.g.swiper"
-      (avy-migemo-mode 1)))
+  (setup "avy-migemo"
+    (setup "avy-migemo-e.g.swiper")
+                                 (avy-migemo-mode 1))
   (evil-leader/set-key
     "i i" 'counsel-imenu
     "i f" 'counsel-find-file

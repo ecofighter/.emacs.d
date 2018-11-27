@@ -1,6 +1,7 @@
 (install-when-compile 'company)
 
 (setup-after "company"
+  (add-to-list 'company-transformers 'company-sort-prefer-same-case-prefix)
   (setq company-selection-wrap-around t)
   (setq company-backends '(company-capf company-files company-dabbrev))
   (setq company-minimum-prefix-length 2)
