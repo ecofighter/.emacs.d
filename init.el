@@ -70,6 +70,7 @@
 (setup-include "20-rainbow-delimiters")
 (setup-include "20-highlight-indent-guides")
 (setup-include "20-magit")
+(setup-include "31-lsp")
 (setup-include "30-c++")
 (setup-include "30-bison")
 (setup-include "30-latex")
@@ -84,7 +85,7 @@
 (setup-include "30-rust")
 (setup-include "30-cmake")
 (setup-include "30-coq")
-(setup-include "30-sml")
+;; (setup-include "30-sml")
 (setup-include "30-lean")
 
 (install-when-compile 'package-utils)
@@ -118,7 +119,7 @@
  '(lsp-haskell-process-path-hie "hie-wrapper")
  '(package-selected-packages
    (quote
-    (omnisharp highlight-indent-guides fsharp-mode eglot sml-mode company-coq cmake-mode hindent intero lsp-ui winner-mode rg edit-indirect ripgrep company-lean lean-mode migemo which-key utop use-package tuareg spaceline smart-mode-line slime-company shackle rainbow-delimiters powerline-evil package-utils ocp-indent nlinum markdown-mode magit lsp-ocaml lsp-haskell key-chord ivy-rtags hl-todo gruvbox-theme flycheck-ocaml flycheck-irony exec-path-from-shell evil-tabs evil-smartparens evil-leader evil-escape ddskk counsel company-rtags company-quickhelp company-lsp company-irony-c-headers company-irony company-auctex cmake-ide clang-format bison-mode auctex-latexmk)))
+    (cargo rust-mode yaml-mode omnisharp highlight-indent-guides fsharp-mode eglot sml-mode company-coq cmake-mode hindent intero lsp-ui winner-mode rg edit-indirect ripgrep company-lean lean-mode migemo which-key utop use-package tuareg spaceline smart-mode-line slime-company shackle rainbow-delimiters powerline-evil package-utils ocp-indent nlinum markdown-mode magit lsp-ocaml lsp-haskell key-chord ivy-rtags hl-todo gruvbox-theme flycheck-ocaml flycheck-irony exec-path-from-shell evil-tabs evil-smartparens evil-leader evil-escape ddskk counsel company-rtags company-quickhelp company-lsp company-irony-c-headers company-irony company-auctex cmake-ide clang-format bison-mode auctex-latexmk)))
  '(pdf-view-midnight-colors (quote ("#fdf4c1" . "#32302f")))
  '(winner-mode t))
 (custom-set-faces

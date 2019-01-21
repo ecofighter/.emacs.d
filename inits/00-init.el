@@ -13,6 +13,8 @@
 (defalias 'c-basic-offset 'tab-width)
 
 (setq vc-handled-backends '())
+(setq-default truncate-lines t)
+(setq-default truncate-partial-width-windows t)
 
 (add-to-list 'load-path "~/.emacs.d/dev")
 

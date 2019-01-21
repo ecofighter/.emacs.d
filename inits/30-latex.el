@@ -6,16 +6,16 @@
 (eval-after-load "latex-math-preview"
   '(progn
      (setq latex-math-preview-command-path-alist
-           '((latex . "dvilualatex")
+           '((platex . "uplatex")
              (pdflatex . "lualatex")
              (dvipng . "dvipng")
              (dvips . "dvips")
              (gs . "gs")))
-     (setq latex-math-preview-tex-to-png-for-preview '(latex dvipng))
-     (setq latex-math-preview-tex-to-png-for-save '(latex dvipng))
-     (setq latex-math-preview-tex-to-eps-for-save '(latex dvips-to-eps))
-     (setq latex-math-preview-tex-to-ps-for-save '(latex dvips-to-ps))
-     (setq latex-math-preview-beamer-to-png '(latex dvipng))
+     (setq latex-math-preview-tex-to-png-for-preview '(platex dvipng))
+     (setq latex-math-preview-tex-to-png-for-save '(platex dvipng))
+     (setq latex-math-preview-tex-to-eps-for-save '(platex dvips-to-eps))
+     (setq latex-math-preview-tex-to-ps-for-save '(platex dvips-to-ps))
+     (setq latex-math-preview-beamer-to-png '(platex dvipng))
      (setq latex-math-preview-convert-dvipng-color-mode t)
      (setq latex-math-preview-select-preview-window nil)))
 
@@ -25,9 +25,9 @@
   (add-hook 'LaTeX-mode-hook #'flycheck-mode-on-safe)
   (add-hook 'LaTeX-mode-hook #'TeX-source-correlate-mode)
   (add-hook 'LaTeX-mode-hook #'LaTeX-math-mode)
-  (add-hook 'LaTeX-mode-hook #'(lambda () (TeX-engine-set "luatex")
-                                 (load-theme 'gruvbox-light-soft)
-                                 (enable-theme 'gruvbox-light-soft)))
+  (add-hook 'LaTeX-mode-hook #'(lambda () (TeX-engine-set "luatex")))
+                                 ;; (load-theme 'gruvbox-light-soft)
+                                 ;; (enable-theme 'gruvbox-light-soft)))
   (add-hook 'LaTeX-mode-hook #'(lambda () (setup-after "company"
                                             (company-auctex-init))))
   (defun build-with-latexmk ()
@@ -49,7 +49,7 @@
   (setq TeX-view-program-selection '((output-pdf "Zathura"))))
 
 (setup-after "auctex-latexmk"
-  (setq auctex-latexmk-inherit-TeX-PDF-mode t))
+  (setq auctex-latexmk-inherit-TeX-PDF-mode nil))
 
 ;; (setup-after "latex-math-preview"
 ;;   (setq latex-math-preview-command-path-alist
