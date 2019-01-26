@@ -14,23 +14,27 @@
 
 (setup-include "whitespace"
   (setq-default show-trailing-whitespace t)
-  (setq whitespace-style '(face
+  (setq-default whitespace-style '(face
                            trailing
                            indentation
                            tab-mark))
   (set-face-background 'trailing-whitespace "#af3a03")
   (add-hook 'after-init-hook #'global-whitespace-mode))
 
-(setup-include "nlinum"
+(setup-expecting "nlinum"
   (add-hook 'after-init-hook #'global-nlinum-mode)
-  (setq nlinum-format "%4d"))
+  (setq-default nlinum-format "%4d"))
 
-(setup-include "hl-line"
+(setup-expecting "hl-line"
   (add-hook 'after-init-hook #'global-hl-line-mode))
 
 (setup-expecting "gruvbox-theme"
-  (load-theme 'gruvbox-dark-soft t)
-  (enable-theme 'gruvbox-dark-soft))
+  (if (daemonp)
+      (add-hook 'after-make-frame-functions
+                (lambda (frame)
+                  (with-selected-frame frame
+                    (load-theme 'gruvbox t))))
+    (load-theme 'gruvbox)))
 
 (add-hook 'after-init-hook #'(lambda () (progn
                                           (show-paren-mode 1)

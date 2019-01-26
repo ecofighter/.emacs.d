@@ -1,6 +1,7 @@
 (install-when-compile 'evil)
 (install-when-compile 'evil-leader)
 (install-when-compile 'evil-escape)
+(install-when-compile 'evil-collection)
 
 (defun evil-swap-key (map key1 key2)
   ;; MAP中のKEY1とKEY2を入れ替え
@@ -11,10 +12,16 @@
     (define-key map key2 def1)))
 
 (setup-expecting "evil"
-  (add-hook 'after-init-hook #'evil-mode))
+  (setq-default evil-want-keybinding nil)
+  (setq-default evil-want-C-i-jump nil)
+  (add-hook 'after-init-hook #'evil-mode)
+  (add-hook 'evil-mode-hook #'evil-collection-init))
 (setup-after "evil"
   (evil-swap-key evil-motion-state-map "j" "gj")
-  (evil-swap-key evil-motion-state-map "k" "gk"))
+  (evil-swap-key evil-motion-state-map "k" "gk")
+  (define-key evil-normal-state-map (kbd "M-.")
+    `(menu-item "" evil-repeat-pop :filter
+                ,(lambda (cmd) (if (eq last-command 'evil-repeat-pop) cmd)))))
 
 (setup-expecting "evil-leader"
   (add-hook 'after-init-hook #'(lambda ()

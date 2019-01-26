@@ -1,6 +1,6 @@
 (install-when-compile 'haskell-mode)
-(install-when-compile 'intero)
-(install-when-compile 'hindent)
+;; (install-when-compile 'intero)
+;; (install-when-compile 'hindent)
 (install-when-compile 'lsp-mode)
 (install-when-compile 'lsp-ui)
 (install-when-compile 'lsp-haskell)
@@ -38,15 +38,17 @@
   "o" 'haskell-evil-open-below
   "O" 'haskell-evil-open-above)
 
-;; (setup "lsp-haskell"
-;;   (setenv "cabal_helper_libexecdir" "/home/haneta/.local/libexec")
-;;   (add-hook 'lsp-mode-hook #'lsp-ui-mode)
-;;   (add-hook 'haskell-mode-hook #'lsp-haskell-enable))
+(setup "lsp-haskell"
+  ;; (setenv "cabal_helper_libexecdir" "/home/haneta/.local/libexec")
+  (add-hook 'haskell-mode-hook #'lsp))
 
-(setup-expecting "intero"
-  (add-hook 'haskell-mode-hook #'intero-mode))
-(setup-expecting "flycheck"
-  (add-hook 'intero-mode-hook #'(lambda ()
-                                  (flycheck-add-next-checker 'intero '(warning . haskell-hlint)))))
+(setup-after "flycheck"
+  (setup-after "lsp-ui-flycheck"
+    (flycheck-add-mode 'lsp-ui 'haskell-mode)))
+;; (setup-expecting "intero"
+;;   (add-hook 'haskell-mode-hook #'intero-mode))
+;; (setup-expecting "flycheck"
+;;   (add-hook 'intero-mode-hook #'(lambda ()
+;;                                   (flycheck-add-next-checker 'intero '(warning . haskell-hlint)))))
 
 (provide-file)

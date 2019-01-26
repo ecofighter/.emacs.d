@@ -10,5 +10,7 @@
 (setup-after "flycheck"
   (setup-after "lsp-ui-flycheck"
     (flycheck-add-mode 'lsp-ui 'rust-mode)))
+(setup-after "rust-mode"
+  (setq rust-indent-offset 2))
 
 (provide-file)
