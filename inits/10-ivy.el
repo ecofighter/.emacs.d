@@ -16,7 +16,8 @@
     "i f" 'counsel-find-file
     "i r" 'counsel-recentf
     "i b" 'ivy-switch-buffer
-    "i g" 'counsel-git-grep
+    "i r" 'counsel-rg
+    "i g" 'counsel-git
     "i p p" 'counsel-projectile-switch-project
     "i p f" 'counsel-projectile-find-file
     "i p b" 'counsel-projectile-switch-to-buffer

@@ -1,7 +1,7 @@
 (install-when-compile 'auctex)
 (install-when-compile 'auctex-latexmk)
 (install-when-compile 'company-auctex)
-;; (install-when-compile 'latex-math-preview)
+(install-when-compile 'latex-math-preview)
 (autoload 'latex-math-preview-expression "latex-math-preview" nil t)
 (eval-after-load "latex-math-preview"
   '(progn

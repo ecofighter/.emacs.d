@@ -10,6 +10,10 @@
               #'(lambda ()
                   (evil-org-set-key-theme)))
     (setup "evil-org-agenda"
-      (evil-org-agenda-set-keys))))
+      (evil-org-agenda-set-keys)))
+  (add-hook 'org-mode-hook
+            #'(lambda ()
+                (add-hook 'completion-at-point-functions
+                          #'pcomplete-completions-at-point nil t))))
 
 (provide-file)

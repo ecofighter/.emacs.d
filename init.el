@@ -31,12 +31,14 @@
              (setq *my/package-refreshed* t))
            (package-install ,package))))))
 
-(defun file-name-to-symbol (file-name)
+(defun file-name-to-symbol (filename)
+  "FILENAME to symbol."
   (intern
    (file-name-nondirectory
-    (file-name-sans-extension file-name))))
+    (file-name-sans-extension filename))))
 
 (defun provide-file ()
+  "Provide filename."
   (provide
    (file-name-to-symbol
     (or load-file-name
@@ -112,7 +114,7 @@
     ("7f89ec3c988c398b88f7304a75ed225eaac64efa8df3638c815acc563dfd3b55" "a622aaf6377fe1cd14e4298497b7b2cae2efc9e0ce362dade3a58c16c89e089c" "595617a3c537447aa7e76ce05c8d43146a995296ea083211225e7efc069c598f" "a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" default)))
  '(package-selected-packages
    (quote
-    (evil-org multi-term evil-collection org-pomodoro cargo rust-mode yaml-mode omnisharp highlight-indent-guides fsharp-mode eglot sml-mode company-coq cmake-mode lsp-ui winner-mode rg edit-indirect ripgrep company-lean lean-mode migemo which-key utop use-package tuareg spaceline smart-mode-line slime-company shackle rainbow-delimiters powerline-evil package-utils ocp-indent nlinum markdown-mode magit lsp-ocaml lsp-haskell key-chord ivy-rtags hl-todo gruvbox-theme flycheck-ocaml flycheck-irony exec-path-from-shell evil-tabs evil-smartparens evil-leader evil-escape ddskk counsel company-rtags company-quickhelp company-lsp company-irony-c-headers company-irony company-auctex cmake-ide clang-format bison-mode auctex-latexmk)))
+    (image+ evil-terminal-cursor-changer latex-math-preview evil-org multi-term evil-collection org-pomodoro cargo rust-mode yaml-mode omnisharp highlight-indent-guides fsharp-mode eglot sml-mode company-coq cmake-mode lsp-ui winner-mode rg edit-indirect ripgrep company-lean lean-mode migemo which-key utop use-package tuareg spaceline smart-mode-line slime-company shackle rainbow-delimiters powerline-evil package-utils ocp-indent nlinum markdown-mode magit lsp-ocaml lsp-haskell key-chord ivy-rtags hl-todo gruvbox-theme flycheck-ocaml flycheck-irony exec-path-from-shell evil-tabs evil-smartparens evil-leader evil-escape ddskk counsel company-rtags company-quickhelp company-lsp company-irony-c-headers company-irony company-auctex cmake-ide clang-format bison-mode auctex-latexmk)))
  '(pdf-view-midnight-colors (quote ("#fdf4c1" . "#32302f")))
  '(winner-mode t))
 (custom-set-faces
@@ -131,3 +133,6 @@
  '(agda2-highlight-primitive-face ((t (:foreground "#CE4045"))))
  '(agda2-highlight-primitive-type-face ((t (:foreground "#E6DB74"))))
  '(font-lock-comment-face ((t (:foreground "#75715E")))))
+
+(provide 'init)
+;;; init.el ends here
