@@ -16,4 +16,12 @@
                 (add-hook 'completion-at-point-functions
                           #'pcomplete-completions-at-point nil t))))
 
+(with-eval-after-load 'org-clock
+  (defun my:org-clock-out-and-save ()
+    "save buffers and stop clock when clocking."
+    (when (org-clocking-p)
+      (org-clock-out)
+      (save-some-buffers)))
+  (add-hook 'kill-emacs-hook #'my:org-clock-out-and-save))
+
 (provide-file)
