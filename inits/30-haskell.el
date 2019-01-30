@@ -38,7 +38,8 @@
   "o" 'haskell-evil-open-below
   "O" 'haskell-evil-open-above)
 
-(setup "lsp-haskell"
+(with-eval-after-load 'haskell-mode
+  (setup "lsp-haskell")
   ;; (setenv "cabal_helper_libexecdir" "/home/haneta/.local/libexec")
   (add-hook 'haskell-mode-hook #'lsp))
 

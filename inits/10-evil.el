@@ -18,7 +18,8 @@
   (add-hook 'after-init-hook #'evil-mode)
   (add-hook 'evil-mode-hook #'evil-collection-init))
 (setup-after "evil"
-  (define-key evil-insert-state-map (kbd "C-h") 'delete-backward-char)
+  (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char)
+  (define-key evil-insert-state-map (kbd "C-d") 'evil-delete-char)
   (evil-swap-key evil-motion-state-map "j" "gj")
   (evil-swap-key evil-motion-state-map "k" "gk")
   (define-key evil-normal-state-map (kbd "M-.")

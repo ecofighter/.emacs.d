@@ -3,8 +3,8 @@
 (install-when-compile 'hl-line)
 
 (add-to-list 'default-frame-alist '(alpha . 100))
-(add-to-list 'default-frame-alist '(font . "Source Han Code JP-10"))
-(set-face-attribute 'default t :font "Source Han Code JP-10")
+(add-to-list 'default-frame-alist '(font . "Noto Sans Mono CJK JP-12"))
+(set-face-attribute 'default t :font "Noto Sans Mono CJK JP-12")
 (setq inhibit-startup-screen t)
 (add-hook 'after-init-hook #'(lambda ()
                                (progn
