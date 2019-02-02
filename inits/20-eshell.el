@@ -1,8 +1,12 @@
+;;; 20-eshell.el -- eshell; -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Code:
+(require 'mymacros)
 (install-when-compile 'eshell)
 
-(setup-expecting "eshell"
-  (setup-expecting "evil-leader"
-    (evil-leader/set-key
-      "'" 'eshell)))
+(eval-after-load "evil-leader"
+  (evil-leader/set-key
+    "'" 'eshell))
 
-(provide-file)
+(provide '20-eshell)
+;;; 20-eshell ends here

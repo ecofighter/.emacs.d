@@ -8,7 +8,7 @@
                 (add-to-list (make-local-variable 'company-backends) '(company-yasnippet company-elisp)))))
 
 (with-eval-after-load "flycheck"
-  (setq flycheck-emacs-lisp-load-path 'inherit))
+  (setq-default flycheck-emacs-lisp-load-path 'inherit))
 
 (provide '30-emacslisp)
 ;;; 30-emacslisp.el ends here

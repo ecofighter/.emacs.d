@@ -1,3 +1,7 @@
+;;; 20-company.el -- auto completion; -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Code:
+(require 'mymacros)
 (install-when-compile 'company)
 
 (with-eval-after-load "company"
@@ -15,4 +19,5 @@
 
 (add-hook 'after-init-hook 'global-company-mode)
 
-(provide-file)
+(provide '20-company)
+;;; 20-company.el ends here

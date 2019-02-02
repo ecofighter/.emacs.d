@@ -1,7 +1,10 @@
+;;; 20-magit -- git tool;
+;;; Commentary:
+;;; Code:
+(require 'mymacros)
 (install-when-compile 'magit)
 
-(setup-expecting "magit"
-  (setup-expecting "evil-leader"
-    (global-set-key (kbd "C-x g") 'magit-status)))
+(global-set-key (kbd "C-x g") 'magit-status)
 
-(provide-file)
+(provide '20-magit)
+;;; 20-magit.el ends here

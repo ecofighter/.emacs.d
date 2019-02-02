@@ -1,5 +1,6 @@
-;; (load-file (let ((coding-system-for-read 'utf-8))
-;;                 (shell-command-to-string "agda-mode locate")))
+;;; 30-agda.el -- agda; -*- lexical-binding: t -*-
+;;; Commentary:
+;;; Code:
 
 (autoload 'agda2-mode (! (let ((coding-system-for-read 'utf-8))
                            (shell-command-to-string "agda-mode locate"))))
@@ -24,4 +25,5 @@
    '(agda2-highlight-primitive-type-face ((t (:foreground "#E6DB74"))))
    '(font-lock-comment-face ((t (:foreground "#75715E"))))))
 
-(provide-file)
+(provide '30-agda)
+;;; 30-agda.el ends here

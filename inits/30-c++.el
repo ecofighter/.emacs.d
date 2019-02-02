@@ -1,74 +1,41 @@
+;;; 30-c++.el -- settings to write C++; -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Code:
+(require 'mymacros)
 (install-when-compile 'cmake-ide)
-(install-when-compile 'rtags)
-(install-when-compile 'ivy-rtags)
-(install-when-compile 'irony)
-(install-when-compile 'company-irony)
-(install-when-compile 'company-irony-c-headers)
-(install-when-compile 'flycheck-irony)
 (install-when-compile 'clang-format)
 
-
-(add-hook 'c-mode-hook #'yas-minor-mode-on)
-(add-hook 'c-mode-hook #'flycheck-mode-on-safe)
-(add-hook 'c++-mode-hook #'yas-minor-mode-on)
-(add-hook 'c++-mode-hook #'flycheck-mode-on-safe)
+(with-eval-after-load "yasnippet"
+  (add-hook 'c-mode-hook #'yas-minor-mode-on)
+  (add-hook 'c++-mode-hook #'yas-minor-mode-on))
+(with-eval-after-load "flycheck"
+  (add-hook 'c-mode-hook #'flycheck-mode-on-safe)
+  (add-hook 'c++-mode-hook #'flycheck-mode-on-safe))
 
 (defmacro do-c-and-c++-mode (&rest body)
   "Anaphoric macro provide mode to eval BODY for C and C++ mode."
   `(dolist (mode '(c++-mode c-mode))
      ,@body))
 
-(setup-expecting "cmake-ide"
-  (dolist (hook '(c++-mode-hook c-mode-hook))
-    (add-hook hook #'(lambda ()
-                       (setup "rtags"
-                         (setq-default cmake-ide-build-dir "build")
-                         (cmake-ide-setup))))))
+(dolist (hook '(c++-mode-hook c-mode-hook))
+  (add-hook hook #'(lambda ()
+                     (setq-default cmake-ide-build-dir "build")
+                     (cmake-ide-setup))))
 
-(setup-after "cmake-ide"
-  (setup-after "evil-leader"
+(eval-after-load "cmake-ide"
+  (eval-after-load "evil-leader"
     (do-c-and-c++-mode
      (evil-leader/set-key-for-mode mode
        "m c" 'cmake-ide-compile))))
 
-(setup-after "rtags"
-  (setup "ivy-rtags")
-  (setq rtags-display-result-backend 'ivy)
-  (setq rtags-autostart-diagnostics t)
-  (do-c-and-c++-mode
-   (evil-leader/set-key-for-mode mode
-     "m r s" 'rtags-find-symbol-at-point)
-   (evil-leader/set-key-for-mode mode
-     "m r r" 'rtags-find-references-at-point)))
-
-(setup-expecting "irony"
-  (setup-after "cmake-ide"
-    (irony-cdb-autosetup-compile-options))
-  (dolist (hook '(c++-mode-hook c-mode-hook))
-    (add-hook hook #'irony-mode)))
-
-(setup-after "irony"
-  (setup-after "company"
-    (setup "company-irony"
-      (add-hook 'irony-mode-hook
-                #'(lambda ()
-                    (add-to-list 'company-backends 'company-irony)
-                    (setq company-backends
-                          (delete 'company-semantic company-backends))
-                    (company-irony-setup-begin-commands))))))
-
-(setup-after "irony"
-  (setup-after "company"
-    (setup "company-irony-c-headers"
-      (add-hook 'irony-mode-hook
-                #'(lambda ()
-                    (add-to-list 'company-backends 'company-irony-c-headers))))))
-
-(setup-after "flycheck"
-  (add-hook 'irony-mode-hook #'flycheck-irony-setup))
+(eval-after-load "cmake-ide"
+  (irony-cdb-autosetup-compile-options))
+(dolist (hook '(c++-mode-hook c-mode-hook))
+  (add-hook hook #'irony-mode))
 
 (do-c-and-c++-mode
  (evil-leader/set-key-for-mode mode
    "m =" 'clang-format-buffer))
 
-(provide-file)
+(provide '30-c++)
+;;; 30-c++.el ends here

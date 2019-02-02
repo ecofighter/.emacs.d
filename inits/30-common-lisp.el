@@ -1,7 +1,11 @@
+;;; 30-common-lisp.el -- common lisp; -*- lexical-binding: t -*-
+;;; Commentary:
+;;; Code:
+(require 'mymacros)
 (install-when-compile 'slime)
 (install-when-compile 'slime-company)
 
-(setup-after "slime"
+(with-eval-after-load "slime"
   (setf slime-lisp-implementations
         `((sbcl    ("sbcl" "--dynamic-space-size" "2000"))
           (roswell ("ros" "-Q" "run"))))
@@ -14,14 +18,14 @@
   ;;                (window-height   . 0.4)))
   (slime-setup '(slime-repl slime-fancy slime-company)))
 
-(setup-expecting "slime"
-  (setup-after "shackle"
-    (add-to-list 'shackle-rules '("\\`\\*slime.*?\\*\\'" :regexp t :popup t))
-    ;; (add-to-list 'shackle-rules '("*inferior-lisp*" :noselect t :align bottom))
-    (add-to-list 'shackle-rules '("*slime-repl-help*" :popup t))))
+(with-eval-after-load "shackle"
+  (add-to-list 'shackle-rules '("\\`\\*slime.*?\\*\\'" :regexp t :popup t))
+  ;; (add-to-list 'shackle-rules '("*inferior-lisp*" :noselect t :align bottom))
+  (add-to-list 'shackle-rules '("*slime-repl-help*" :popup t)))
 
-(setup-after "evil-leader"
+(eval-after-load "evil-leader"
   (evil-leader/set-key-for-mode 'lisp-mode
     "m '" 'slime))
 
-(provide-file)
+(provide '30-common-lisp)
+;;; 30-common-lisp.el ends here
