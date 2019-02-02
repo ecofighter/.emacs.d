@@ -16,19 +16,6 @@
 ;;         '((evil      . "melpa-stable")))))
 (package-initialize)
 
-(defun file-name-to-symbol (filename)
-  "FILENAME to symbol."
-  (intern
-   (file-name-nondirectory
-    (file-name-sans-extension filename))))
-
-(defun provide-file ()
-  "Provide filename."
-  (provide
-   (file-name-to-symbol
-    (or load-file-name
-        (buffer-file-name)))))
-
 (add-to-list 'load-path "~/.emacs.d/mylisp")
 (require 'mymacros)
 (add-to-list 'load-path "~/.emacs.d/inits")
