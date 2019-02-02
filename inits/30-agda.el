@@ -2,8 +2,9 @@
 ;;; Commentary:
 ;;; Code:
 
-(autoload 'agda2-mode (! (let ((coding-system-for-read 'utf-8))
-                           (shell-command-to-string "agda-mode locate"))))
+(let* ((coding-system-for-read 'utf-8)
+       (file (shell-command-to-string "agda-mode locate")))
+  (autoload 'agda2-mode file))
 
 (add-to-list 'auto-mode-alist '("\\.agda$" . agda2-mode))
 

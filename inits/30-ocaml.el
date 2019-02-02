@@ -22,8 +22,9 @@
 
 (add-hook 'tuareg-mode-hook #'ocp-setup-indent)
 
-(eval-after-load "smartparens"
-  (sp-local-pair '(tuareg-mode) "'" "'" :actions nil))
+(let ((ok (require 'smartparens nil t)))
+  (when ok
+    (sp-local-pair (list 'tuareg-mode) "'" "'" :actions nil)))
 
 (provide '30-ocaml)
 ;;; 30-ocaml.el ends here

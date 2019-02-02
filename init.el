@@ -1,10 +1,6 @@
 ;;; init.el --- my init.el           -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;;; Code:
-(add-to-list 'load-path "~/.emacs.d/setup")
-(require 'setup)
-(setup-initialize)
-
 (require 'package)
 (setq package-enable-at-startup nil)
 (setq
@@ -34,8 +30,8 @@
         (buffer-file-name)))))
 
 (add-to-list 'load-path "~/.emacs.d/mylisp")
-(add-to-list 'load-path "~/.emacs.d/inits")
 (require 'mymacros)
+(add-to-list 'load-path "~/.emacs.d/inits")
 (require '00-init)
 (require '01-graphics)
 (require '02-exec-path-from-shell)
@@ -60,19 +56,19 @@
 (require '30-emacslisp)
 ;; (require '30-c++)
 ;; (require '30-bison)
+;; (setup-include "30-cmake")
 (require '30-latex)
 (require '30-org)
 (require '30-common-lisp)
 (require '30-agda)
 (require '30-ocaml)
-(setup-include "30-fsharp")
-(setup-include "30-markdown")
-(setup-include "30-cmake")
-(setup-include "30-coq")
-(setup-include "30-lean")
-(setup-include "31-lsp")
-(setup-include "30-rust")
-(setup-include "30-haskell")
+(require '30-fsharp)
+(require '30-markdown)
+(require '30-coq)
+(require '30-lean)
+(require '31-lsp)
+(require '32-rust)
+(require '32-haskell)
 
 (install-when-compile 'package-utils)
 (provide 'init)

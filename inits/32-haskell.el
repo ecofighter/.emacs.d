@@ -1,17 +1,16 @@
+;;; 32-haskell.el -- haskell
+;;; Commentary:
+;;; Code:
+(require 'mymacros)
 (install-when-compile 'haskell-mode)
-;; (install-when-compile 'intero)
-;; (install-when-compile 'hindent)
-(install-when-compile 'lsp-mode)
-(install-when-compile 'lsp-ui)
-(install-when-compile 'lsp-haskell)
-(install-when-compile 'company-lsp)
 
 (add-hook 'haskell-mode-hook
           #'(lambda ()
               (setq tab-width 2)
               (setq indent-tabs-mode nil)))
-(setup-include "s")
+(require 's)
 (defun haskell-indentation-advice ()
+  "Advice for indent when evil open."
   (when (and (< 1 (line-number-at-pos))
              (save-excursion
                (forward-line -1)
@@ -22,6 +21,7 @@
             :after 'haskell-indentation-advice)
 
 (defun haskell-evil-open-above ()
+  "Evil open above and indent."
   (interactive)
   (evil-digit-argument-or-evil-beginning-of-line)
   (haskell-indentation-newline-and-indent)
@@ -30,26 +30,19 @@
   (evil-append-line nil))
 
 (defun haskell-evil-open-below ()
+  "Evil open below and indent."
   (interactive)
   (evil-append-line nil)
   (haskell-indentation-newline-and-indent))
 
-(evil-define-key 'normal haskell-mode-map
-  "o" 'haskell-evil-open-below
-  "O" 'haskell-evil-open-above)
+(eval-after-load "evil"
+  (eval-after-load "haskell-mode"
+    (evil-define-key 'normal haskell-mode-map
+      "o" 'haskell-evil-open-below
+      "O" 'haskell-evil-open-above)))
 
-(with-eval-after-load 'haskell-mode
-  (setup "lsp-haskell")
-  ;; (setenv "cabal_helper_libexecdir" "/home/haneta/.local/libexec")
-  (add-hook 'haskell-mode-hook #'lsp))
+(autoload 'lsp "lsp-mode")
+(add-hook 'haskell-mode-hook #'lsp)
 
-(setup-after "flycheck"
-  (setup-after "lsp-ui-flycheck"
-    (flycheck-add-mode 'lsp-ui 'haskell-mode)))
-;; (setup-expecting "intero"
-;;   (add-hook 'haskell-mode-hook #'intero-mode))
-;; (setup-expecting "flycheck"
-;;   (add-hook 'intero-mode-hook #'(lambda ()
-;;                                   (flycheck-add-next-checker 'intero '(warning . haskell-hlint)))))
-
-(provide-file)
+(provide '32-haskell)
+;;; 32-haskell.el ends here
