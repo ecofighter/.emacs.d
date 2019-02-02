@@ -3,6 +3,7 @@
 ;;; Code:
 (require 'mymacros)
 (install-when-compile 'haskell-mode)
+(install-when-compile 'lsp-haskell)
 
 (add-hook 'haskell-mode-hook
           #'(lambda ()
@@ -35,14 +36,16 @@
   (evil-append-line nil)
   (haskell-indentation-newline-and-indent))
 
-(eval-after-load "evil"
-  (eval-after-load "haskell-mode"
-    (evil-define-key 'normal haskell-mode-map
-      "o" 'haskell-evil-open-below
-      "O" 'haskell-evil-open-above)))
+(with-eval-after-load "haskell-mode"
+  (require 'evil)
+  (evil-define-key 'normal haskell-mode-map
+    "o" 'haskell-evil-open-below
+    "O" 'haskell-evil-open-above))
 
 (autoload 'lsp "lsp-mode")
-(add-hook 'haskell-mode-hook #'lsp)
+(add-hook 'haskell-mode-hook #'(lambda ()
+                                 (require 'lsp-haskell)
+                                 (lsp)))
 
 (provide '32-haskell)
 ;;; 32-haskell.el ends here
