@@ -4,19 +4,19 @@
 (require 'mymacros)
 (install-when-compile 'ivy)
 (install-when-compile 'counsel)
-(install-when-compile 'avy-migemo)
+;; (install-when-compile 'avy-migemo)
 (install-when-compile 'projectile)
 (install-when-compile 'counsel-projectile)
 
 (add-hook 'after-init-hook #'ivy-mode)
 (setq-default ivy-use-virtual-buffers t)
 (setq-default enable-recursive-minibuffers t)
-(add-hook 'ivy-mode-hook #'avy-migemo-mode)
-(with-eval-after-load "avy-migemo"
-  (require 'avy-migemo-e.g.zzz-to-char)
-  (require 'avy-migemo-e.g.counsel)
-  (require 'avy-migemo-e.g.ivy)
-  (require 'avy-migemo-e.g.swiper))
+;; (add-hook 'ivy-mode-hook #'avy-migemo-mode)
+;; (with-eval-after-load "avy-migemo"
+;;   (require 'avy-migemo-e.g.zzz-to-char)
+;;   (require 'avy-migemo-e.g.counsel)
+;;   (require 'avy-migemo-e.g.ivy)
+;;   (require 'avy-migemo-e.g.swiper))
 (with-eval-after-load "evil-leader"
   (evil-leader/set-key
     "i i" 'counsel-imenu

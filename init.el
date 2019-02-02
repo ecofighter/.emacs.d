@@ -32,7 +32,7 @@
 ;; (require '10-ripgrep)
 (require '20-eshell)
 (require '20-ddskk)
-(require '20-migemo)
+;; (require '20-migemo)
 (require '20-company)
 (require '20-yasnippet)
 (require '20-flycheck)
