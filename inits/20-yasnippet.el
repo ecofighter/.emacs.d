@@ -6,6 +6,8 @@
 
 (with-eval-after-load "company"
   (with-eval-after-load "yasnippet"
+    (define-key yas-minor-mode-map (kbd "TAB") nil)
+    (define-key yas-minor-mode-map (kbd "<tab>") nil)
     (define-key yas-minor-mode-map (kbd "M-TAB") 'yas-expand)
     (add-hook 'yas-global-mode-hook
               #'(lambda ()

@@ -7,7 +7,9 @@
   (setq company-minimum-prefix-length 2)
   (setq company-idle-delay 0.1)
   (setq company-selection-wrap-around t)
-  ;; (define-key company-active-map (kbd "C-i") 'company-complete-common-or-cycle)
+  (define-key company-active-map (kbd "TAB") 'company-select-next-if-tooltip-visible-or-complete-selection)
+  (define-key company-active-map (kbd "<tab>") 'company-select-next-if-tooltip-visible-or-complete-selection)
+  ;; (define-key company-active-map (kbd "TAB") 'company-complete-common-or-cycle)
   ;; (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
   (define-key company-active-map (kbd "<backtab>") 'company-select-previous))
 

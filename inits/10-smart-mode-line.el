@@ -12,9 +12,11 @@
                                  (setq evil-replace-state-tag (propertize "<R>" 'face '((:background "#8f3f71"))))
                                  (setq evil-mode-line-format '(before . mode-line-front-space))))
 
-  (add-hook 'after-make-frame-functions
-            (lambda (frame)
-              (with-selected-frame frame
-                (sml/setup)))))
+  (if (daemonp)
+      (add-hook 'after-make-frame-functions
+                (lambda (frame)
+                  (with-selected-frame frame
+                    (sml/setup))))
+    (add-hook 'after-init-hook #'sml/setup)))
 
 (provide-file)

@@ -1,7 +1,7 @@
 ;;; 30-org -- My org-mode config; -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;;; Code:
-(install-when-compile 'org)
+(install-when-compile 'org-plus-contrib)
 (install-when-compile 'org-evil)
 (install-when-compile 'org-pomodoro)
 
@@ -18,7 +18,8 @@
             #'(lambda ()
                 (org-babel-do-load-languages 'org-babel-load-languages
                                              '((emacs-lisp . t)
-                                               (R . t)))
+                                               (R . t)
+                                               (julia . t)))
                 (add-hook 'completion-at-point-functions
                           #'pcomplete-completions-at-point nil t))))
 

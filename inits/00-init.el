@@ -1,5 +1,8 @@
+;;; 00-init.el -- init setting; -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; Code:
 ;; (setenv "LANG" "en_US.UTF-8")
-(setup-include "recentf")
+(require 'recentf)
 (setq make-backup-files nil)
 (add-hook 'after-init-hook #'recentf-mode)
 (setq-default fill-column 80)
@@ -16,6 +19,5 @@
 (setq-default truncate-lines t)
 (setq-default truncate-partial-width-windows t)
 
-(add-to-list 'load-path "~/.emacs.d/dev")
-
-(provide-file)
+(provide '00-init)
+;;; 00-init.el ends here

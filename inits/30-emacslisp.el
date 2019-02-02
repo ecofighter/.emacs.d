@@ -5,7 +5,10 @@
   (add-hook 'emacs-lisp-mode-hook
             #'(lambda ()
                 (yas-minor-mode)
-                (add-to-list 'company-backends '(company-yasnippet company-elisp)))))
+                (add-to-list (make-local-variable 'company-backends) '(company-yasnippet company-elisp)))))
+
+(with-eval-after-load "flycheck"
+  (setq flycheck-emacs-lisp-load-path 'inherit))
 
 (provide '30-emacslisp)
 ;;; 30-emacslisp.el ends here
