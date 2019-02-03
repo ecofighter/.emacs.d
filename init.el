@@ -60,3 +60,27 @@
 (install-when-compile 'package-utils)
 (provide 'init)
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (yasnippet-snippets yaml-mode which-key utop tuareg sml-mode smart-mode-line slime-company shut-up shackle rustic rg rainbow-delimiters proof-general package-utils org-pomodoro org-plus-contrib org-evil omnisharp ocp-indent nlinum magit lsp-ui lsp-haskell latex-math-preview ivy-rtags hl-todo highlight-indent-guides gruvbox-theme ghub fsharp-mode flycheck-ocaml flycheck-irony exec-path-from-shell evil-terminal-cursor-changer evil-smartparens evil-org evil-leader evil-escape evil-collection ess eglot ddskk cuda-mode counsel-projectile company-reftex company-lsp company-lean company-irony-c-headers company-irony company-coq company-auctex cmake-mode cmake-ide clang-format cargo bison-mode avy-migemo auctex-latexmk))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(agda2-highlight-datatype-face ((t (:foreground "#E6DB74"))))
+ '(agda2-highlight-field-face ((t (:foreground "#A6E22E"))))
+ '(agda2-highlight-function-face ((t (:foreground "#A6E22E"))))
+ '(agda2-highlight-inductive-constructor-face ((t (:foreground "#F92672"))))
+ '(agda2-highlight-keyword-face ((t (:foreground "#66D9EF"))))
+ '(agda2-highlight-module-face ((t (:foreground "#AE81FF"))))
+ '(agda2-highlight-number-face ((t (:foreground "#AE81FF"))))
+ '(agda2-highlight-postulate-face ((t (:foreground "#E6DB74"))))
+ '(agda2-highlight-primitive-face ((t (:foreground "#CE4045"))))
+ '(agda2-highlight-primitive-type-face ((t (:foreground "#E6DB74"))))
+ '(font-lock-comment-face ((t (:foreground "#75715E")))))
