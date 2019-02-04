@@ -5,6 +5,7 @@
   (add-hook 'emacs-lisp-mode-hook
             #'(lambda ()
                 (highlight-indent-guides-mode)
+                (require 'yasnippet)
                 (yas-minor-mode)
                 (add-to-list (make-local-variable 'company-backends) '(company-yasnippet company-elisp)))))
 

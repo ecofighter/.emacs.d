@@ -2,12 +2,12 @@
 ;;; Commentary:
 ;;; Code:
 (eval-when-compile (require 'mymacros))
-(install-when-compile 'yaml-mode)
+;; (install-when-compile 'yaml-mode)
 
-(autoload 'yaml-mode "yaml-mode")
+;; (autoload 'yaml-mode "yaml-mode")
 
-(delete '("\\.\\(e?ya?\\|ra\\)ml\\'" . yaml-mode) 'auto-mode-alist)
-(add-to-list 'auto-mode-alist '("\\.\\ya?ml\\'" . yaml-mode))
+;; (delete '("\\.\\(e?ya?\\|ra\\)ml\\'" . yaml-mode) auto-mode-alist)
+;; (add-to-list 'auto-mode-alist '("\\.\\ya?ml\\'" . yaml-mode))
 
 (provide '30-yaml)
 ;;; 30-yaml.el ends here

@@ -8,12 +8,8 @@
 (install-when-compile 'ocp-indent)
 (install-when-compile 'utop)
 
-(autoload 'tuareg-mode "tuareg" "Major mode for editing OCaml code." t)
-(autoload 'tuareg-run-ocaml "tuareg" "Run an inferior OCaml process." t)
-(autoload 'ocamldebug "ocamldebug" "Run the OCaml debugger." t)
-
+(delete '("\\.ml\\'" . lisp-mode) auto-mode-alist)
 (with-eval-after-load "tuareg"
-  (require 'flycheck-ocaml)
   (add-hook 'tuareg-mode-hook #'flycheck-ocaml-setup)
   (add-hook 'tuareg-mode-hook #'ocp-setup-indent)
   (add-hook 'tuareg-mode-hook #'utop-minor-mode)
@@ -27,6 +23,18 @@
 
 (eval-after-load "smart-parens-mode"
   (sp-local-pair (list 'tuareg-mode) "'" "'" :actions nil))
+
+;; Settings for Dune Builde Manager
+(add-to-list 'load-path
+             (substitute-in-file-name "$OPAM_SWITCH_PREFIX/share/emacs/site-lisp"))
+(autoload 'dune-mode "dune")
+(add-to-list 'auto-mode-alist '("\\.dune\\'" . dune-mode))
+(add-hook 'dune-mode-hook #'(lambda ()
+                              (require 'flycheck)
+                              (require 'dune-flymake)
+                              (flycheck-mode -1)
+                              (flymake-mode-on)
+                              (dune-flymake-init)))
 
 (provide '30-ocaml)
 ;;; 30-ocaml.el ends here
