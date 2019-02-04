@@ -8,23 +8,25 @@
 (install-when-compile 'ocp-indent)
 (install-when-compile 'utop)
 
-(eval-after-load "tuareg"
+(autoload 'tuareg-mode "tuareg" "Major mode for editing OCaml code." t)
+(autoload 'tuareg-run-ocaml "tuareg" "Run an inferior OCaml process." t)
+(autoload 'ocamldebug "ocamldebug" "Run the OCaml debugger." t)
+
+(with-eval-after-load "tuareg"
+  (require 'flycheck-ocaml)
+  (add-hook 'tuareg-mode-hook #'flycheck-ocaml-setup)
+  (add-hook 'tuareg-mode-hook #'ocp-setup-indent)
+  (add-hook 'tuareg-mode-hook #'utop-minor-mode)
   (add-hook 'tuareg-mode-hook #'merlin-mode))
 
 (with-eval-after-load "merlin"
   (require 'merlin-company)
-  (require 'flycheck-ocaml)
   (setq-default merlin-error-after-save nil)
-  (add-hook 'tuareg-mode-hook #'flycheck-ocaml-setup)
   (eval-after-load "company"
     (add-to-list 'company-backends 'merlin-company-backend)))
-(add-hook 'tuareg-mode-hook #'utop-minor-mode)
 
-(add-hook 'tuareg-mode-hook #'ocp-setup-indent)
-
-(let ((ok (require 'smartparens nil t)))
-  (when ok
-    (sp-local-pair (list 'tuareg-mode) "'" "'" :actions nil)))
+(eval-after-load "smart-parens-mode"
+  (sp-local-pair (list 'tuareg-mode) "'" "'" :actions nil))
 
 (provide '30-ocaml)
 ;;; 30-ocaml.el ends here

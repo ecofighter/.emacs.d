@@ -46,6 +46,7 @@
 ;; (require '30-cmake)
 (require '30-latex)
 (require '30-org)
+(require '30-yaml)
 (require '30-common-lisp)
 (require '30-agda)
 (require '30-ocaml)
