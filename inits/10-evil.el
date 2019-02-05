@@ -21,6 +21,11 @@
 (add-hook 'after-init-hook #'evil-mode)
 (with-eval-after-load "evil"
   (require 'evil-anzu)
+  (setq evil-normal-state-tag "<N>")
+  (setq evil-insert-state-tag (propertize "<I>" 'face '((:background "#076678"))))
+  (setq evil-visual-state-tag (propertize "<V>" 'face '((:background "#fe8019"))))
+  (setq evil-replace-state-tag (propertize "<R>" 'face '((:background "#8f3f71"))))
+  (setq evil-mode-line-format '(before . mode-line-front-space))
   (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char)
   ;; (define-key evil-insert-state-map (kbd "C-d") 'evil-delete-char)
   (evil-swap-key evil-motion-state-map "j" "gj")
