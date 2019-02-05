@@ -6,6 +6,7 @@
 (install-when-compile 'evil-smartparens)
 
 (add-hook 'after-init-hook #'smartparens-global-mode)
+(add-hook 'after-init-hook #'show-smartparens-global-mode)
 (eval-after-load "evil"
   (add-hook 'smartparens-enabled-hook #'evil-smartparens-mode))
 

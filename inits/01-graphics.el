@@ -60,7 +60,7 @@
                          trailing
                          indentation
                          tab-mark))
-(set-face-background 'trailing-whitespace "#af3a03")
+;; (set-face-background 'trailing-whitespace "#af3a03")
 (add-hook 'after-init-hook #'global-whitespace-mode)
 
 (add-hook 'after-init-hook #'global-nlinum-mode)
@@ -68,8 +68,8 @@
 
 (add-hook 'after-init-hook #'global-hl-line-mode)
 
-(add-hook 'after-init-hook #'show-paren-mode)
-(setq-default show-paren-style 'mixed)
+;; (add-hook 'after-init-hook #'show-paren-mode)
+;; (setq-default show-paren-style 'mixed)
 
 (provide '01-graphics)
 ;;; 01-graphics.el ends here
