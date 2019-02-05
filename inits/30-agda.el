@@ -6,7 +6,7 @@
        (file (shell-command-to-string "agda-mode locate")))
   (autoload 'agda2-mode file))
 
-(add-to-list 'auto-mode-alist '("\\.agda$" . agda2-mode))
+(add-to-list 'auto-mode-alist '("\\.agda\\'" . agda2-mode))
 
 ;; (eval-after-load 'agda2-mode
 ;;   (custom-set-faces
