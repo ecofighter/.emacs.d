@@ -5,7 +5,7 @@
 (install-when-compile 'evil)
 (install-when-compile 'evil-leader)
 (install-when-compile 'evil-escape)
-(install-when-compile 'evil-collection)
+(install-when-compile 'evil-anzu)
 (install-when-compile 'evil-terminal-cursor-changer)
 
 (defun evil-swap-key (map key1 key2)
@@ -20,8 +20,9 @@
 ;; (add-hook 'evil-mode-hook #'evil-collection-init)
 (add-hook 'after-init-hook #'evil-mode)
 (with-eval-after-load "evil"
+  (require 'evil-anzu)
   (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char)
-  (define-key evil-insert-state-map (kbd "C-d") 'evil-delete-char)
+  ;; (define-key evil-insert-state-map (kbd "C-d") 'evil-delete-char)
   (evil-swap-key evil-motion-state-map "j" "gj")
   (evil-swap-key evil-motion-state-map "k" "gk")
   (define-key evil-normal-state-map (kbd "M-.")
