@@ -19,7 +19,8 @@
   (slime-setup '(slime-repl slime-fancy slime-company)))
 
 (with-eval-after-load "shackle"
-  (add-to-list 'shackle-rules '("\\`\\*slime.*?\\*\\'" :regexp t :popup t))
+  (add-to-list 'shackle-rules '(slime-repl-mode :align right
+                                           :size 0.4))
   ;; (add-to-list 'shackle-rules '("*inferior-lisp*" :noselect t :align bottom))
   (add-to-list 'shackle-rules '("*slime-repl-help*" :popup t)))
 

@@ -9,8 +9,9 @@
 (setq-default lsp-prefer-flymake nil)
 (eval-after-load "company"
   (add-hook 'lsp-mode-hook #'(lambda ()
-                               (add-to-list 'company-backends 'company-lsp))))
+                               (add-to-list 'company-backends #'company-lsp))))
 (with-eval-after-load "lsp-ui"
+  (require 'flycheck)
   (require 'lsp-ui-flycheck)
   (add-hook 'lsp-ui-mode-hook #'(lambda ()
                                   (flycheck-add-mode 'lsp-ui 'haskell-mode)

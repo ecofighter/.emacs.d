@@ -5,6 +5,7 @@
 (install-when-compile 'flycheck)
 
 (with-eval-after-load "flycheck"
+  (setq flycheck-emacs-lisp-load-path 'inherit)
   (defun flycheck-toggle-window ()
     (interactive)
     (let ((window (flycheck-get-error-list-window)))

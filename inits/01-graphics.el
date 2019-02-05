@@ -3,6 +3,7 @@
 ;;; Code:
 (require 'mymacros)
 (install-when-compile 'gruvbox-theme)
+(install-when-compile 'zenburn-theme)
 (install-when-compile 'nlinum)
 (install-when-compile 'hl-line)
 
@@ -37,12 +38,13 @@
 (add-to-list 'default-frame-alist '(font . "Noto Sans Mono CJK JP-13"))
 
 ;;; load theme
+(defvar *my/selected-theme* 'zenburn)
 (if (daemonp)
     (add-hook 'after-make-frame-functions
               (lambda (frame)
                 (with-selected-frame frame
-                  (load-theme 'gruvbox t))))
-  (load-theme 'gruvbox t))
+                  (load-theme *my/selected-theme* t))))
+  (load-theme *my/selected-theme* t))
 
 (setq inhibit-startup-screen t)
 

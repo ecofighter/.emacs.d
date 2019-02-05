@@ -9,16 +9,17 @@
 (install-when-compile 'utop)
 
 (delete '("\\.ml\\'" . lisp-mode) auto-mode-alist)
-(with-eval-after-load "tuareg"
-  (add-hook 'tuareg-mode-hook #'flycheck-ocaml-setup)
-  (add-hook 'tuareg-mode-hook #'ocp-setup-indent)
-  (add-hook 'tuareg-mode-hook #'utop-minor-mode)
-  (add-hook 'tuareg-mode-hook #'merlin-mode))
+(add-hook 'tuareg-mode-hook #'flycheck-ocaml-setup)
+(add-hook 'tuareg-mode-hook #'ocp-setup-indent)
+(add-hook 'tuareg-mode-hook #'utop-minor-mode)
+(add-hook 'tuareg-mode-hook #'merlin-mode)
 
 (with-eval-after-load "merlin"
-  (require 'merlin-company)
   (setq-default merlin-error-after-save nil)
-  (eval-after-load "company"
+  (with-eval-after-load "company"
+    (require 'merlin-company)
+    (require 'yasnippet)
+    (require 'company-yasnippet)
     (add-to-list 'company-backends 'merlin-company-backend)))
 
 (eval-after-load "smart-parens-mode"

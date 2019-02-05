@@ -4,12 +4,11 @@
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (require 'package)
 (setq package-enable-at-startup nil)
-(setq
- package-archives
- '(("melpa"        . "http://melpa.org/packages/")
-   ("melpa-stable" . "https://stable.melpa.org/packages/")
-   ("org"          . "http://orgmode.org/elpa/")
-   ("gnu"          . "http://elpa.gnu.org/packages/")))
+(setq package-archives
+      '(("melpa"        . "http://melpa.org/packages/")
+        ("melpa-stable" . "https://stable.melpa.org/packages/")
+        ("org"          . "http://orgmode.org/elpa/")
+        ("gnu"          . "http://elpa.gnu.org/packages/")))
 
 ;; (eval-when-compile
 ;; (when (boundp 'package-pinned-packages)
@@ -41,12 +40,12 @@
 (require '20-rainbow-delimiters)
 (require '20-highlight-indent-guides)
 (require '20-magit)
-(require '30-emacslisp)
 ;; (require '30-bison)
 ;; (require '30-cmake)
 (require '30-latex)
 (require '30-org)
 (require '30-yaml)
+(require '30-emacslisp)
 (require '30-common-lisp)
 (require '30-agda)
 (require '30-ocaml)
