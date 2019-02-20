@@ -16,6 +16,7 @@
     (define-key map key2 def1)))
 
 ;; (setq-default evil-want-keybinding nil)
+(setq-default evil-want-abbrev-expand-on-insert-exit nil)
 (setq-default evil-want-C-i-jump nil)
 ;; (add-hook 'evil-mode-hook #'evil-collection-init)
 (add-hook 'after-init-hook #'evil-mode)

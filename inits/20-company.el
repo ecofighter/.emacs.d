@@ -7,7 +7,7 @@
 (with-eval-after-load "company"
   (add-to-list 'company-transformers 'company-sort-prefer-same-case-prefix)
   (setq company-selection-wrap-around t)
-  (setq company-backends '(company-capf company-files company-dabbrev-code))
+  (setq company-backends '(company-capf company-yasnippet company-files company-dabbrev-code))
   (setq company-minimum-prefix-length 2)
   (setq company-idle-delay 0.1)
   (setq company-selection-wrap-around t)

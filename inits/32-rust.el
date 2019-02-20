@@ -2,13 +2,18 @@
 ;;; Commentary:
 ;;; Code:
 (require 'mymacros)
+(require '31-lsp)
 (install-when-compile 'rust-mode)
 (install-when-compile 'cargo)
-(install-when-compile 'lsp-mode)
-(install-when-compile 'lsp-ui)
 
-(autoload 'lsp "lsp-mode")
-(add-hook 'rust-mode-hook #'lsp)
+;; (autoload 'lsp "lsp-mode")
+(add-hook 'rust-mode-hook #'(lambda ()
+                              (highlight-indent-guides-mode)
+                              (lsp)
+                              (flycheck-add-mode 'lsp-ui 'rust-mode)
+                              (set (make-local-variable 'company-backends)
+                                   '((company-lsp company-yasnippet company-dabbrev-code)))))
+
 (with-eval-after-load "rust-mode"
   (setq-default rust-indent-offset 4))
 

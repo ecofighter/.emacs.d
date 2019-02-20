@@ -22,6 +22,7 @@
 ;;         ;; (set-fontset-font fsn 'greek (font-spec :name *my/greekfont*) nil 'append)
 ;;         ;; (set-fontset-font fsn 'unicode (font-spec :name *my/unicodefont*) nil 'append)
 ;;         (set-fontset-font fsn 'unicode (font-spec :name *my/jpfont*) nil 'append)
+;;         (add-to-list 'face-font-rescale-alist '(*my/jpfont* . 0.85))
 ;;         ;; (set-fontset-font fsn 'japanese-jisx0213.2004-1 (font-spec :family *my/jpfont*) nil 'append)
 ;;         ;; (set-fontset-font fsn ?の (font-spec :family *my/jpfont*) nil 'prepend)
 ;;         (set-frame-font fsn)
@@ -30,12 +31,12 @@
 ;;         (set-frame-parameter (selected-frame) 'font fsn)
 ;;         (remove-hook 'after-init-hook #'my/setup-font)
 ;;         (remove-hook 'after-make-frame-functions #'my/setup-font)))))
-;; ;;; add hook to set font
+;; ;; add hook to set font
 ;; (if (daemonp)
 ;;     (add-hook 'after-make-frame-functions #'my/setup-font)
 ;;   (when window-system
 ;;     (add-hook 'after-init-hook #'my/setup-font)))
-(add-to-list 'default-frame-alist '(font . "Noto Sans Mono CJK JP-13"))
+(add-to-list 'default-frame-alist '(font . "Ricty-12"))
 
 ;;; load theme
 (defvar *my/selected-theme* 'zenburn)

@@ -7,10 +7,15 @@
 
 (dolist (hook '(c++-mode-hook c-mode-hook))
   (add-hook hook #'(lambda ()
+                     (highlight-indent-guides-mode)
                      (setq-default cmake-ide-build-dir "build")
                      (cmake-ide-setup)
                      (require 'ccls)
-                     (lsp))))
+                     (lsp)
+                     (flycheck-add-mode 'lsp-ui 'c-mode)
+                     (flycheck-add-mode 'lsp-ui 'c++-mode)
+                     (set (make-local-variable 'company-backends)
+                          '((company-lsp company-yasnippet company-dabbrev-code))))))
 
 (eval-after-load "yasnippet"
   (dolist (hook '(c++-mode-hook c-mode-hook))

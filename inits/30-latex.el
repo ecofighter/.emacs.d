@@ -49,8 +49,7 @@
       "m b" 'build-with-latexmk
       "m p" 'latex-math-preview-expression)))
 
-(eval-after-load "tex"
-  (setq-default TeX-view-program-selection '((output-pdf "Zathura"))))
+(setq-default TeX-view-program-selection '((output-pdf "Zathura")))
 
 (eval-after-load "auctex-latexmk"
   (setq-default auctex-latexmk-inherit-TeX-PDF-mode nil))

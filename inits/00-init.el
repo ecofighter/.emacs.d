@@ -13,7 +13,9 @@
 
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
-(defalias 'c-basic-offset 'tab-width)
+(defvaralias 'c-basic-offset 'tab-width)
+(defvaralias 'cperl-indent-level 'tab-width)
+(setq split-width-threshold 80)
 
 (setq vc-handled-backends '())
 (setq-default truncate-lines t)
