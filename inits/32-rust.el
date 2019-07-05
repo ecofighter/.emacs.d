@@ -7,12 +7,13 @@
 (install-when-compile 'cargo)
 
 ;; (autoload 'lsp "lsp-mode")
-(add-hook 'rust-mode-hook #'(lambda ()
-                              (highlight-indent-guides-mode)
-                              (lsp)
-                              (flycheck-add-mode 'lsp-ui 'rust-mode)
-                              (set (make-local-variable 'company-backends)
-                                   '((company-lsp company-yasnippet company-dabbrev-code)))))
+(add-hook 'rust-mode-hook
+          #'(lambda ()
+              (highlight-indent-guides-mode)
+              (lsp)
+              (flycheck-add-mode 'lsp-ui 'rust-mode)
+              (set (make-local-variable 'company-backends)
+                   '((company-lsp company-yasnippet company-dabbrev-code)))))
 
 (with-eval-after-load "rust-mode"
   (setq-default rust-indent-offset 4))

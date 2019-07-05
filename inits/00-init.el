@@ -26,7 +26,7 @@
   "Exit from Emacs window.
 this sxec 'server-edit' when in client, or 'save-buffers-kill-emacs'."
   (interactive)
-  (if (boundp server-buffer-clients)
+  (if server-clients
       (server-edit)
     (save-buffers-kill-emacs)))
 
