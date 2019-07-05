@@ -19,7 +19,16 @@
     ;; (define-key lsp-ui-mode-map (kbd "C-c l") #'lsp-ui-flycheck-list)
     (define-key lsp-ui-mode-map (kbd "C-c d") #'lsp-execute-code-action)
     (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
-    (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references))
+    (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
+    (setq lsp-ui-sideline-ignore-duplicate t)
+    (setq lsp-ui-sideline-show-code-actions nil)
+    (set-face-attribute 'lsp-ui-sideline-symbol nil
+                        :height 0.85)
+    (set-face-attribute 'lsp-ui-sideline-current-symbol nil
+                        :height 0.85)
+    (set-face-attribute 'lsp-ui-sideline-symbol-info nil
+                        :height 0.85
+                        :slant 'normal))
 
 (provide '31-lsp)
 ;;; 31-lsp.el ends here

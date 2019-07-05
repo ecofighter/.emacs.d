@@ -8,7 +8,8 @@
 (add-hook 'coq-mode-hook #'company-coq-mode)
 (add-hook 'coq-mode-hook #'(lambda ()
                                ;; (setq abbrev-expand-function #'ignore)
-                               (setq proof-three-window-mode-policy 'hybrid)))
+                             (setq proof-three-window-mode-policy 'hybrid)
+                             (setq coq-compile-before-require t)))
 
 (provide '30-coq)
 ;;; 30-coq.el ends here

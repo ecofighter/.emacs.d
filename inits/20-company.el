@@ -9,7 +9,7 @@
   (setq company-selection-wrap-around t)
   (setq company-backends '(company-capf company-yasnippet company-files company-dabbrev-code))
   (setq company-minimum-prefix-length 2)
-  (setq company-idle-delay 0.1)
+  (setq company-idle-delay 0.3)
   (setq company-selection-wrap-around t)
   (define-key company-active-map (kbd "TAB") 'company-select-next-if-tooltip-visible-or-complete-selection)
   (define-key company-active-map (kbd "<tab>") 'company-select-next-if-tooltip-visible-or-complete-selection)

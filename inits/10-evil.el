@@ -2,6 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 (require 'mymacros)
+(require '00-init)
 (install-when-compile 'evil)
 (install-when-compile 'evil-leader)
 (install-when-compile 'evil-escape)
@@ -43,8 +44,10 @@
                               (evil-leader/set-key "<backtab>" 'next-buffer)
                               (evil-leader/set-key "<SPC>" 'counsel-M-x)
                               (evil-leader/set-key
-                                "q q" 'save-buffers-kill-emacs
-                                "q f" 'delete-frame)))
+                                "q q" 'exit
+                                "q Q" 'save-buffers-kill-emacs
+                                "q f" 'delete-frame
+                                "q t" 'toggle-frame-maximized)))
 
 (add-hook 'evil-mode-hook #'evil-escape-mode)
 (setq-default evil-escape-key-sequence "fd")

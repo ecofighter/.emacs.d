@@ -41,6 +41,7 @@
 (require '20-rainbow-delimiters)
 (require '20-highlight-indent-guides)
 (require '20-magit)
+(require '20-google-translate)
 ;; (require '30-bison)
 ;; (require '30-cmake)
 (require '30-latex)
