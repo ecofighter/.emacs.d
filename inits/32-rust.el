@@ -10,8 +10,9 @@
 (add-hook 'rust-mode-hook
           #'(lambda ()
               (highlight-indent-guides-mode)
-              (lsp)
+              (require 'lsp-ui)
               (flycheck-add-mode 'lsp-ui 'rust-mode)
+              (lsp)
               (set (make-local-variable 'company-backends)
                    '((company-lsp company-yasnippet company-dabbrev-code)))))
 

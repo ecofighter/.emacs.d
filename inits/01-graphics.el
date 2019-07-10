@@ -36,7 +36,7 @@
 ;;     (add-hook 'after-make-frame-functions #'my/setup-font)
 ;;   (when window-system
 ;;     (add-hook 'after-init-hook #'my/setup-font)))
-(add-to-list 'default-frame-alist '(font . "Ricty-12"))
+(add-to-list 'default-frame-alist '(font . "Cica-12"))
 
 ;;; load theme
 (defvar *my/selected-theme* 'zenburn)

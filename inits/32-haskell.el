@@ -51,6 +51,7 @@
 (add-hook 'haskell-mode-hook
           #'(lambda ()
               (highlight-indent-guides-mode)
+              (require 'lsp-haskell)
               (lsp)
               (add-hook 'lsp-ui-mode-hook #'(lambda ()
                                               (require 'lsp-ui-flycheck)

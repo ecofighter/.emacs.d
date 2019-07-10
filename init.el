@@ -50,6 +50,7 @@
 (require '30-yaml)
 (require '30-emacslisp)
 (require '30-common-lisp)
+(require '30-scheme)
 (require '30-agda)
 (require '30-ocaml)
 (require '30-fsharp)
