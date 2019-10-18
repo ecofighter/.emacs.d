@@ -24,26 +24,29 @@
   (setq-default latex-math-preview-convert-dvipng-color-mode t)
   (setq-default latex-math-preview-select-preview-window nil))
 
-(add-hook 'LaTeX-mode-hook #'(lambda () (TeX-engine-set "luatex")))
-(add-hook 'LaTeX-mode-hook #'auctex-latexmk-setup)
-(add-hook 'LaTeX-mode-hook #'flycheck-mode-on-safe)
-(add-hook 'LaTeX-mode-hook #'TeX-source-correlate-mode)
-(add-hook 'LaTeX-mode-hook #'LaTeX-math-mode)
-(add-hook 'LaTeX-mode-hook #'reftex-mode)
-(setq-default reftex-plug-into-AUCTeX t)
+(add-hook 'LaTeX-mode-hook #'(lambda ()
+                               (TeX-engine-set "luatex")
+                               (auctex-latexmk-setup)
+                               (flycheck-mode-on-safe)
+                               (TeX-source-correlate-mode)
+                               (LaTeX-math-mode)
+                               (reftex-mode)))
 (with-eval-after-load "company"
   (add-hook 'LaTeX-mode-hook #'company-auctex-init)
   (with-eval-after-load "reftex"
+    (setq-default reftex-plug-into-AUCTeX t)
     (add-hook 'reftex-mode-hook
               #'(lambda ()
                   (add-to-list 'company-backends 'company-reftex-citations)
                   (add-to-list 'company-backends 'company-reftex-labels)))))
 
 (defun build-with-latexmk ()
+"Build buffer with latexmk."
   (interactive)
   (TeX-save-document (TeX-master-file))
   (TeX-command "LatexMk" 'TeX-master-file -1))
-(eval-after-load "evil-leader"
+
+(with-eval-after-load "evil-leader"
   (dolist (mode '(latex-mode tex-mode))
     (evil-leader/set-key-for-mode mode
       "m b" 'build-with-latexmk
@@ -51,7 +54,7 @@
 
 (setq-default TeX-view-program-selection '((output-pdf "Zathura")))
 
-(eval-after-load "auctex-latexmk"
+(with-eval-after-load "auctex-latexmk"
   (setq-default auctex-latexmk-inherit-TeX-PDF-mode nil))
 
 (provide '30-latex)

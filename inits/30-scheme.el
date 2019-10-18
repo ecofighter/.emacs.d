@@ -16,7 +16,7 @@
 
 ;; set variables in geiser-impl
 (progn
-  (setq-default geiser-active-implementations '(chicken)))
+  (setq-default geiser-active-implementations '(chicken chez)))
 ;; set variables in geiser-chicken
 (progn
   (setq-default geiser-chicken-binary "chicken-csi"))

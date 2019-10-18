@@ -1,9 +1,12 @@
 ;;; 10-winner.el -- Undo/Redo window manipulations; -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;;; Code:
+(require 'mymacros)
+(install-when-compile 'winner)
+
 (add-hook 'after-init-hook #'winner-mode)
 
-(eval-after-load "evil-leader"
+(with-eval-after-load "evil-leader"
   (evil-leader/set-key
     "w s" 'delete-other-windows
     "w u" 'winner-undo

@@ -4,7 +4,7 @@
 (require 'mymacros)
 (install-when-compile 'gruvbox-theme)
 (install-when-compile 'zenburn-theme)
-(install-when-compile 'nlinum)
+;; (install-when-compile 'nlinum)
 (install-when-compile 'hl-line)
 
 ;; (defconst *my/fontset-name* "myfontset")
@@ -36,7 +36,7 @@
 ;;     (add-hook 'after-make-frame-functions #'my/setup-font)
 ;;   (when window-system
 ;;     (add-hook 'after-init-hook #'my/setup-font)))
-(add-to-list 'default-frame-alist '(font . "Cica-12"))
+(add-to-list 'default-frame-alist '(font . "Ricty-12"))
 
 ;;; load theme
 (defvar *my/selected-theme* 'zenburn)
@@ -64,8 +64,8 @@
 ;; (set-face-background 'trailing-whitespace "#af3a03")
 (add-hook 'after-init-hook #'global-whitespace-mode)
 
-(add-hook 'after-init-hook #'global-nlinum-mode)
-(setq-default nlinum-format "%4d")
+;; (add-hook 'after-init-hook #'global-nlinum-mode)
+;; (setq-default nlinum-format "%4d")
 
 (add-hook 'after-init-hook #'global-hl-line-mode)
 

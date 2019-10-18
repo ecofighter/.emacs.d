@@ -4,12 +4,15 @@
 (require 'mymacros)
 (install-when-compile 'lsp-mode)
 (install-when-compile 'lsp-ui)
+(install-when-compile 'dap-mode)
 (install-when-compile 'company-lsp)
 
-(setq-default lsp-prefer-flymake nil)
-(eval-after-load "company"
-  (add-hook 'lsp-mode-hook #'(lambda ()
-                               (add-to-list 'company-backends #'company-lsp))))
+(with-eval-after-load "lsp-mode"
+  (setq-default lsp-enable-snippet nil)
+  (setq-default lsp-prefer-flymake nil)
+  (eval-after-load "company"
+    (add-hook 'lsp-mode-hook #'(lambda ()
+                                 (add-to-list 'company-backends #'company-lsp)))))
 (with-eval-after-load "lsp-ui"
   (require 'lsp-ui-flycheck)
   ;; (add-hook 'lsp-ui-mode-hook #'(lambda ()

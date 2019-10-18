@@ -1,9 +1,10 @@
-;;; 32-haskell.el -- haskell
+;;; 32-haskell.el -- haskell -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;;; Code:
 (require 'mymacros)
 (require '31-lsp)
 (install-when-compile 'haskell-mode)
+(install-when-compile 'haskell-snippets)
 (install-when-compile 'lsp-haskell)
 
 ;; (setq-default haskell-indent-offset 2)
@@ -50,8 +51,14 @@
 
 (add-hook 'haskell-mode-hook
           #'(lambda ()
+              (interactive-haskell-mode)
               (highlight-indent-guides-mode)
+              (require 'lsp)
               (require 'lsp-haskell)
+              (setq lsp-document-sync-method 'full)
+              (setq lsp-haskell-process-path-hie "hie-8.6.5")
+              (setq lsp-haskell-process-args-hie
+                    (append lsp-haskell-process-args-hie '("+RTS" "-M1.5G" "-RTS")))
               (lsp)
               (add-hook 'lsp-ui-mode-hook #'(lambda ()
                                               (require 'lsp-ui-flycheck)

@@ -4,7 +4,7 @@
 (require 'mymacros)
 (install-when-compile 'eshell)
 
-(eval-after-load "evil-leader"
+(with-eval-after-load "evil-leader"
   (evil-leader/set-key
     "'" 'eshell))
 

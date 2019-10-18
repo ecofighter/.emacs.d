@@ -8,7 +8,8 @@
 (with-eval-after-load "yasnippet"
   (define-key yas-minor-mode-map (kbd "TAB") nil)
   (define-key yas-minor-mode-map (kbd "<tab>") nil)
-  (define-key yas-minor-mode-map (kbd "M-TAB") 'yas-expand))
+  (define-key yas-minor-mode-map (kbd "M-TAB") 'yas-expand)
+  (define-key yas-minor-mode-map (kbd "C-x /") 'yas-expand))
 
 (provide '20-yasnippet)
 ;;; 20-yasnippet.el ends here
