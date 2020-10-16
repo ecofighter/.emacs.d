@@ -6,6 +6,8 @@
 (install-when-compile 'haskell-mode)
 (install-when-compile 'haskell-snippets)
 (install-when-compile 'lsp-haskell)
+(install-when-compile 'reformatter)
+(install-when-compile 'ormolu)
 
 ;; (setq-default haskell-indent-offset 2)
 ;; (setq-default haskell-indent-spaces 2)
@@ -30,6 +32,21 @@
   (advice-add 'haskell-indentation-newline-and-indent
               :after 'haskell-indentation-advice))
 
+(defgroup brittany nil
+  "Integration with brittany Haskell formatter"
+  :prefix "brittany-"
+  :group 'haskell)
+(defvar brittany-mode-map (make-sparse-keymap)
+  "Local keymap for `brittany-format-on-save-mode`.")
+
+(require 'reformatter)
+(reformatter-define brittany-format
+  :program "brittany"
+  :args '("--indent" "2" "--columns" "80" "--write-mode" "display" "/dev/stdin")
+  :group 'brittany
+  :lighter " br"
+  :keymap brittany-mode-map)
+
 (with-eval-after-load "haskell-mode"
   (defun haskell-evil-open-above ()
     "Evil open above and indent."
@@ -47,18 +64,24 @@
   (eval-after-load "evil"
     (evil-define-key 'normal haskell-mode-map
       "o" 'haskell-evil-open-below
-      "O" 'haskell-evil-open-above)))
+      "O" 'haskell-evil-open-above))
+  (define-key haskell-mode-map (kbd "C-c r") #'brittany-format-buffer))
 
 (add-hook 'haskell-mode-hook
           #'(lambda ()
-              (interactive-haskell-mode)
+              ;; (interactive-haskell-mode)
+              (yas-minor-mode-on)
+              (company-mode-on)
+              (flycheck-mode-on-safe)
               (highlight-indent-guides-mode)
               (require 'lsp)
               (require 'lsp-haskell)
-              (setq lsp-document-sync-method 'full)
-              (setq lsp-haskell-process-path-hie "hie-8.6.5")
-              (setq lsp-haskell-process-args-hie
-                    (append lsp-haskell-process-args-hie '("+RTS" "-M1.5G" "-RTS")))
+              (setq lsp-haskell-process-path-hie "ghcide")
+              (setq lsp-haskell-process-args-hie '())
+              ;; (setq lsp-document-sync-method 'full)
+              ;; (setq lsp-haskell-process-path-hie "hie-8.6.5")
+              ;; (setq lsp-haskell-process-args-hie
+              ;;       (append lsp-haskell-process-args-hie '("+RTS" "-M1.5G" "-RTS")))
               (lsp)
               (add-hook 'lsp-ui-mode-hook #'(lambda ()
                                               (require 'lsp-ui-flycheck)

@@ -5,14 +5,13 @@
 (install-when-compile 'lsp-mode)
 (install-when-compile 'lsp-ui)
 (install-when-compile 'dap-mode)
-(install-when-compile 'company-lsp)
 
+(setq gc-cons-threshold 100000000)
+(setq read-process-output-max (* 1024 1024))
 (with-eval-after-load "lsp-mode"
   (setq-default lsp-enable-snippet nil)
   (setq-default lsp-prefer-flymake nil)
-  (eval-after-load "company"
-    (add-hook 'lsp-mode-hook #'(lambda ()
-                                 (add-to-list 'company-backends #'company-lsp)))))
+  (setq-default lsp-completion-provider :capf))
 (with-eval-after-load "lsp-ui"
   (require 'lsp-ui-flycheck)
   ;; (add-hook 'lsp-ui-mode-hook #'(lambda ()
@@ -27,11 +26,12 @@
   ;;           (lambda (frame _w)
   ;;             (set-face-attribute 'default frame
   ;;                                 :height 100)))
-  (setq lsp-ui-doc-enable nil)
-  (set-face-attribute 'markdown-code-face nil
-                      :inherit 'default)
-  (setq lsp-ui-sideline-ignore-duplicate nil)
-  (setq lsp-ui-sideline-show-code-actions nil))
+  (setq lsp-ui-doc-enable t)
+  ;; (set-face-attribute 'markdown-code-face nil
+  ;;                     :inherit 'default)
+  ;; (setq lsp-ui-sideline-ignore-duplicate nil)
+  ;; (setq lsp-ui-sideline-show-code-actions nil))
+  )
 
 (provide '31-lsp)
 ;;; 31-lsp.el ends here

@@ -7,7 +7,7 @@
 (global-set-key (kbd "C-x j") 'skk-mode)
 (global-set-key (kbd "C-x J") 'skk-auto-fill-mode)
 
-(setq-default skk-kutouten-type '("．" . "，"))
+;; (setq-default skk-kutouten-type '("．" . "，"))
 (setq-default skk-use-azik t)
 ;; (setup "skk-study")
 ;; (setq-default skk-user-directory "~/.skk-jisyo")

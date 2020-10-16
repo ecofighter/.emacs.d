@@ -9,12 +9,16 @@
 ;; (autoload 'lsp "lsp-mode")
 (add-hook 'rust-mode-hook
           #'(lambda ()
-              (highlight-indent-guides-mode)
+              (setq tab-width 4)
+              (yas-minor-mode-on)
+              ;; (highlight-indent-guides-mode)
+              (require 'lsp-rust)
               (require 'lsp-ui)
               (flycheck-add-mode 'lsp-ui 'rust-mode)
-              (lsp)
-              (set (make-local-variable 'company-backends)
-                   '((company-lsp company-yasnippet company-dabbrev-code)))))
+              (lsp)))
+              ;; (require 'company)
+              ;; (set (make-local-variable 'company-backends)
+              ;;      '((company-lsp company-yasnippet)))))
 
 (with-eval-after-load "rust-mode"
   (setq-default rust-indent-offset 4))
