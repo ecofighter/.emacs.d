@@ -4,12 +4,14 @@
 (require 'mymacros)
 (install-when-compile 'ivy)
 (install-when-compile 'counsel)
+;; (install-when-compile 'ivy-posframe)
 (install-when-compile 'ivy-rich)
 (install-when-compile 'amx)
 (install-when-compile 'projectile)
 (install-when-compile 'counsel-projectile)
 
 (add-hook 'after-init-hook #'ivy-mode)
+;; (add-hook 'ivy-mode-hook #'ivy-posframe-mode)
 (add-hook 'after-init-hook #'amx-initialize)
 (with-eval-after-load "ivy"
   (setq ivy-use-virtual-buffers t)

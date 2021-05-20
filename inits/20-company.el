@@ -3,6 +3,7 @@
 ;;; Code:
 (require 'mymacros)
 (install-when-compile 'company)
+;; (install-when-compile 'company-posframe)
 
 (with-eval-after-load "company"
   (add-to-list 'company-transformers 'company-sort-prefer-same-case-prefix)
@@ -17,7 +18,8 @@
   ;; (define-key company-active-map (kbd "<tab>") 'company-complete-common-or-cycle)
   (define-key company-active-map (kbd "<backtab>") 'company-select-previous))
 
-(add-hook 'after-init-hook 'global-company-mode)
+(add-hook 'after-init-hook #'global-company-mode)
+;; (add-hook 'company-mode-hook #'company-posframe-mode)
 
 (provide '20-company)
 ;;; 20-company.el ends here

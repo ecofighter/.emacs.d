@@ -22,7 +22,7 @@
 (setq-default truncate-partial-width-windows t)
 
 (require 'server)
-(defun exit ()
+(defun my/exit ()
   "Exit from Emacs window.
 this sxec 'server-edit' when in client, or 'save-buffers-kill-emacs'."
   (interactive)

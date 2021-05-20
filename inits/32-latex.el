@@ -60,18 +60,30 @@
 
 ;; (with-eval-after-load "auctex-latexmk"
 ;;   (setq-default auctex-latexmk-inherit-TeX-PDF-mode nil))
+(with-eval-after-load "lsp-latex"
+  (setq lsp-latex-build-args '("-lualatex" "-interaction=nonstopmode" "-synctex=1" "%f"))
+  (setq lsp-latex-forward-search-executable "zathura")
+  (setq lsp-latex-forward-search-args '("--synctex-forward" "%l:1:%f" "%p")))
+
 (with-eval-after-load "tex-mode"
   (require 'lsp-latex)
-  (setq-default lsp-latex-build-args '("-lualatex" "-interaction=nonstopmode" "-synctex=1" "%f"))
-  (setq-default lsp-latex-forward-search-executable "zathura")
-  (setq-default lsp-latex-forward-search-args '("--synctex-forward" "%l:1:%f" "%p"))
+  (unless (server-running-p)
+    (server-start))
   (add-hook 'tex-mode-hook 'lsp)
-  (add-hook 'latex-mode-hook 'lsp))
+  (add-hook 'tex-mode-hook 'yas-minor-mode-on)
+  (add-hook 'latex-mode-hook 'lsp)
+  (add-hook 'latex-mode-hook 'yas-minor-mode-on))
 
 (with-eval-after-load "bibtex"
   (require 'lsp-latex)
-  (setq-default lsp-latex-build-args '("-lualatex" "-interaction=nonstopmode" "-synctex=1" "%f"))
   (add-hook 'bibtex-mode-hook 'lsp))
+
+(with-eval-after-load "evil-leader"
+  (dolist (mode '(latex-mode tex-mode))
+    (evil-leader/set-key-for-mode mode
+      "m b" 'lsp-latex-build
+      "m f" 'lsp-latex-forward-search
+      "m p" 'latex-math-preview-expression)))
 
 (provide '32-latex)
 ;;; 32-latex.el ends here

@@ -6,9 +6,8 @@
 (install-when-compile 'lsp-ui)
 (install-when-compile 'dap-mode)
 
-(setq gc-cons-threshold 100000000)
-(setq read-process-output-max (* 1024 1024))
 (with-eval-after-load "lsp-mode"
+  (setq-default lsp-auto-guess-root t)
   (setq-default lsp-enable-snippet nil)
   (setq-default lsp-prefer-flymake nil)
   (setq-default lsp-completion-provider :capf))
@@ -26,7 +25,7 @@
   ;;           (lambda (frame _w)
   ;;             (set-face-attribute 'default frame
   ;;                                 :height 100)))
-  (setq lsp-ui-doc-enable t)
+  (setq-default lsp-ui-doc-enable nil)
   ;; (set-face-attribute 'markdown-code-face nil
   ;;                     :inherit 'default)
   ;; (setq lsp-ui-sideline-ignore-duplicate nil)

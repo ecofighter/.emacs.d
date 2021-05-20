@@ -3,6 +3,7 @@
 ;;; Code:
 (require 'mymacros)
 (install-when-compile 'flycheck)
+(install-when-compile 'flycheck-posframe)
 
 (with-eval-after-load "flycheck"
   (setq flycheck-emacs-lisp-load-path 'inherit)
@@ -17,6 +18,7 @@
       "e l" 'flycheck-toggle-window
       "e p" 'flycheck-previous-error
       "e n" 'flycheck-next-error)))
+(add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
 
 (defconst flycheck-error-list-format
   [("Line" 4 flycheck-error-list-entry-< :right-align t)

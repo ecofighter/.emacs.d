@@ -32,20 +32,20 @@
   (advice-add 'haskell-indentation-newline-and-indent
               :after 'haskell-indentation-advice))
 
-(defgroup brittany nil
-  "Integration with brittany Haskell formatter"
-  :prefix "brittany-"
-  :group 'haskell)
-(defvar brittany-mode-map (make-sparse-keymap)
-  "Local keymap for `brittany-format-on-save-mode`.")
+;; (defgroup brittany nil
+;;   "Integration with brittany Haskell formatter"
+;;   :prefix "brittany-"
+;;   :group 'haskell)
+;; (defvar brittany-mode-map (make-sparse-keymap)
+;;   "Local keymap for `brittany-format-on-save-mode`.")
 
-(require 'reformatter)
-(reformatter-define brittany-format
-  :program "brittany"
-  :args '("--indent" "2" "--columns" "80" "--write-mode" "display" "/dev/stdin")
-  :group 'brittany
-  :lighter " br"
-  :keymap brittany-mode-map)
+;; (require 'reformatter)
+;; (reformatter-define brittany-format
+;;   :program "brittany"
+;;   :args '("--indent" "2" "--columns" "80" "--write-mode" "display" "/dev/stdin")
+;;   :group 'brittany
+;;   :lighter " br"
+;;   :keymap brittany-mode-map)
 
 (with-eval-after-load "haskell-mode"
   (defun haskell-evil-open-above ()
@@ -70,25 +70,26 @@
 (add-hook 'haskell-mode-hook
           #'(lambda ()
               ;; (interactive-haskell-mode)
-              (yas-minor-mode-on)
-              (company-mode-on)
-              (flycheck-mode-on-safe)
+              ;; (yas-minor-mode-on)
+              ;; (company-mode-on)
+              ;; (flycheck-mode-on-safe)
               (highlight-indent-guides-mode)
               (require 'lsp)
               (require 'lsp-haskell)
-              (setq lsp-haskell-process-path-hie "ghcide")
-              (setq lsp-haskell-process-args-hie '())
+              ;; (setq lsp-haskell-process-path-hie "ghcide")
+              ;; (setq lsp-haskell-process-args-hie '())
               ;; (setq lsp-document-sync-method 'full)
               ;; (setq lsp-haskell-process-path-hie "hie-8.6.5")
               ;; (setq lsp-haskell-process-args-hie
               ;;       (append lsp-haskell-process-args-hie '("+RTS" "-M1.5G" "-RTS")))
               (lsp)
-              (add-hook 'lsp-ui-mode-hook #'(lambda ()
-                                              (require 'lsp-ui-flycheck)
-                                              (flycheck-mode 1)
-                                              (flycheck-select-checker 'lsp-ui)))
-              (set (make-local-variable 'company-backends)
-                   '((company-lsp company-yasnippet company-dabbrev-code)))))
+              ;; (add-hook 'lsp-ui-mode-hook #'(lambda ()
+              ;;                                 (require 'lsp-ui-flycheck)
+              ;;                                 (flycheck-mode 1)
+              ;;                                 (flycheck-select-checker 'lsp-ui)))
+              ;; (set (make-local-variable 'company-backends)
+              ;;      '((company-lsp company-yasnippet company-dabbrev-code)))
+              ))
 
 (provide '32-haskell)
 ;;; 32-haskell.el ends here

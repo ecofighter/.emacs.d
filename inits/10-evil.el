@@ -23,6 +23,7 @@
 (add-hook 'after-init-hook #'evil-mode)
 (with-eval-after-load "evil"
   (require 'evil-anzu)
+  (customize-set-variable 'evil-undo-system 'undo-fu)
   (setq evil-normal-state-tag "<N>")
   (setq evil-insert-state-tag (propertize "<I>" 'face '((:background "#076678"))))
   (setq evil-visual-state-tag (propertize "<V>" 'face '((:background "#fe8019"))))
@@ -44,7 +45,7 @@
                               (evil-leader/set-key "<backtab>" 'next-buffer)
                               (evil-leader/set-key "<SPC>" 'counsel-M-x)
                               (evil-leader/set-key
-                                "q q" 'exit
+                                "q q" 'my/exit
                                 "q Q" 'save-buffers-kill-emacs
                                 "q f" 'delete-frame
                                 "q t" 'toggle-frame-maximized)))

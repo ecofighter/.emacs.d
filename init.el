@@ -2,6 +2,9 @@
 ;;; Commentary:
 ;;; Code:
 (setq custom-file (locate-user-emacs-file "custom.el"))
+(setq gc-cons-threshold 100000000)
+(setq read-process-output-max (* 1024 1024))
+
 (require 'package)
 (setq package-enable-at-startup nil)
 (setq package-archives
@@ -36,6 +39,7 @@
 (require '20-ddskk)
 ;; (require '20-migemo)
 ;; (require '20-fcitx)
+;; (require '20-uim)
 (require '20-company)
 (require '20-yasnippet)
 ;; (require '20-flymake)
@@ -44,7 +48,7 @@
 (require '20-rainbow-delimiters)
 (require '20-highlight-indent-guides)
 (require '20-magit)
-(require '20-google-translate)
+;; (require '20-google-translate)
 ;; (require '30-bison)
 ;; (require '30-cmake)
 (require '30-org)
@@ -54,11 +58,13 @@
 (require '30-scheme)
 ;; (require '30-agda)
 ;; (require '30-ocaml)
+(require '30-sml)
 (require '30-fsharp)
 (require '30-markdown)
 (require '30-purescript)
 (require '30-coq)
 ;; (require '30-lean)
+;; (require '30-pdf)
 (require '31-lsp)
 ;; (require '31-eglot)
 (require '32-c++)
@@ -69,5 +75,6 @@
 (require '32-latex)
 
 (install-when-compile 'package-utils)
+(garbage-collect)
 (provide 'init)
 ;;; init.el ends here
