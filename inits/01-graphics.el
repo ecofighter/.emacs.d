@@ -10,33 +10,30 @@
 (defun my/make-fontset (&optional frame)
   "Make my fontset not use FRAME."
   (with-selected-frame (or frame (selected-frame))
-    (when window-system
-      (let* ((fsnn "myfont")
-             (fsn (concat "fontset-" fsnn))
-             (asciifont "Ricty-12:weight=normal:slant=normal")
-             (jpfont "Ricty")
-             (unicodefont "XITS Math"))
-        (create-fontset-from-ascii-font asciifont nil fsnn)
-        (set-fontset-font fsn 'unicode (font-spec :family jpfont) nil 'append)
-        (set-fontset-font fsn 'unicode (font-spec :family unicodefont) nil 'append)
-        ;; (set-fontset-font fsn 'greek (font-spec :family jpfont) nil 'prepend)
-        ;; (set-fontset-font fsn 'unicode (font-spec :family jpfont) nil 'append)
-        ;; (set-fontset-font fsn ?の (font-spec :family jpfont) nil 'prepend)
-        ;; (set-fontset-font fsn 'japanese-jisx0213.2004-1 (font-spec :name jpfont) nil 'prepend)
-        ;; (add-to-list 'face-font-rescale-alist '(*my/jpfont* . 0.85))
-        (set-frame-font fsn)
-        (add-to-list 'default-frame-alist '(font . "fontset-myfont")))
-      (remove-hook 'after-make-frame-functions #'my/make-fontset))))
+    (pcase system-type
+      ('windows-nt
+       (add-to-list 'default-frame-alist '(font . "Cascadia Mono")))
+      ('gnu/linux
+       (let* ((fsnn "myfont")
+              (fsn (concat "fontset-" fsnn))
+              (asciifont "Ricty-12:weight=normal:slant=normal")
+              (jpfont "Ricty")
+              (unicodefont "XITS Math"))
+         (create-fontset-from-ascii-font asciifont nil fsnn)
+         (set-fontset-font fsn 'unicode (font-spec :family jpfont) nil 'append)
+         (set-fontset-font fsn 'unicode (font-spec :family unicodefont) nil 'append)
+         ;; (set-fontset-font fsn 'greek (font-spec :family jpfont) nil 'prepend)
+         ;; (set-fontset-font fsn 'unicode (font-spec :family jpfont) nil 'append)
+         ;; (set-fontset-font fsn ?の (font-spec :family jpfont) nil 'prepend)
+         ;; (set-fontset-font fsn 'japanese-jisx0213.2004-1 (font-spec :name jpfont) nil 'prepend)
+         ;; (add-to-list 'face-font-rescale-alist '(*my/jpfont* . 0.85))
+         (add-to-list 'default-frame-alist '(font . "fontset-myfont")))))
+    (remove-hook 'after-make-frame-functions #'my/make-fontset)))
 
 (if (daemonp)
     (add-hook 'after-make-frame-functions #'my/make-fontset)
   (when window-system
     (my/make-fontset)))
-;; (add-to-list 'default-frame-alist '(font . "Ricty-12"))
-;; (when window-system
-;;   (if after-init-time
-;;       (my/make-fontset)
-;;     (add-hook 'after-init-hook #'my/make-fontset)))
 
 ;;; load theme
 (defvar *my/selected-theme* 'zenburn)

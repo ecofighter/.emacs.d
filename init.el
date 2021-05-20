@@ -34,6 +34,7 @@
 ;; (require '10-hl-todo)
 ;; (require '10-editorconfig)
 (require '10-smart-mode-line)
+(require '10-tramp)
 ;; (require '10-ripgrep)
 (require '20-eshell)
 (require '20-ddskk)
