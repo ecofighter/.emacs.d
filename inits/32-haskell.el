@@ -95,9 +95,10 @@
   "Haskell lsp client on remote.")
 
 (with-eval-after-load 'lsp-haskell
+  (setq lsp-log-io t)
   (setq *my/lsp-remote-haskell*
         (make-lsp--client
-         :new-connection (lsp-tramp-connection "haskell-language-server-wrapper")
+         :new-connection (lsp-tramp-connection (lambda () (lsp-haskell--server-command)))
          ;; Should run under haskell-mode and haskell-literate-mode. We need to list the
          ;; latter even though it's a derived mode of the former
          :major-modes '(haskell-mode haskell-literate-mode)
@@ -107,8 +108,7 @@
          ;; the future lsp-mode will asssociate servers with configuration sections more directly.
          :initialized-fn (lambda (workspace)
                            (with-lsp-workspace workspace
-                             (lsp--set-configuration (lsp-configuration-section "haskell"))
-                             (setq lsp-haskell-server-args '("-d" "-l" "/tmp/hls.log"))))
+                             (lsp--set-configuration (lsp-configuration-section "haskell"))))
          ;; This is somewhat irrelevant, but it is listed in lsp-language-id-configuration, so
          ;; we should set something consistent here.
          :language-id "haskell"
