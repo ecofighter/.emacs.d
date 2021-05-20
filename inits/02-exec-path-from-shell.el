@@ -4,11 +4,13 @@
 (require 'mymacros)
 (install-when-compile 'exec-path-from-shell)
 
+(unless (equal system-type 'windows-nt)
 (require 'exec-path-from-shell)
 (setq exec-path-from-shell-arguments nil)
 (setq exec-path-from-shell-check-startup-files nil)
 (add-to-list 'exec-path-from-shell-variables "CAML_LD_LIBRARY_PATH")
 (exec-path-from-shell-initialize)
+)
 
 (provide '02-exec-path-from-shell)
 ;;; 02-exec-path-from-shell.el ends here

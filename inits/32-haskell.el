@@ -90,5 +90,31 @@
               (set (make-local-variable 'company-backends)
                    '((company-lsp company-yasnippet company-dabbrev-code)))))
 
+(defvar *my/lsp-remote-haskell* nil
+  "Haskell lsp client on remote.")
+
+(with-eval-after-load 'lsp-haskell
+  (setq *my/lsp-remote-haskell*
+        (make-lsp--client
+         :new-connection (lsp-tramp-connection "haskell-language-server-wrapper")
+         ;; Should run under haskell-mode and haskell-literate-mode. We need to list the
+         ;; latter even though it's a derived mode of the former
+         :major-modes '(haskell-mode haskell-literate-mode)
+         ;; This is arbitrary.
+         :server-id 'lsp-haskell-remote
+         ;; We need to manually pull out the configuration section and set it. Possibly in
+         ;; the future lsp-mode will asssociate servers with configuration sections more directly.
+         :initialized-fn (lambda (workspace)
+                           (with-lsp-workspace workspace
+                             (lsp--set-configuration (lsp-configuration-section "haskell"))
+                             (setq lsp-haskell-server-args '("-d" "-l" "/tmp/hls.log"))))
+         ;; This is somewhat irrelevant, but it is listed in lsp-language-id-configuration, so
+         ;; we should set something consistent here.
+         :language-id "haskell"
+         ;; This is required for completions to works inside language pragma statements
+         :completion-in-comments? t
+         :remote? t))
+  (lsp-register-client *my/lsp-remote-haskell*))
+
 (provide '32-haskell)
 ;;; 32-haskell.el ends here
