@@ -6,12 +6,12 @@
 (setq read-process-output-max (* 1024 1024))
 
 (require 'package)
+(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 (setq package-enable-at-startup nil)
 (setq package-archives
-      '(("melpa"        . "http://melpa.org/packages/")
-        ("melpa-stable" . "https://stable.melpa.org/packages/")
-        ("org"          . "http://orgmode.org/elpa/")
-        ("gnu"          . "http://elpa.gnu.org/packages/")))
+      '(("melpa"        . "https://melpa.org/packages/")
+        ("org"          . "https://orgmode.org/elpa/")
+        ("gnu"          . "https://elpa.gnu.org/packages/")))
 
 ;; (eval-when-compile
 ;; (when (boundp 'package-pinned-packages)
