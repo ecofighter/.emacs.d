@@ -4,6 +4,7 @@
 (require 'mymacros)
 (require '00-init)
 (install-when-compile 'evil)
+(install-when-compile 'undo-fu)
 (install-when-compile 'evil-leader)
 (install-when-compile 'evil-escape)
 (install-when-compile 'evil-anzu)
