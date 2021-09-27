@@ -64,6 +64,7 @@
 (require '30-markdown)
 (require '30-purescript)
 (require '30-coq)
+(require '30-maude)
 ;; (require '30-lean)
 ;; (require '30-pdf)
 (require '31-lsp)
