@@ -10,7 +10,7 @@
 (dolist (hook '(c++-mode-hook c-mode-hook))
   (add-hook hook #'(lambda ()
                      (highlight-indent-guides-mode)
-                     (require 'ccls)
+                     (require 'lsp-clangd)
                      ;; (require 'lsp)
                      ;; (require 'lsp-clients)
                      ;; (setq-default lsp-clients-clangd-args '("-compile-commands-dir=build"))

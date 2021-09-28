@@ -7,6 +7,8 @@
 
 (require 'package)
 (setq package-enable-at-startup nil)
+(when (native-comp-available-p)
+  (setq package-native-compile t))
 (setq package-archives
       '(("melpa"        . "http://melpa.org/packages/")
         ("melpa-stable" . "https://stable.melpa.org/packages/")

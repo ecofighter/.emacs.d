@@ -4,6 +4,7 @@
 (require 'mymacros)
 (require '00-init)
 (install-when-compile 'evil)
+(install-when-compile 'undo-fu)
 (install-when-compile 'evil-leader)
 (install-when-compile 'evil-escape)
 (install-when-compile 'evil-anzu)
@@ -24,6 +25,7 @@
 (with-eval-after-load "evil"
   (require 'evil-anzu)
   (customize-set-variable 'evil-undo-system 'undo-fu)
+  (customize-set-variable 'evil-want-C-i-jump t)
   (setq evil-normal-state-tag "<N>")
   (setq evil-insert-state-tag (propertize "<I>" 'face '((:background "#076678"))))
   (setq evil-visual-state-tag (propertize "<V>" 'face '((:background "#fe8019"))))
