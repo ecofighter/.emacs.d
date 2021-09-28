@@ -6,14 +6,14 @@
 (setq read-process-output-max (* 1024 1024))
 
 (require 'package)
+(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 (setq package-enable-at-startup nil)
 (when (native-comp-available-p)
   (setq package-native-compile t))
 (setq package-archives
-      '(("melpa"        . "http://melpa.org/packages/")
-        ("melpa-stable" . "https://stable.melpa.org/packages/")
-        ("org"          . "http://orgmode.org/elpa/")
-        ("gnu"          . "http://elpa.gnu.org/packages/")))
+      '(("melpa"        . "https://melpa.org/packages/")
+        ("org"          . "https://orgmode.org/elpa/")
+        ("gnu"          . "https://elpa.gnu.org/packages/")))
 
 ;; (eval-when-compile
 ;; (when (boundp 'package-pinned-packages)
@@ -66,6 +66,7 @@
 (require '30-markdown)
 (require '30-purescript)
 (require '30-coq)
+(require '30-maude)
 ;; (require '30-lean)
 ;; (require '30-pdf)
 (require '31-lsp)
