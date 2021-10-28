@@ -4,9 +4,10 @@
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (setq gc-cons-threshold 100000000)
 (setq read-process-output-max (* 1024 1024))
+(setq garbage-collection-messages t)
 
 (require 'package)
-(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
+(customize-set-variable 'gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 (setq package-enable-at-startup nil)
 (when (fboundp 'native-comp-available-p)
   (when (native-comp-available-p)
@@ -39,7 +40,6 @@
 (require '00-init)
 (require '01-graphics)
 (require '02-exec-path-from-shell)
-;;(require '10-evil)
 (leaf evil
   :ensure t
   :require t
