@@ -1,4 +1,4 @@
-;;; init.el --- my init.el           -*- lexical-binding: t; -*-
+;;; init.el -- my confiG
 ;;; Commentary:
 ;;; Code:
 (setq custom-file (locate-user-emacs-file "custom.el"))
@@ -11,16 +11,24 @@
 (when (fboundp 'native-comp-available-p)
   (when (native-comp-available-p)
     (setq package-native-compile t)))
-(setq package-archives
-      '(("melpa"        . "https://melpa.org/packages/")
-        ("org"          . "https://orgmode.org/elpa/")
-        ("gnu"          . "https://elpa.gnu.org/packages/")))
+(eval-and-compile
+  (customize-set-variable
+   'package-archives '(("melpa"        . "https://melpa.org/packages/")
+                       ("org"          . "https://orgmode.org/elpa/")
+                       ("gnu"          . "https://elpa.gnu.org/packages/")))
+  (package-initialize)
+  (unless (package-installed-p 'leaf)
+    (package-refresh-contents)
+    (package-install 'leaf))
+  (leaf leaf-keywords
+    :ensure t
+    :config
+    (leaf-keywords-init)))
 
 ;; (eval-when-compile
 ;; (when (boundp 'package-pinned-packages)
 ;;   (setq package-pinned-packages
 ;;         '((evil      . "melpa-stable")))))
-(package-initialize)
 
 (add-to-list 'load-path "~/.emacs.d/mylisp")
 (require 'mymacros)
@@ -29,7 +37,70 @@
 (require '00-init)
 (require '01-graphics)
 (require '02-exec-path-from-shell)
-(require '10-evil)
+;;(require '10-evil)
+(leaf evil
+  :ensure t
+  :require t
+  :custom
+  ((evil-want-C-i-jump . t)
+   (evil-normal-state-tag . "<N>")
+   (evil-insert-state-tag . `(,(propertize "<I>" 'face '((:background "#076678")))))
+   (evil-visual-state-tag . `(,(propertize "<V>" 'face '((:background "#fe8019")))))
+   (evil-replace-state-tag . `(,(propertize "<R>" 'face '((:background "#8f3f71")))))
+   (evil-mode-line-format . '(before . mode-line-front-space)))
+  :global-minor-mode evil-mode
+  :bind
+  (:evil-insert-state-map
+   ("C-h" . evil-delete-backward-char))
+  (:evil-motion-state-map
+   ("j" . evil-next-visual-line)
+   ("gj" . evil-next-line)
+   ("k" . evil-previous-visual-line)
+   ("gk" . evil-previous-line))
+  ;; :defer-config
+  ;; (eval-and-compile
+  ;;   (defmacro my/swap-key-in-map (map key1 key2)
+  ;;     "Swap KEY1 and KEY2 in MAP."
+  ;;     `(let ((def1 (lookup-key ,map ,key1))
+  ;;            (def2 (lookup-key ,map ,key2)))
+  ;;        (define-key ,map ,key1 def2)
+  ;;        (define-key ,map ,key2 def1)))
+  ;;   (my/swap-key-in-map evil-motion-state-map "j" "gj")
+  ;;   (my/swap-key-in-map evil-motion-state-map "k" "gk"))
+  :config
+  (define-key evil-normal-state-map (kbd "M-.")
+    `(menu-item "" evil-repeat-pop :filter
+                ,(lambda (cmd) (if (eq last-command 'evil-repeat-pop) cmd))))
+  ;; subtree
+  (leaf undo-fu
+    :ensure t
+    :require t
+    :custom
+    ((evil-undo-system . 'undo-fu)))
+  (leaf evil-leader
+    :ensure t
+    :global-minor-mode global-evil-leader-mode
+    :config
+    (evil-leader/set-leader "<SPC>")
+    (evil-leader/set-key "C-i" 'previous-buffer)
+    (evil-leader/set-key "<backtab>" 'next-buffer)
+    (evil-leader/set-key "<SPC>" 'counsel-M-x)
+    (evil-leader/set-key
+      "q q" 'my/exit
+      "q Q" 'save-buffers-kill-emacs
+      "q f" 'delete-frame
+      "q t" 'toggle-frame-maximized))
+  (leaf evil-anzu
+    :ensure t
+    :after evil
+    :require t)
+  (leaf evil-terminal-cursor-changer
+    :ensure t
+    :unless (window-system)
+    :after evil
+    :require t
+    :config
+    (etcc-on)))
 (require '10-ivy)
 (require '10-shackle)
 (require '10-winner)

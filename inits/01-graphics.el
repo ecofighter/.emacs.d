@@ -33,7 +33,8 @@
 (if (daemonp)
     (add-hook 'after-make-frame-functions #'my/make-fontset)
   (when window-system
-    (my/make-fontset)))
+    (my/make-fontset)
+    (set-frame-size (selected-frame) 80 20)))
 
 ;;; load theme
 (defvar *my/selected-theme* 'zenburn)
