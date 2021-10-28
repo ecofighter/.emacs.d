@@ -11,7 +11,7 @@
 (setq package-enable-at-startup nil)
 (when (fboundp 'native-comp-available-p)
   (when (native-comp-available-p)
-    (setq package-native-compile t)))
+    (customize-set-variable 'package-native-compile t)))
 (eval-and-compile
   (customize-set-variable
    'package-archives '(("melpa"        . "https://melpa.org/packages/")
@@ -24,6 +24,7 @@
   (leaf leaf-keywords
     :ensure t
     :config
+    (leaf blackout :ensure t)
     (leaf-keywords-init))
   (leaf leaf-convert
     :ensure t))
@@ -38,6 +39,26 @@
 (require 'myutils)
 (add-to-list 'load-path "~/.emacs.d/inits")
 (require '00-init)
+(leaf *line-numbers
+  :global-minor-mode global-display-line-numbers-mode
+  :config
+  (leaf *resize
+    :defvar text-scale-mode text-scale-mode-step text-scale-mode-amount
+    :defun face-remap-add-relative face-remap-remove-relative my/resize-line-number
+    :after face-remap
+    :config
+    (defvar-local my/line-number-remapping nil)
+    (defun my/resize-line-number (&optional inc)
+      (when my/line-number-remapping
+        (face-remap-remove-relative my/line-number-remapping))
+      (setq-local my/line-number-remapping
+            (and text-scale-mode
+                 (face-remap-add-relative 'line-number
+                                          :height
+                                          (expt text-scale-mode-step
+                                                text-scale-mode-amount))))
+      (force-window-update (current-buffer)))
+    (advice-add 'text-scale-mode :after #'my/resize-line-number)))
 (require '01-graphics)
 (require '02-exec-path-from-shell)
 (leaf evil
@@ -46,11 +67,12 @@
   :custom
   ((evil-want-C-i-jump . t)
    (evil-normal-state-tag . "<N>")
-   (evil-insert-state-tag . `(,(propertize "<I>" 'face '((:background "#076678")))))
-   (evil-visual-state-tag . `(,(propertize "<V>" 'face '((:background "#fe8019")))))
-   (evil-replace-state-tag . `(,(propertize "<R>" 'face '((:background "#8f3f71")))))
+   (evil-insert-state-tag . `,(propertize "<I>" 'face '((:background "#076678"))))
+   (evil-visual-state-tag . `,(propertize "<V>" 'face '((:background "#fe8019"))))
+   (evil-replace-state-tag . `,(propertize "<R>" 'face '((:background "#8f3f71"))))
    (evil-mode-line-format . '(before . mode-line-front-space)))
   :global-minor-mode evil-mode
+  :defvar evil-normal-state-map
   :bind
   (:evil-insert-state-map
    ("C-h" . evil-delete-backward-char))
@@ -69,11 +91,11 @@
   ;;        (define-key ,map ,key2 def1)))
   ;;   (my/swap-key-in-map evil-motion-state-map "j" "gj")
   ;;   (my/swap-key-in-map evil-motion-state-map "k" "gk"))
-  :config
+  :defer-config
   (define-key evil-normal-state-map (kbd "M-.")
     `(menu-item "" evil-repeat-pop :filter
                 ,(lambda (cmd) (if (eq last-command 'evil-repeat-pop) cmd))))
-  ;; subtree
+  :config
   (leaf undo-fu
     :emacs< 28
     :ensure t
@@ -86,7 +108,9 @@
     ((evil-undo-system . 'undo-redo)))
   (leaf evil-leader
     :ensure t
+    :after evil
     :global-minor-mode global-evil-leader-mode
+    :defun evil-leader/set-leader
     :config
     (evil-leader/set-leader "<SPC>")
     (evil-leader/set-key "C-i" 'previous-buffer)
@@ -96,12 +120,16 @@
       "q q" 'my/exit
       "q Q" 'save-buffers-kill-emacs
       "q f" 'delete-frame
-      "q t" 'toggle-frame-maximized))
+      "q t" 'toggle-frame-maximized)
+    (evil-leader/set-key
+      "k k" 'kill-buffer-and-window
+      "k b" 'kill-buffer))
   (leaf evil-anzu
     :ensure t
     :require t
     :after evil
-    :global-minor-mode global-anzu-mode)
+    :global-minor-mode global-anzu-mode
+    :blackout anzu-mode)
   (leaf evil-terminal-cursor-changer
     :ensure t
     :unless (window-system)
