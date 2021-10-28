@@ -1,4 +1,4 @@
-;;; init.el -- my config    -*- lexical-binding: t -*-
+;;; init.el -- my config -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
 (setq custom-file (locate-user-emacs-file "custom.el"))
@@ -48,7 +48,9 @@
     :after face-remap
     :config
     (defvar my/line-number-remapping nil)
-    (defun my/resize-line-number (&rest)
+    (make-local-variable 'my/line-number-remapping)
+    (defun my/resize-line-number (&rest _rest)
+      "Advice to resize line numbers."
       (when my/line-number-remapping
         (face-remap-remove-relative my/line-number-remapping))
       (setq-local my/line-number-remapping
