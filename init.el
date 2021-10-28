@@ -99,8 +99,9 @@
       "q t" 'toggle-frame-maximized))
   (leaf evil-anzu
     :ensure t
+    :require t
     :after evil
-    :require t)
+    :global-minor-mode global-anzu-mode)
   (leaf evil-terminal-cursor-changer
     :ensure t
     :unless (window-system)
