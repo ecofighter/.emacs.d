@@ -16,7 +16,7 @@
       ('gnu/linux
        (let* ((fsnn "myfont")
               (fsn (concat "fontset-" fsnn))
-              (asciifont "Ricty-12:weight=normal:slant=normal")
+              (asciifont "Ricty Diminished-24:weight=normal:slant=normal")
               (jpfont "Ricty")
               (unicodefont "XITS Math"))
          (create-fontset-from-ascii-font asciifont nil fsnn)
