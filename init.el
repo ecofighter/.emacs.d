@@ -1,4 +1,4 @@
-;;; init.el -- my confiG
+;;; init.el -- my config
 ;;; Commentary:
 ;;; Code:
 (setq custom-file (locate-user-emacs-file "custom.el"))
@@ -23,7 +23,9 @@
   (leaf leaf-keywords
     :ensure t
     :config
-    (leaf-keywords-init)))
+    (leaf-keywords-init))
+  (leaf leaf-convert
+    :ensure t))
 
 ;; (eval-when-compile
 ;; (when (boundp 'package-pinned-packages)
@@ -73,10 +75,15 @@
                 ,(lambda (cmd) (if (eq last-command 'evil-repeat-pop) cmd))))
   ;; subtree
   (leaf undo-fu
+    :emacs< 28
     :ensure t
     :require t
     :custom
     ((evil-undo-system . 'undo-fu)))
+  (leaf *emacs-undo
+    :emacs>= 28
+    :custom
+    ((evil-undo-system . 'undo-redo)))
   (leaf evil-leader
     :ensure t
     :global-minor-mode global-evil-leader-mode
