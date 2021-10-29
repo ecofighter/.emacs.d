@@ -25,9 +25,7 @@
     :ensure t
     :config
     (leaf blackout :ensure t)
-    (leaf-keywords-init))
-  (leaf leaf-convert
-    :ensure t))
+    (leaf-keywords-init)))
 
 ;; (eval-when-compile
 ;; (when (boundp 'package-pinned-packages)
@@ -42,7 +40,7 @@
 (leaf *line-numbers
   :global-minor-mode global-display-line-numbers-mode
   :config
-  (leaf *resize
+  (leaf *line-numbers-resize-advice
     :defvar text-scale-mode text-scale-mode-step text-scale-mode-amount
     :defun face-remap-add-relative face-remap-remove-relative my/resize-line-number
     :after face-remap
@@ -137,8 +135,24 @@
     :unless (window-system)
     :after evil
     :require t
+    :defun etcc-on
     :config
     (etcc-on)))
+(leaf treemacs
+  :ensure t
+  :config
+  (add-hook 'treemacs-mode-hook
+            (lambda () (display-line-numbers-mode -1)))
+  (leaf treemacs-evil
+    :ensure t
+    :after evil
+    :require t)
+  (leaf *treemacs-evil-keyconfig
+    :after evil-leader
+    :config
+    (evil-leader/set-key
+      "t t" 'treemacs
+      "t s" 'treemacs-select-window)))
 (require '10-ivy)
 (require '10-shackle)
 (require '10-winner)
