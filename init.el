@@ -163,7 +163,36 @@
 (require '10-tramp)
 ;; (require '10-ripgrep)
 (require '20-eshell)
-(require '20-ddskk)
+;;(require '20-ddskk)
+(leaf ddskk
+  :ensure t
+  :defvar skk-isearch-mode-enable
+  :custom
+  ((skk-kutouten-type . '("．" . "，"))
+   (skk-use-azik . t)
+   (skk-isearch-start-mode . 'latin)
+   (skk-isearch-mode-enable . t)
+   (default-input-method . "japanese-skk")
+   ;;(skk-large-jisyo . "~/.emacs.d/skk-get-jisyo/SKK-JISYO.L")
+   (skk-itaiji-jisyo . "~/.emacs.d/skk-get-jisyo/SKK-JISYO.itaiji")
+   (skk-cdb-large-jisyo . "~/.emacs.d/SKK-JISYO.myL.cdb"))
+  :bind (("C-x j" . skk-mode)
+         ("C-x J" . skk-auto-fill-mode))
+  :init
+  (leaf *skk-isearch
+    :after skk
+    :config
+    (add-hook 'isearch-mode-hook
+              #'(lambda ()
+                  (when (and (boundp 'skk-mode)
+                             skk-mode
+                             skk-isearch-mode-enable)
+                    (skk-isearch-mode-setup))))
+    (add-hook 'isearch-mode-end-hook
+              #'(lambda ()
+                  (when (and (featurep 'skk-isearch)
+                             skk-isearch-mode-enable)
+                    (skk-isearch-mode-cleanup))))))
 ;; (require '20-migemo)
 ;; (require '20-fcitx)
 ;; (require '20-uim)
@@ -183,6 +212,8 @@
 ;; (require '30-emacslisp)
 (leaf *emacslisp
   :ensure smartparens
+  :require smartparens-config
+  :defun my/elisp-mode-hook-fun
   :config
   (defun my/elisp-mode-hook-fun ()
     (hs-minor-mode 1)
@@ -202,13 +233,61 @@
 ;; (require '30-lean)
 ;; (require '30-pdf)
 (require '31-lsp)
-;; (require '31-eglot)
+(leaf lsp-mode
+  :ensure t
+  :custom
+  ((lsp-auto-guess-root . t)
+   (lsp-enable-snippet . nil)
+   (lsp-prefer-flymake . nil)
+   (lsp-completion-provider . :capf))
+  :config
+  (leaf lsp-ui
+    :ensure t
+    :custom
+    ((lsp-ui-doc-enable . t))
+    :bind ((:lsp-ui-mode-map
+            ([remap xref-find-definitions]
+             . lsp-ui-peek-find-definitions)
+            ([remap xref-find-references]
+             . lsp-ui-peek-find-references))))
+  (leaf *latex
+    :defun my/start-server
+    :config
+    (defun my/start-server ()
+      (unless (server-running-p)
+        (server-start)))
+    (add-hook 'latex-mode-hook #'my/start-server)
+    (add-hook 'tex-mode-hook #'lsp)
+    (add-hook 'latex-mode-hook #'lsp)
+    (add-hook 'bibtex-mode-hook #'lsp)
+    (leaf lsp-latex
+      :ensure t
+      :commands lsp-latex-build lsp-latex-forward-search
+      :custom
+      ((lsp-latex-build-executable . "cluttex")
+       (lsp-latex-build-args . '("-e" "lualatex" "--biber" "-synctex=1" "%f"))
+       (lsp-latex-forward-search-executable . `,(pcase system-type
+                                                  ('windows-nt "C:\\Users\\ecofi\\AppData\\Local\\SumatraPDF\\SumatraPDF.exe")
+                                                  ('gnu/linux "zathura")))
+       (lsp-latex-forward-search-args . `,(pcase system-type
+                                            ('windows-nt '("-reuse-instance" "%p" "-forward-search" "%f" "%l"))
+                                            ('gnu/linux '("--synctex-forward" "%l:1:%f" "%p")))))
+      :config
+      (leaf *keybinds
+        :ensure evil-leader
+        :config
+        `,(dolist (mode '(latex-mode tex-mode))
+            (evil-leader/set-key-for-mode mode
+              "m b" 'lsp-latex-build
+              "m f" 'lsp-latex-forward-search))))))
+
+;;(require '31-eglot)
 (require '32-c++)
 (require '32-rust)
 (require '32-haskell)
 (require '32-scala)
 (require '32-typescript)
-(require '32-latex)
+;;(require '32-latex)
 
 (install-when-compile 'package-utils)
 (garbage-collect)
