@@ -52,11 +52,11 @@
       (when my/line-number-remapping
         (face-remap-remove-relative my/line-number-remapping))
       (setq-local my/line-number-remapping
-            (and text-scale-mode
-                 (face-remap-add-relative 'line-number
-                                          :height
-                                          (expt text-scale-mode-step
-                                                text-scale-mode-amount))))
+                  (and text-scale-mode
+                       (face-remap-add-relative 'line-number
+                                                :height
+                                                (expt text-scale-mode-step
+                                                      text-scale-mode-amount))))
       (force-window-update (current-buffer)))
     (advice-add 'text-scale-mode :after #'my/resize-line-number)))
 (require '01-graphics)
@@ -180,7 +180,15 @@
 ;; (require '30-cmake)
 (require '30-org)
 (require '30-yaml)
-(require '30-emacslisp)
+;; (require '30-emacslisp)
+(leaf *emacslisp
+  :ensure smartparens
+  :config
+  (defun my/elisp-mode-hook-fun ()
+    (hs-minor-mode 1)
+    (smartparens-strict-mode 1)
+    (flycheck-mode 1))
+  (add-hook 'emacs-lisp-mode-hook #'my/elisp-mode-hook-fun))
 ;; (require '30-common-lisp)
 (require '30-scheme)
 ;; (require '30-agda)
