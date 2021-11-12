@@ -17,10 +17,11 @@
        (let* ((fsnn "myfont")
               (fsn (concat "fontset-" fsnn))
               (asciifont "Ricty Diminished-24:weight=normal:slant=normal")
-              (jpfont "Ricty")
-              (unicodefont "XITS Math"))
+              ;;(jpfont "Ricty Diminished")
+              ;;(unicodefont "XITS Math")
+              (unicodefont "Symbola"))
          (create-fontset-from-ascii-font asciifont nil fsnn)
-         (set-fontset-font fsn 'unicode (font-spec :family jpfont) nil 'append)
+         ;;(set-fontset-font fsn 'unicode (font-spec :family jpfont) nil 'append)
          (set-fontset-font fsn 'unicode (font-spec :family unicodefont) nil 'append)
          ;; (set-fontset-font fsn 'greek (font-spec :family jpfont) nil 'prepend)
          ;; (set-fontset-font fsn 'unicode (font-spec :family jpfont) nil 'append)
@@ -30,10 +31,19 @@
          (add-to-list 'default-frame-alist '(font . "fontset-myfont")))))
     (remove-hook 'after-make-frame-functions #'my/make-fontset)))
 
+
+(setq use-default-font-for-symbols nil)
+(add-to-list 'default-frame-alist '(font . "Ricty Diminished-14"))
+(set-face-attribute 'default nil :font "Ricty Diminished-14")
+;; (set-fontset-font t 'ascii (font-spec :family "Ricty Diminished" :size 14))
+;; (set-fontset-font t 'japanese-jisx0208 (font-spec :family "Ricty Diminished"))
+(set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'append)
+
 (if (daemonp)
-    (add-hook 'after-make-frame-functions #'my/make-fontset)
+    ;;(add-hook 'after-make-frame-functions #'my/make-fontset)
+    t
   (when window-system
-    (my/make-fontset)
+    ;;(my/make-fontset)
     (set-frame-size (selected-frame) 80 20)))
 
 ;;; load theme

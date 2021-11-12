@@ -68,8 +68,9 @@
   ((evil-want-C-i-jump . t)
    (evil-normal-state-tag . "<N>")
    (evil-insert-state-tag . `,(propertize "<I>" 'face '((:background "#076678"))))
-   (evil-visual-state-tag . `,(propertize "<V>" 'face '((:background "#fe8019"))))
+   (evil-visual-state-tag . `,(propertize "<V>" 'face '((:background "#fe8019" :foreground "#232323"))))
    (evil-replace-state-tag . `,(propertize "<R>" 'face '((:background "#8f3f71"))))
+   (evil-emacs-state-tag . `,(propertize "<E>" 'face '((:background "#ba45ea" :foreground "#efefef"))))
    (evil-mode-line-format . '(before . mode-line-front-space)))
   :global-minor-mode evil-mode
   :defvar evil-normal-state-map
@@ -232,7 +233,13 @@
 (require '30-maude)
 ;; (require '30-lean)
 ;; (require '30-pdf)
-(require '31-lsp)
+;; (require '31-lsp)
+(leaf *latex
+  :config
+  (leaf auctex
+    :ensure t))
+
+
 (leaf lsp-mode
   :ensure t
   :custom
@@ -241,6 +248,15 @@
    (lsp-prefer-flymake . nil)
    (lsp-completion-provider . :capf))
   :config
+  (leaf *lsp-keybinds
+    :custom
+    ((lsp-keymap-prefix . "C-c l"))
+    :bind
+    (:lsp-mode-map
+     ("C-c l" . lsp-command-map))
+    ;;(define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
+    :config
+    (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
   (leaf lsp-ui
     :ensure t
     :custom
@@ -250,36 +266,34 @@
              . lsp-ui-peek-find-definitions)
             ([remap xref-find-references]
              . lsp-ui-peek-find-references))))
-  (leaf *latex
+  (leaf lsp-latex
+    :ensure t
+    :commands lsp-latex-build lsp-latex-forward-search
     :defun my/start-server
-    :config
+    :custom
+    ((lsp-latex-build-executable . "cluttex")
+     (lsp-latex-build-args . '("-e" "lualatex" "--biber" "-synctex=1" "%f"))
+     (lsp-latex-forward-search-executable . `,(pcase system-type
+                                                ('windows-nt "C:\\Users\\ecofi\\AppData\\Local\\SumatraPDF\\SumatraPDF.exe")
+                                                ('gnu/linux "zathura")))
+     (lsp-latex-forward-search-args . `,(pcase system-type
+                                          ('windows-nt '("-reuse-instance" "%p" "-forward-search" "%f" "%l"))
+                                          ('gnu/linux '("--synctex-forward" "%l:1:%f" "%p")))))
+    :init
     (defun my/start-server ()
       (unless (server-running-p)
         (server-start)))
-    (add-hook 'latex-mode-hook #'my/start-server)
-    (add-hook 'tex-mode-hook #'lsp)
-    (add-hook 'latex-mode-hook #'lsp)
+    (add-hook 'LaTeX-mode-hook #'my/start-server)
+    (add-hook 'plain-TeX-mode-hook #'lsp)
+    (add-hook 'LaTeX-mode-hook #'lsp)
     (add-hook 'bibtex-mode-hook #'lsp)
-    (leaf lsp-latex
-      :ensure t
-      :commands lsp-latex-build lsp-latex-forward-search
-      :custom
-      ((lsp-latex-build-executable . "cluttex")
-       (lsp-latex-build-args . '("-e" "lualatex" "--biber" "-synctex=1" "%f"))
-       (lsp-latex-forward-search-executable . `,(pcase system-type
-                                                  ('windows-nt "C:\\Users\\ecofi\\AppData\\Local\\SumatraPDF\\SumatraPDF.exe")
-                                                  ('gnu/linux "zathura")))
-       (lsp-latex-forward-search-args . `,(pcase system-type
-                                            ('windows-nt '("-reuse-instance" "%p" "-forward-search" "%f" "%l"))
-                                            ('gnu/linux '("--synctex-forward" "%l:1:%f" "%p")))))
+    (leaf *lsp-latex-keybinds
+      :after evil-leader
       :config
-      (leaf *keybinds
-        :ensure evil-leader
-        :config
-        `,(dolist (mode '(latex-mode tex-mode))
-            (evil-leader/set-key-for-mode mode
-              "m b" 'lsp-latex-build
-              "m f" 'lsp-latex-forward-search))))))
+      `,(dolist (mode '(latex-mode tex-mode))
+          (evil-leader/set-key-for-mode mode
+            "m b" 'lsp-latex-build
+            "m f" 'lsp-latex-forward-search)))))
 
 ;;(require '31-eglot)
 (require '32-c++)
