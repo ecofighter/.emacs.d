@@ -60,6 +60,16 @@
       (force-window-update (current-buffer)))
     (advice-add 'text-scale-mode :after #'my/resize-line-number)))
 (require '01-graphics)
+(leaf *graphics
+  :config
+  (leaf *font
+    :config
+    (setq use-default-font-for-symbols nil)
+    (add-to-list 'default-frame-alist '(font . "Ricty Diminished-14"))
+    (set-face-attribute 'default nil :font "Ricty Diminished-14")
+    ;; (set-fontset-font t 'ascii (font-spec :family "Ricty Diminished" :size 14))
+    ;; (set-fontset-font t 'japanese-jisx0208 (font-spec :family "Ricty Diminished"))
+    (set-fontset-font t 'unicode (font-spec :family "Noto Sans") nil 'append)))
 (require '02-exec-path-from-shell)
 (leaf evil
   :ensure t
@@ -208,6 +218,17 @@
 ;; (require '20-google-translate)
 ;; (require '30-bison)
 ;; (require '30-cmake)
+(leaf posframe
+  :ensure t
+  :config
+  (leaf company-posframe
+    :ensure t
+    :after company
+    :global-minor-mode t)
+  (leaf ddskk-posframe
+    :ensure t
+    :after skk
+    :global-minor-mode t))
 (require '30-org)
 (require '30-yaml)
 ;; (require '30-emacslisp)
@@ -234,19 +255,29 @@
 ;; (require '30-lean)
 ;; (require '30-pdf)
 ;; (require '31-lsp)
-(leaf *latex
+(leaf *languages
   :config
-  (leaf auctex
-    :ensure t))
-
+  (leaf *latex
+    :config
+    (leaf auctex
+      :custom
+      ((TeX-engine . 'luatex))
+      :ensure t
+      :config
+      (leaf auctex-cluttex
+        :ensure t
+        :config
+        (add-hook 'LaTeX-mode-hook #'auctex-cluttex-mode)))))
 
 (leaf lsp-mode
   :ensure t
   :custom
   ((lsp-auto-guess-root . t)
-   (lsp-enable-snippet . nil)
-   (lsp-prefer-flymake . nil)
-   (lsp-completion-provider . :capf))
+   (lsp-enable-snippet . t)
+   (lsp-diagnostics-provider . :flycheck)
+   (lsp-enable-completion . t)
+   (lsp-completion-provider . :capf)
+   (lsp-modeline-diagnostics-scope . :file))
   :config
   (leaf *lsp-keybinds
     :custom
@@ -260,19 +291,28 @@
   (leaf lsp-ui
     :ensure t
     :custom
-    ((lsp-ui-doc-enable . t))
+    ((lsp-ui-doc-enable . t)
+     (lsp-ui-doc-use-childframe . t)
+     (lsp-ui-doc-use-webkit . nil))
     :bind ((:lsp-ui-mode-map
             ([remap xref-find-definitions]
              . lsp-ui-peek-find-definitions)
             ([remap xref-find-references]
-             . lsp-ui-peek-find-references))))
+             . lsp-ui-peek-find-references)))
+    :config
+    (add-hook 'lsp-mode-hook #'lsp-ui-mode))
+  (leaf lsp-treemacs
+    :ensure t
+    :after treemacs
+    :config
+    (add-hook 'lsp-mode-hook #'lsp-treemacs-sync-mode))
   (leaf lsp-latex
     :ensure t
     :commands lsp-latex-build lsp-latex-forward-search
     :defun my/start-server
     :custom
     ((lsp-latex-build-executable . "cluttex")
-     (lsp-latex-build-args . '("-e" "lualatex" "--biber" "-synctex=1" "%f"))
+     (lsp-latex-build-args . '("-e" "lualatex" "-interaction=nonstopmode" "-synctex=1" "%f"))
      (lsp-latex-forward-search-executable . `,(pcase system-type
                                                 ('windows-nt "C:\\Users\\ecofi\\AppData\\Local\\SumatraPDF\\SumatraPDF.exe")
                                                 ('gnu/linux "zathura")))
