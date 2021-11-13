@@ -70,7 +70,16 @@
     ;; (set-fontset-font t 'ascii (font-spec :family "Ricty Diminished" :size 14))
     ;; (set-fontset-font t 'japanese-jisx0208 (font-spec :family "Ricty Diminished"))
     (set-fontset-font t 'unicode (font-spec :family "Noto Sans") nil 'append)))
-(require '02-exec-path-from-shell)
+;; (require '02-exec-path-from-shell)
+(leaf exec-path-from-shell
+  :ensure t
+  :unless (equal system-type 'windows-nt)
+  :require exec-path-from-shell
+  :custom ((exec-path-from-shell-arguments . nil)
+           (exec-path-from-shell-check-startup-files . nil))
+  :config
+  ;;(add-to-list 'exec-path-from-shell-variables "CAML_LD_LIBRARY_PATH")
+  (exec-path-from-shell-initialize))
 (leaf evil
   :ensure t
   :require t
