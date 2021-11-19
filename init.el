@@ -15,7 +15,7 @@
 (eval-and-compile
   (customize-set-variable
    'package-archives '(("melpa"        . "https://melpa.org/packages/")
-                       ("org"          . "https://orgmode.org/elpa/")
+                       ;;("org"          . "https://orgmode.org/elpa/")
                        ("gnu"          . "https://elpa.gnu.org/packages/")))
   (package-initialize)
   (unless (package-installed-p 'leaf)
@@ -37,6 +37,23 @@
 (require 'myutils)
 (add-to-list 'load-path "~/.emacs.d/inits")
 (require '00-init)
+(leaf *init
+  :custom ((make-backup-files . nil)
+           (indent-tabs-mode . nil)
+           (select-enable-clipboard . t)
+           (x-select-enable-clipboard-manager . t)
+           (split-width-threshold . 80)
+           (vc-handled-backends quote nil)
+           (fill-column . 80)
+           (tab-width . 2)
+           (truncate-lines . t)
+           (truncate-partial-width-windows . t))
+  :config
+  (defalias 'yes-or-no-p 'y-or-n-p)
+  (defvaralias 'c-basic-offset 'tab-width)
+  (defvaralias 'cperl-indent-level 'tab-width)
+  (set-language-environment "Japanese")
+  (prefer-coding-system 'utf-8))
 (leaf *line-numbers
   :global-minor-mode global-display-line-numbers-mode
   :config
@@ -70,11 +87,11 @@
     ;; (set-fontset-font t 'ascii (font-spec :family "Ricty Diminished" :size 14))
     ;; (set-fontset-font t 'japanese-jisx0208 (font-spec :family "Ricty Diminished"))
     (set-fontset-font t 'unicode (font-spec :family "Noto Sans") nil 'append)))
-;; (require '02-exec-path-from-shell)
 (leaf exec-path-from-shell
   :ensure t
   :unless (equal system-type 'windows-nt)
   :require exec-path-from-shell
+  :defun exec-path-from-shell-initialize
   :custom ((exec-path-from-shell-arguments . nil)
            (exec-path-from-shell-check-startup-files . nil))
   :config
@@ -89,6 +106,7 @@
    (evil-insert-state-tag . `,(propertize "<I>" 'face '((:background "#076678"))))
    (evil-visual-state-tag . `,(propertize "<V>" 'face '((:background "#fe8019" :foreground "#232323"))))
    (evil-replace-state-tag . `,(propertize "<R>" 'face '((:background "#8f3f71"))))
+   (evil-operator-state-tag . `,(propertize "<O>" 'face '((:background "#3f3f3f"))))
    (evil-emacs-state-tag . `,(propertize "<E>" 'face '((:background "#ba45ea" :foreground "#efefef"))))
    (evil-mode-line-format . '(before . mode-line-front-space)))
   :global-minor-mode evil-mode
@@ -101,16 +119,6 @@
    ("gj" . evil-next-line)
    ("k" . evil-previous-visual-line)
    ("gk" . evil-previous-line))
-  ;; :defer-config
-  ;; (eval-and-compile
-  ;;   (defmacro my/swap-key-in-map (map key1 key2)
-  ;;     "Swap KEY1 and KEY2 in MAP."
-  ;;     `(let ((def1 (lookup-key ,map ,key1))
-  ;;            (def2 (lookup-key ,map ,key2)))
-  ;;        (define-key ,map ,key1 def2)
-  ;;        (define-key ,map ,key2 def1)))
-  ;;   (my/swap-key-in-map evil-motion-state-map "j" "gj")
-  ;;   (my/swap-key-in-map evil-motion-state-map "k" "gk"))
   :defer-config
   (define-key evil-normal-state-map (kbd "M-.")
     `(menu-item "" evil-repeat-pop :filter
@@ -220,8 +228,40 @@
 (require '20-yasnippet)
 ;; (require '20-flymake)
 (require '20-flycheck)
-(require '20-smartparens)
-(require '20-rainbow-delimiters)
+;; (require '20-smartparens)
+;; (require '20-rainbow-delimiters)
+(leaf rainbow-delimiters
+  :ensure t
+  :hook (prog-mode-hook . rainbow-delimiters-mode))
+(leaf smartparens
+  :ensure t
+  :global-minor-mode smartparens-global-mode
+  :defun my/sp-wrap-dquote sp-wrap-with-pair
+  :require smartparens-config
+  :config
+  (defun my/sp-wrap-dquote ()
+    (interactive)
+    (sp-wrap-with-pair "\""))
+  (leaf evil-smartparens
+    :ensure t
+    :after evil
+    :hook (smartparens-enabled-hook . evil-smartparens-mode)
+    :config
+    (leaf *smartparens-evil-leader
+      :after evil-leader
+      :config
+      (evil-leader/set-key
+        "p f s" 'sp-forward-slurp-sexp
+        "p f b" 'sp-forward-barf-sexp
+        "p b s" 'sp-backward-slurp-sexp
+        "p b b" 'sp-backward-barf-sexp
+        "p b u" 'sp-backward-unwrap-sexp
+        "p w (" 'sp-wrap-round
+        "p w [" 'sp-wrap-square
+        "p w {" 'sp-wrap-curly
+        "p w \"" 'my/sp-wrap-dquote
+        "p u u" 'sp-unwrap-sexp
+        "p u b" 'sp-backward-unwrap-sexp))))
 (require '20-highlight-indent-guides)
 (require '20-magit)
 ;; (require '20-google-translate)
@@ -233,12 +273,26 @@
   (leaf company-posframe
     :ensure t
     :after company
-    :global-minor-mode t)
+    :global-minor-mode t
+    :blackout t)
   (leaf ddskk-posframe
     :ensure t
     :after skk
-    :global-minor-mode t))
-(require '30-org)
+    :global-minor-mode t
+    :blackout t))
+;;(require '30-org)
+(leaf org
+  :ensure t
+  :config
+  (leaf org-plus-contrib
+    :ensure t)
+  (leaf evil-org
+    :ensure t
+    :hook ((org-mode-hook . evil-org-mode))
+    :defun evil-org-set-key-theme
+    :config
+    (evil-org-set-key-theme
+     '(navigation insert textobjects additional calendar))))
 (require '30-yaml)
 ;; (require '30-emacslisp)
 (leaf *emacslisp
@@ -287,6 +341,7 @@
    (lsp-enable-completion . t)
    (lsp-completion-provider . :capf)
    (lsp-modeline-diagnostics-scope . :file))
+  :defun lsp-enable-which-key-integration
   :config
   (leaf *lsp-keybinds
     :custom

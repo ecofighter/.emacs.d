@@ -10,7 +10,7 @@
   (plist-put org-format-latex-options :scale 2.0)
   (add-hook 'org-mode-hook 'evil-org-mode)
   (add-hook 'evil-org-mode-hook #'evil-org-set-key-theme)
-  (require 'evil-org-agenda)
+  ;;(require 'evil-org-agenda)
   (add-hook 'evil-org-mode-hook #'evil-org-agenda-set-keys)
   (add-hook 'org-mode-hook
             #'(lambda ()
