@@ -9,4 +9,4 @@
     "'" 'eshell))
 
 (provide '20-eshell)
-;;; 20-eshell ends here
+;;; 20-eshell.el ends here

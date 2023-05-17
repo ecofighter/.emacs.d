@@ -7,7 +7,7 @@
 (setq garbage-collection-messages t)
 
 (require 'package)
-(customize-set-variable 'gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
+                                        ;(customize-set-variable 'gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 (setq package-enable-at-startup nil)
 (when (fboundp 'native-comp-available-p)
   (when (native-comp-available-p)
@@ -47,7 +47,8 @@
            (fill-column . 80)
            (tab-width . 2)
            (truncate-lines . t)
-           (truncate-partial-width-windows . t))
+           (truncate-partial-width-windows . t)
+           (enable-recusive-minibuffers . t))
   :config
   (defalias 'yes-or-no-p 'y-or-n-p)
   (defvaralias 'c-basic-offset 'tab-width)
@@ -55,6 +56,7 @@
   (set-language-environment "Japanese")
   (prefer-coding-system 'utf-8))
 (leaf *line-numbers
+  :disabled t
   :global-minor-mode global-display-line-numbers-mode
   :config
   (leaf *line-numbers-resize-advice
@@ -86,7 +88,7 @@
     (set-face-attribute 'default nil :font "Ricty Diminished-14")
     ;; (set-fontset-font t 'ascii (font-spec :family "Ricty Diminished" :size 14))
     ;; (set-fontset-font t 'japanese-jisx0208 (font-spec :family "Ricty Diminished"))
-    (set-fontset-font t 'unicode (font-spec :family "Noto Sans") nil 'append)))
+    (set-fontset-font t 'unicode (font-spec :family "Noto Sans CJK JP") nil 'append)))
 (leaf exec-path-from-shell
   :ensure t
   :unless (equal system-type 'windows-nt)
@@ -121,8 +123,8 @@
    ("gk" . evil-previous-line))
   :defer-config
   (define-key evil-normal-state-map (kbd "M-.")
-    `(menu-item "" evil-repeat-pop :filter
-                ,(lambda (cmd) (if (eq last-command 'evil-repeat-pop) cmd))))
+              `(menu-item "" evil-repeat-pop :filter
+                          ,(lambda (cmd) (if (eq last-command 'evil-repeat-pop) cmd))))
   :config
   (leaf undo-fu
     :emacs< 28
@@ -181,7 +183,36 @@
     (evil-leader/set-key
       "t t" 'treemacs
       "t s" 'treemacs-select-window)))
-(require '10-ivy)
+;;(require '10-ivy)
+(leaf *fido
+  :config
+  ;;(fido-vertical-mode 1)
+  (leaf vertico
+    :ensure t
+    :global-minor-mode vertico-mode)
+  (leaf embark
+    :ensure t
+    :bind
+    (("C-." . 'embark-act)
+     ("C-;" . 'embark-dwim)))
+  (leaf consult
+    :ensure t
+    :config
+    (evil-leader/set-key
+      "i i" 'consult-imenu
+      "i I" 'consult-imenu-multi
+      "i f" 'consult-find
+      "i g" 'consult-ripgrep)
+    (leaf embark-consult
+      :ensure t
+      :hook ((embark-collect-mode-hook . consult-preview-at-point-mode))))
+  (leaf marginalia
+    :ensure t
+    :global-minor-mode marginalia-mode)
+  (leaf orderless
+    :ensure t
+    :custom
+    ((completion-styles . '(orderless basic)))))
 (require '10-shackle)
 (require '10-winner)
 (require '10-which-key)
@@ -190,7 +221,18 @@
 (require '10-smart-mode-line)
 (require '10-tramp)
 ;; (require '10-ripgrep)
-(require '20-eshell)
+;; (require '20-eshell)
+(leaf vterm
+  :ensure t)
+(leaf eshell
+  :config
+  (leaf eshell-vterm
+    :ensure t)
+  (leaf *eshell-evil-leader
+    :after evil-leader
+    :config
+    (evil-leader/set-key
+      "'" 'eshell)))
 ;;(require '20-ddskk)
 (leaf ddskk
   :ensure t
@@ -284,8 +326,8 @@
 (leaf org
   :ensure t
   :config
-  (leaf org-plus-contrib
-    :ensure t)
+  ;; (leaf org-plus-contrib
+  ;;   :ensure t)
   (leaf evil-org
     :ensure t
     :hook ((org-mode-hook . evil-org-mode))
@@ -309,12 +351,12 @@
 (require '30-scheme)
 ;; (require '30-agda)
 ;; (require '30-ocaml)
-(require '30-sml)
+;; (require '30-sml)
 (require '30-fsharp)
 (require '30-markdown)
-(require '30-purescript)
+;; (require '30-purescript)
 (require '30-coq)
-(require '30-maude)
+;; (require '30-maude)
 ;; (require '30-lean)
 ;; (require '30-pdf)
 ;; (require '31-lsp)
@@ -324,13 +366,35 @@
     :config
     (leaf auctex
       :custom
-      ((TeX-engine . 'luatex))
-      :ensure t
+      ((TeX-engine . 'luatex)
+       (TeX-PDF-mode . t)
+       (TeX-source-correlate-mode . t)
+       (TeX-source-correlate-method . 'synctex)
+       (TeX-source-correlate-start-server . t)
+       (TeX-parse-self . t))
+      :ensure f
+      :defvar TeX-view-program-list
       :config
-      (leaf auctex-cluttex
+      ;;(load "tex-site.el" nil t)
+      (leaf pdf-tools
         :ensure t
+        :custom
+        ((TeX-view-program-selection . '((output-pdf "PDF Tools"))))
         :config
-        (add-hook 'LaTeX-mode-hook #'auctex-cluttex-mode)))))
+        (pdf-tools-install)
+        (leaf *auctex-config
+          :after tex
+          :config
+          (add-to-list 'TeX-view-program-list '("PDF Tools" TeX-pdf-tools-sync-view)))))
+    (leaf auctex-cluttex
+      :ensure f
+      :custom
+      ((auctex-cluttex-program . "cluttex.exe")
+       (auctex-cluttex-ClutTeX-command . '("ClutTeX" "cluttex.exe -e %(cluttexengine) %(cluttexbib) %(cluttexindex) %S %t" auctex-cluttex--TeX-run-ClutTeX nil
+                                           (plain-tex-mode latex-mode)
+                                           :help "Run ClutTeX")))
+      :config
+      (add-hook 'LaTeX-mode-hook #'auctex-cluttex-mode))))
 
 (leaf lsp-mode
   :ensure t
@@ -369,41 +433,40 @@
     :ensure t
     :after treemacs
     :config
-    (add-hook 'lsp-mode-hook #'lsp-treemacs-sync-mode))
-  (leaf lsp-latex
-    :ensure t
-    :commands lsp-latex-build lsp-latex-forward-search
-    :defun my/start-server
-    :custom
-    ((lsp-latex-build-executable . "cluttex")
-     (lsp-latex-build-args . '("-e" "lualatex" "-interaction=nonstopmode" "-synctex=1" "%f"))
-     (lsp-latex-forward-search-executable . `,(pcase system-type
-                                                ('windows-nt "C:\\Users\\ecofi\\AppData\\Local\\SumatraPDF\\SumatraPDF.exe")
-                                                ('gnu/linux "zathura")))
-     (lsp-latex-forward-search-args . `,(pcase system-type
-                                          ('windows-nt '("-reuse-instance" "%p" "-forward-search" "%f" "%l"))
-                                          ('gnu/linux '("--synctex-forward" "%l:1:%f" "%p")))))
-    :init
-    (defun my/start-server ()
-      (unless (server-running-p)
-        (server-start)))
-    (add-hook 'LaTeX-mode-hook #'my/start-server)
-    (add-hook 'plain-TeX-mode-hook #'lsp)
-    (add-hook 'LaTeX-mode-hook #'lsp)
-    (add-hook 'bibtex-mode-hook #'lsp)
-    (leaf *lsp-latex-keybinds
-      :after evil-leader
-      :config
-      `,(dolist (mode '(latex-mode tex-mode))
-          (evil-leader/set-key-for-mode mode
-            "m b" 'lsp-latex-build
-            "m f" 'lsp-latex-forward-search)))))
-
+    (add-hook 'lsp-mode-hook #'lsp-treemacs-sync-mode)))
+;; (leaf lsp-latex
+;;     :ensure t
+;;     :commands lsp-latex-build lsp-latex-forward-search
+;;     :defun my/start-server
+;;     :custom
+;;     ((lsp-latex-build-executable . "cluttex")
+;;      (lsp-latex-build-args . '("-e" "lualatex" "-interaction=nonstopmode" "-synctex=1" "%f"))
+;;      (lsp-latex-forward-search-executable . `,(pcase system-type
+;;                                                 ('windows-nt "C:\\Users\\ecofi\\AppData\\Local\\SumatraPDF\\SumatraPDF.exe")
+;;                                                 ('gnu/linux "zathura")))
+;;      (lsp-latex-forward-search-args . `,(pcase system-type
+;;                                           ('windows-nt '("-reuse-instance" "%p" "-forward-search" "%f" "%l"))
+;;                                           ('gnu/linux '("--synctex-forward" "%l:1:%f" "%p")))))
+;;     :init
+;;     (defun my/start-server ()
+;;       (unless (server-running-p)
+;;         (server-start)))
+;;     (add-hook 'LaTeX-mode-hook #'my/start-server)
+;;     (add-hook 'plain-TeX-mode-hook #'lsp)
+;;     (add-hook 'LaTeX-mode-hook #'lsp)
+;;     (add-hook 'bibtex-mode-hook #'lsp)
+;;     (leaf *lsp-latex-keybinds
+;;       :after evil-leader
+;;       :config
+;;       `,(dolist (mode '(latex-mode tex-mode))
+;;           (evil-leader/set-key-for-mode mode
+;;             "m b" 'lsp-latex-build
+;;             "m f" 'lsp-latex-forward-search))))
 ;;(require '31-eglot)
 (require '32-c++)
 (require '32-rust)
 (require '32-haskell)
-(require '32-scala)
+;; (require '32-scala)
 (require '32-typescript)
 ;;(require '32-latex)
 
