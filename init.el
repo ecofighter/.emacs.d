@@ -189,6 +189,7 @@
   ;;(fido-vertical-mode 1)
   (leaf vertico
     :ensure t
+    :bind (:vertico-map (("C-h" . 'vertico-directory-up)))
     :global-minor-mode vertico-mode)
   (leaf embark
     :ensure t
@@ -197,12 +198,16 @@
      ("C-;" . 'embark-dwim)))
   (leaf consult
     :ensure t
+    :after vertico
     :config
-    (evil-leader/set-key
-      "i i" 'consult-imenu
-      "i I" 'consult-imenu-multi
-      "i f" 'consult-find
-      "i g" 'consult-ripgrep)
+    (leaf *consult-leader-key
+      :after evil-leader
+      :config (evil-leader/set-key
+                "i i" 'consult-imenu
+                "i I" 'consult-imenu-multi
+                "i p" 'consult-yank-from-kill-ring
+                "i l" 'consult-compile-error
+                "i g" 'consult-ripgrep))
     (leaf embark-consult
       :ensure t
       :hook ((embark-collect-mode-hook . consult-preview-at-point-mode))))
