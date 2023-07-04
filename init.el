@@ -1,14 +1,26 @@
 ;;; init.el -- my config -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 6))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (setq gc-cons-threshold 100000000)
 (setq read-process-output-max (* 1024 1024))
 (setq garbage-collection-messages t)
+(setq package-enable-at-startup nil)
 
 (require 'package)
-                                        ;(customize-set-variable 'gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
-(setq package-enable-at-startup nil)
 (when (fboundp 'native-comp-available-p)
   (when (native-comp-available-p)
     (customize-set-variable 'package-native-compile t)))
@@ -203,6 +215,7 @@
     (leaf *consult-leader-key
       :after evil-leader
       :config (evil-leader/set-key
+                "i s" 'consult-line
                 "i i" 'consult-imenu
                 "i I" 'consult-imenu-multi
                 "i p" 'consult-yank-from-kill-ring
@@ -219,7 +232,23 @@
     :custom
     ((completion-styles . '(orderless basic)))))
 (require '10-shackle)
-(require '10-winner)
+;; (require '10-winner)
+(leaf winner
+  :ensure t
+  :global-minor-mode winner-mode
+  :config
+  (leaf *winner-evil-leader
+    :after evil-leader
+    :config
+    (evil-leader/set-key
+      "w s" 'delete-other-windows
+      "w u" 'winner-undo
+      "w r" 'winner-redo
+      "w >" 'enlarge-window-horizontally
+      "w <" 'shrink-window-horizontally
+      "w ." 'enlarge-window
+      "w ," 'shrink-window
+      "w =" 'balance-windows)))
 (require '10-which-key)
 ;; (require '10-hl-todo)
 ;; (require '10-editorconfig)
@@ -271,7 +300,21 @@
 ;; (require '20-migemo)
 ;; (require '20-fcitx)
 ;; (require '20-uim)
-(require '20-company)
+;; (require '20-company)
+(leaf company
+  :ensure t
+  :global-minor-mode global-company-mode
+  :custom ((company-selection-wrap-around . t)
+           (company-backends . '(company-capf company-yasnippet company-files company-dabbrev-code))
+           (company-minimum-prefix-length . 2)
+           (company-idle-delay . 0.3))
+  :bind (:company-active-map
+         ("<tab>" . 'company-select-next-if-tooltip-visible-or-complete-selection)
+         ("TAB" . 'company-select-next-if-tooltip-visible-or-complete-selection))
+  :config
+  (leaf company-box
+    :hook (company-mode . company-box-mode)))
+
 (require '20-yasnippet)
 ;; (require '20-flymake)
 (require '20-flycheck)
@@ -357,7 +400,20 @@
 ;; (require '30-agda)
 ;; (require '30-ocaml)
 ;; (require '30-sml)
-(require '30-fsharp)
+;; (require '30-fsharp)
+(leaf *fsharp
+  :config
+  (leaf fsharp-mode
+    :ensure t
+    :config
+    (leaf *fsharp-company
+      :after company
+      :disabled t
+      :config
+      (add-to-list 'company-transformers 'company-sort-prefer-same-case-prefix)))
+  (leaf eglot-fsharp
+    :ensure t
+    :require t))
 (require '30-markdown)
 ;; (require '30-purescript)
 (require '30-coq)
@@ -372,37 +428,42 @@
     (leaf auctex
       :custom
       ((TeX-engine . 'luatex)
+       (TeX-engine-alist . '((luatex "LuaTeX" "luatex.exe" "lualatex.exe --jobname=%(s-filename-only)" "luatex.exe")))
+       (LaTeX-using-Biber . t)
        (TeX-PDF-mode . t)
        (TeX-source-correlate-mode . t)
        (TeX-source-correlate-method . 'synctex)
        (TeX-source-correlate-start-server . t)
-       (TeX-parse-self . t))
-      :ensure f
+       (TeX-parse-self . t)
+       (TeX-auto-save . t)
+       (reftex-plug-into-AUCTeX . t))
+      :ensure t
       :defvar TeX-view-program-list
+      :defun TeX-revert-document-buffer
       :config
-      ;;(load "tex-site.el" nil t)
+      (add-hook 'LaTeX-mode-hook #'turn-on-reftex)
       (leaf pdf-tools
         :ensure t
+        :require t
         :custom
-        ((TeX-view-program-selection . '((output-pdf "PDF Tools"))))
+        ((TeX-view-program-selection . '((output-pdf "PDF Tools")))
+         (TeX-view-program-list . '(("PDF Tools" TeX-pdf-tools-sync-view))))
         :config
         (pdf-tools-install)
-        (leaf *auctex-config
-          :after tex
-          :config
-          (add-to-list 'TeX-view-program-list '("PDF Tools" TeX-pdf-tools-sync-view)))))
+        (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)))
     (leaf auctex-cluttex
-      :ensure f
+      :ensure t
       :custom
       ((auctex-cluttex-program . "cluttex.exe")
        (auctex-cluttex-ClutTeX-command . '("ClutTeX" "cluttex.exe -e %(cluttexengine) %(cluttexbib) %(cluttexindex) %S %t" auctex-cluttex--TeX-run-ClutTeX nil
                                            (plain-tex-mode latex-mode)
                                            :help "Run ClutTeX")))
-      :config
-      (add-hook 'LaTeX-mode-hook #'auctex-cluttex-mode))))
-
+      :hook ((LaTeX-mode-hook . auctex-cluttex-mode)))))
+(leaf eglot
+  :ensure t)
 (leaf lsp-mode
   :ensure t
+  :disabled t
   :custom
   ((lsp-auto-guess-root . t)
    (lsp-enable-snippet . t)
@@ -469,11 +530,32 @@
 ;;             "m f" 'lsp-latex-forward-search))))
 ;;(require '31-eglot)
 (require '32-c++)
-(require '32-rust)
+;; (require '32-rust)
+(leaf *rust
+  :config
+  (leaf rust-mode
+    :ensure t
+    :require t
+    :hook 'eglot-ensure
+    :custom
+    ((rust-indent-offset . 4)))
+  (leaf cargo
+    :ensure t))
 (require '32-haskell)
 ;; (require '32-scala)
-(require '32-typescript)
-;;(require '32-latex)
+;; (require '32-typescript)
+;; (require '32-latex)
+
+(leaf editorconfig
+  :ensure t)
+(leaf copilot
+  :straight (copilot
+           :host github
+           :repo "zerolfx/copilot.el"
+           :files ("dist" "*.el"))
+  :bind (:copilot-completion-map
+         ("<tab>" . 'copilot-accept-completion)
+         ("TAB" . 'copilot-accept-completion)))
 
 (install-when-compile 'package-utils)
 (garbage-collect)
