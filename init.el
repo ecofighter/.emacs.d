@@ -96,8 +96,8 @@
   (leaf *font
     :config
     (setq use-default-font-for-symbols nil)
-    (add-to-list 'default-frame-alist '(font . "Ricty Diminished-14"))
-    (set-face-attribute 'default nil :font "Ricty Diminished-14")
+    (add-to-list 'default-frame-alist '(font . "UDEV Gothic 35 NFLG-14"))
+    (set-face-attribute 'default nil :font "UDEV Gothic 35 NFLG-14")
     ;; (set-fontset-font t 'ascii (font-spec :family "Ricty Diminished" :size 14))
     ;; (set-fontset-font t 'japanese-jisx0208 (font-spec :family "Ricty Diminished"))
     (set-fontset-font t 'unicode (font-spec :family "Noto Sans CJK JP") nil 'append)))
@@ -111,11 +111,16 @@
   :config
   ;;(add-to-list 'exec-path-from-shell-variables "CAML_LD_LIBRARY_PATH")
   (exec-path-from-shell-initialize))
+(leaf tab-bar-mode
+  :global-minor-mode t)
 (leaf evil
   :ensure t
   :require t
   :custom
   ((evil-want-C-i-jump . t)
+   (evil-overriding-maps . nil)
+   (evil-want-integration . t)
+   (evil-want-keybinding . nil)
    (evil-normal-state-tag . "<N>")
    (evil-insert-state-tag . `,(propertize "<I>" 'face '((:background "#076678"))))
    (evil-visual-state-tag . `,(propertize "<V>" 'face '((:background "#fe8019" :foreground "#232323"))))
@@ -132,7 +137,8 @@
    ("j" . evil-next-visual-line)
    ("gj" . evil-next-line)
    ("k" . evil-previous-visual-line)
-   ("gk" . evil-previous-line))
+   ("gk" . evil-previous-line)
+   ("gc" . tab-bar-new-tab))
   :defer-config
   (define-key evil-normal-state-map (kbd "M-.")
               `(menu-item "" evil-repeat-pop :filter
@@ -148,6 +154,13 @@
     :emacs>= 28
     :custom
     ((evil-undo-system . 'undo-redo)))
+  (leaf evil-collection
+    :ensure t
+    :after evil
+    :defun evil-collection-init
+    :custom
+    :config
+    (evil-collection-init))
   (leaf evil-leader
     :ensure t
     :after evil
@@ -230,7 +243,7 @@
   (leaf orderless
     :ensure t
     :custom
-    ((completion-styles . '(orderless basic)))))
+    ((completion-styles . '(substring orderless basic)))))
 (require '10-shackle)
 ;; (require '10-winner)
 (leaf winner
@@ -277,9 +290,9 @@
    (skk-isearch-start-mode . 'latin)
    (skk-isearch-mode-enable . t)
    (default-input-method . "japanese-skk")
-   ;;(skk-large-jisyo . "~/.emacs.d/skk-get-jisyo/SKK-JISYO.L")
+   (skk-large-jisyo . "~/.emacs.d/skk-get-jisyo/SKK-JISYO.L")
    (skk-itaiji-jisyo . "~/.emacs.d/skk-get-jisyo/SKK-JISYO.itaiji")
-   (skk-cdb-large-jisyo . "~/.emacs.d/SKK-JISYO.myL.cdb"))
+   (skk-cdb-large-jisyo . "~/.emacs.d/SKK-JISYO.XL.cdb"))
   :bind (("C-x j" . skk-mode)
          ("C-x J" . skk-auto-fill-mode))
   :init
@@ -305,7 +318,7 @@
   :ensure t
   :global-minor-mode global-company-mode
   :custom ((company-selection-wrap-around . t)
-           (company-backends . '(company-capf company-yasnippet company-files company-dabbrev-code))
+           ;; (company-backends . '(company-capf company-yasnippet company-files company-dabbrev-code))
            (company-minimum-prefix-length . 2)
            (company-idle-delay . 0.3))
   :bind (:company-active-map
@@ -370,6 +383,54 @@
     :after skk
     :global-minor-mode t
     :blackout t))
+(leaf eglot
+  :ensure t
+  :config
+  (leaf flycheck-eglot
+    :ensure t
+    :after (flycheck eglot)
+    :custom ((flycheck-eglot-exclusive . nil))
+    :global-minor-mode global-flycheck-eglot-mode))
+(leaf lsp-mode
+  :ensure t
+  :disabled nil
+  :custom
+  ((lsp-auto-guess-root . t)
+   (lsp-use-plist . t)
+   (lsp-enable-snippet . t)
+   (lsp-diagnostics-provider . :flycheck)
+   (lsp-enable-completion . t)
+   (lsp-completion-provider . :capf)
+   (lsp-modeline-diagnostics-scope . :file))
+  :defun lsp-enable-which-key-integration
+  :defer-config
+  (leaf *lsp-keybinds
+    :custom
+    ((lsp-keymap-prefix . "C-c l"))
+    :bind
+    ;; (:lsp-mode-map
+    ;;  ("C-c l" . lsp-command-map))
+    ;;(define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
+    :config
+    (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
+  (leaf lsp-ui
+    :ensure t
+    :custom
+    ((lsp-ui-doc-enable . t)
+     (lsp-ui-doc-use-childframe . t)
+     (lsp-ui-doc-use-webkit . nil))
+    :bind ((:lsp-ui-mode-map
+            ([remap xref-find-definitions]
+             . lsp-ui-peek-find-definitions)
+            ([remap xref-find-references]
+             . lsp-ui-peek-find-references)))
+    :config
+    (add-hook 'lsp-mode-hook #'lsp-ui-mode))
+  (leaf lsp-treemacs
+    :ensure t
+    :after treemacs
+    :config
+    (add-hook 'lsp-mode-hook #'lsp-treemacs-sync-mode)))
 ;;(require '30-org)
 (leaf org
   :ensure t
@@ -385,35 +446,12 @@
      '(navigation insert textobjects additional calendar))))
 (require '30-yaml)
 ;; (require '30-emacslisp)
-(leaf *emacslisp
-  :ensure smartparens
-  :require smartparens-config
-  :defun my/elisp-mode-hook-fun
-  :config
-  (defun my/elisp-mode-hook-fun ()
-    (hs-minor-mode 1)
-    (smartparens-strict-mode 1)
-    (flycheck-mode 1))
-  (add-hook 'emacs-lisp-mode-hook #'my/elisp-mode-hook-fun))
 ;; (require '30-common-lisp)
 (require '30-scheme)
 ;; (require '30-agda)
 ;; (require '30-ocaml)
 ;; (require '30-sml)
 ;; (require '30-fsharp)
-(leaf *fsharp
-  :config
-  (leaf fsharp-mode
-    :ensure t
-    :config
-    (leaf *fsharp-company
-      :after company
-      :disabled t
-      :config
-      (add-to-list 'company-transformers 'company-sort-prefer-same-case-prefix)))
-  (leaf eglot-fsharp
-    :ensure t
-    :require t))
 (require '30-markdown)
 ;; (require '30-purescript)
 (require '30-coq)
@@ -423,12 +461,46 @@
 ;; (require '31-lsp)
 (leaf *languages
   :config
+  (leaf *elisp
+    :ensure smartparens
+    :require smartparens-config
+    :defun my/elisp-mode-hook-fun
+    :config
+    (defun my/elisp-mode-hook-fun ()
+      (hs-minor-mode 1)
+      (smartparens-strict-mode 1)
+      (flycheck-mode 1))
+    (add-hook 'emacs-lisp-mode-hook #'my/elisp-mode-hook-fun))
+  (leaf *rust
+    :config
+    (leaf rust-mode
+      :ensure t
+      :require t
+      :hook 'eglot-ensure
+      :custom
+      ((rust-indent-offset . 4)))
+    (leaf cargo
+      :ensure t))
+  (leaf *fsharp
+    :config
+    (leaf fsharp-mode
+      :ensure t
+      :config
+      (leaf *fsharp-company
+        :after company
+        :disabled t
+        :config
+        (add-to-list 'company-transformers 'company-sort-prefer-same-case-prefix)))
+    (leaf eglot-fsharp
+      :ensure t
+      :after fsharp-mode
+      :require t))
   (leaf *latex
     :config
     (leaf auctex
       :custom
       ((TeX-engine . 'luatex)
-       (TeX-engine-alist . '((luatex "LuaTeX" "luatex.exe" "lualatex.exe --jobname=%(s-filename-only)" "luatex.exe")))
+       ;;(TeX-engine-alist . '((luatex "LuaTeX" "luatex.exe" "lualatex.exe --jobname=%(s-filename-only)" "luatex.exe")))
        (LaTeX-using-Biber . t)
        (TeX-PDF-mode . t)
        (TeX-source-correlate-mode . t)
@@ -454,52 +526,15 @@
     (leaf auctex-cluttex
       :ensure t
       :custom
-      ((auctex-cluttex-program . "cluttex.exe")
-       (auctex-cluttex-ClutTeX-command . '("ClutTeX" "cluttex.exe -e %(cluttexengine) %(cluttexbib) %(cluttexindex) %S %t" auctex-cluttex--TeX-run-ClutTeX nil
-                                           (plain-tex-mode latex-mode)
-                                           :help "Run ClutTeX")))
-      :hook ((LaTeX-mode-hook . auctex-cluttex-mode)))))
-(leaf eglot
-  :ensure t)
-(leaf lsp-mode
-  :ensure t
-  :disabled t
-  :custom
-  ((lsp-auto-guess-root . t)
-   (lsp-enable-snippet . t)
-   (lsp-diagnostics-provider . :flycheck)
-   (lsp-enable-completion . t)
-   (lsp-completion-provider . :capf)
-   (lsp-modeline-diagnostics-scope . :file))
-  :defun lsp-enable-which-key-integration
-  :config
-  (leaf *lsp-keybinds
-    :custom
-    ((lsp-keymap-prefix . "C-c l"))
-    :bind
-    (:lsp-mode-map
-     ("C-c l" . lsp-command-map))
-    ;;(define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
-    :config
-    (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
-  (leaf lsp-ui
-    :ensure t
-    :custom
-    ((lsp-ui-doc-enable . t)
-     (lsp-ui-doc-use-childframe . t)
-     (lsp-ui-doc-use-webkit . nil))
-    :bind ((:lsp-ui-mode-map
-            ([remap xref-find-definitions]
-             . lsp-ui-peek-find-definitions)
-            ([remap xref-find-references]
-             . lsp-ui-peek-find-references)))
-    :config
-    (add-hook 'lsp-mode-hook #'lsp-ui-mode))
-  (leaf lsp-treemacs
-    :ensure t
-    :after treemacs
-    :config
-    (add-hook 'lsp-mode-hook #'lsp-treemacs-sync-mode)))
+      ;; ((auctex-cluttex-program . "cluttex.exe")
+      ;;  (auctex-cluttex-ClutTeX-command . '("ClutTeX" "cluttex.exe -e %(cluttexengine) %(cluttexbib) %(cluttexindex) %S %t" auctex-cluttex--TeX-run-ClutTeX nil
+      ;;                                      (plain-tex-mode latex-mode)
+      ;;                                      :help "Run ClutTeX")))
+      :hook ((LaTeX-mode-hook . auctex-cluttex-mode)))
+    (leaf *latex-lsp
+      :config
+      (add-hook 'LaTeX-mode-hook #'eglot-ensure)
+      (add-hook 'plain-TeX-mode-hook #'eglot-ensure))))
 ;; (leaf lsp-latex
 ;;     :ensure t
 ;;     :commands lsp-latex-build lsp-latex-forward-search
@@ -531,16 +566,6 @@
 ;;(require '31-eglot)
 (require '32-c++)
 ;; (require '32-rust)
-(leaf *rust
-  :config
-  (leaf rust-mode
-    :ensure t
-    :require t
-    :hook 'eglot-ensure
-    :custom
-    ((rust-indent-offset . 4)))
-  (leaf cargo
-    :ensure t))
 (require '32-haskell)
 ;; (require '32-scala)
 ;; (require '32-typescript)
@@ -550,9 +575,9 @@
   :ensure t)
 (leaf copilot
   :straight (copilot
-           :host github
-           :repo "zerolfx/copilot.el"
-           :files ("dist" "*.el"))
+             :host github
+             :repo "zerolfx/copilot.el"
+             :files ("dist" "*.el"))
   :bind (:copilot-completion-map
          ("<tab>" . 'copilot-accept-completion)
          ("TAB" . 'copilot-accept-completion)))
