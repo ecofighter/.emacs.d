@@ -82,16 +82,19 @@
     (tool-bar-mode -1)
     (menu-bar-mode -1)
     (scroll-bar-mode -1)))
-;; (require '01-graphics)
 (leaf *graphics
   :config
   (leaf *theme
     :config
+    (leaf mood-line
+      :ensure t
+      :init
+      (mood-line-mode))
     (leaf modus-themes
       :ensure t
       :require t
       :config
-      (load-theme 'modus-vivendi :no-confirm)))
+      (load-theme 'modus-vivendi-tinted :no-confirm)))
   (leaf *font
     :config
     (setq use-default-font-for-symbols nil)
@@ -138,11 +141,10 @@
    ("k" . evil-previous-visual-line)
    ("gk" . evil-previous-line)
    ("gc" . tab-bar-new-tab))
-  :defer-config
+  :config
   (define-key evil-normal-state-map (kbd "M-.")
               `(menu-item "" evil-repeat-pop :filter
                           ,(lambda (cmd) (if (eq last-command 'evil-repeat-pop) cmd))))
-  :config
   (leaf undo-fu
     :emacs< 28
     :ensure t
@@ -162,8 +164,7 @@
     (evil-collection-init))
   (leaf evil-leader
     :ensure t
-    :after evil
-    :global-minor-mode t
+    :global-minor-mode global-evil-leader-mode
     :defun evil-leader/set-leader
     :config
     (evil-leader/set-leader "<SPC>")
@@ -180,8 +181,8 @@
       "k b" 'kill-buffer))
   (leaf evil-anzu
     :ensure t
-    :require t
     :after evil
+    :require t
     :global-minor-mode global-anzu-mode
     :blackout anzu-mode)
   (leaf evil-terminal-cursor-changer
@@ -243,8 +244,15 @@
     :ensure t
     :custom
     ((completion-styles . '(substring orderless basic)))))
-(require '10-shackle)
-;; (require '10-winner)
+(leaf shackle
+  :ensure t
+  :global-minor-mode shackle-mode
+  :custom
+  (shackle-rules . '((compilation-mode :align below :ratio 0.2)
+                     ("*Flycheck errors*" :align 'below :ratio 0.2)
+                     ("*Help*" :align right :ratio 0.5 :select t)
+                     ("*Completions*" :align below :ratio 0.3)
+                     ("*latex-math-preview-expression*" :align below :ratio 0.3 :noselect t))))
 (leaf winner
   :ensure t
   :global-minor-mode winner-mode
@@ -261,10 +269,17 @@
       "w ." 'enlarge-window
       "w ," 'shrink-window
       "w =" 'balance-windows)))
-(require '10-which-key)
+(leaf which-key
+  :ensure t
+  :global-minor-mode which-key-mode
+  :config
+  (which-key-setup-side-window-bottom)
+  (leaf which-key-posframe
+    :ensure t
+    :hook (which-key-mode-hook . which-key-posframe-mode)))
 ;; (require '10-hl-todo)
 ;; (require '10-editorconfig)
-(require '10-smart-mode-line)
+;; (require '10-smart-mode-line)
 (require '10-tramp)
 ;; (require '10-ripgrep)
 ;; (require '20-eshell)
@@ -326,7 +341,7 @@
    ("TAB" . #'company-select-next-if-tooltip-visible-or-complete-selection))
   :config
   (leaf company-box
-    :hook (company-mode . company-box-mode)))
+    :hook (company-mode-hook . company-box-mode)))
 
 ;; (require '20-yasnippet)
 ;; (require '20-flymake)
@@ -617,7 +632,8 @@
          ("<tab>" . 'copilot-accept-completion)
          ("TAB" . 'copilot-accept-completion)))
 
-(install-when-compile 'package-utils)
+(leaf package-utils
+  :ensure t)
 (garbage-collect)
 (provide 'init)
 ;;; init.el ends here
