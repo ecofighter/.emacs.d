@@ -336,8 +336,8 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
                      ("*Help*" :align right :ratio 0.5 :select t)
                      ("*Completions*" :align below :ratio 0.3)
                      ("*latex-math-preview-expression*" :align below :ratio 0.3 :noselect t))))
-(leaf winner
-  :ensure t
+(leaf *winner
+  :ensure nil
   :global-minor-mode winner-mode
   :config
   (leaf *winner-evil-leader
@@ -429,6 +429,8 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 ;; (require '20-yasnippet)
 ;; (require '20-flymake)
 ;; (require '20-flycheck)
+(leaf flycheck
+  :ensure t)
 ;; (require '20-smartparens)
 ;; (require '20-rainbow-delimiters)
 (leaf rainbow-delimiters
@@ -506,16 +508,23 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   ;;            :repo "manateelazycat/lsp-bridge"
   ;;            :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
   ;;            :build (:not compile))
+  :ensure t
   :after yasnippet
   :defun global-lsp-bridge-mode
   :init (global-lsp-bridge-mode)
   :custom ((lsp-bridge-tex-lsp-server . "digestif"))
   :config
+  (leaf *lsp-bridge-evil-state
+    :after evil evil-leader
+    :config
+    (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs)
+    (evil-leader/set-key
+      "l d" #'lsp-bridge-diagnostic-list))
   (leaf markdown-mode
     :ensure t))
 (leaf eglot
   :disabled t
-  :ensure nil
+  :ensure t
   :config
   (leaf flycheck-eglot
     :ensure t
@@ -602,6 +611,12 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
       (smartparens-strict-mode 1)
       (flycheck-mode -1))
     (add-hook 'emacs-lisp-mode-hook #'my/elisp-mode-hook-fun))
+  (leaf *haskell
+    :config
+    (leaf haskell-mode
+      :ensure t)
+    (leaf haskell-snippets
+      :ensure t))
   (leaf *rust
     :config
     (leaf rust-mode
@@ -646,7 +661,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
       :config
       (add-hook 'LaTeX-mode-hook #'turn-on-reftex)
       (leaf pdf-tools
-        :ensure nil
+        :ensure t
         :require t
         :custom
         ((TeX-view-program-selection . '((output-pdf "PDF Tools")))
