@@ -39,16 +39,99 @@
     (leaf blackout :ensure t)
     (leaf-keywords-init)))
 
-;; (eval-when-compile
-;; (when (boundp 'package-pinned-packages)
-;;   (setq package-pinned-packages
-;;         '((evil      . "melpa-stable")))))
+(leaf *mymacros
+  :init
+  (defvar *my/package-refreshed* nil)
+  (defmacro install-when-compile (package)
+    "Install PACKAGE when compile."
+    `(list
+      (add-to-list 'package-selected-packages ,package)
+      (eval-when-compile
+        (progn
+          (unless (package-installed-p ,package)
+            (unless *my/package-refreshed*
+              (package-refresh-contents)
+              (setq *my/package-refreshed* t))
+            (package-install ,package)))))))
+(leaf *myutils
+  :config
+  (defun my/reopen-with-sudo ()
+    "Reopen buffer with sudo."
+    (interactive)
+    (find-file (concat "/sudo::"
+                       (expand-file-name (buffer-file-name)))))
+  (require 'server)
+  (defun my/exit ()
+    "Exit from Emacs window.
+this sxec 'server-edit' when in client, or 'save-buffers-kill-emacs'."
+    (interactive)
+    (if server-clients
+        (server-edit)
+      (save-buffers-kill-emacs)))
 
-(add-to-list 'load-path "~/.emacs.d/mylisp")
-(require 'mymacros)
-(require 'myutils)
+  (defun client-save-kill-emacs (&optional display)
+    "Save buffers and shutdown the Emacs daemon, use DISPLAY if passed.
+It should be called using emacsclient -e '(client-save-kill-emacs)'.
+This function will check to see if there are any modified buffers or active
+clients or frame.  If so an x window will be opened and the user will
+be prompted."
+
+    (let (new-frame modified-buffers active-clients-or-frames)
+                                        ; Check if there are modified buffers or active clients or frames.
+      (setq modified-buffers (modified-buffers-exist))
+      (setq active-clients-or-frames ( or (> (length server-clients) 1)
+                                       (> (length (frame-list)) 1)))
+                                        ; Create a new frame if prompts are needed.
+      (when (or modified-buffers active-clients-or-frames)
+        (when (not (eq window-system 'x))
+          (message "Initializing x windows system.")
+          (x-initialize-window-system))
+        (when (not display) (setq display (getenv "DISPLAY")))
+        (message "Opening frame on display: %s" display)
+        (select-frame (make-frame-on-display display '((window-system . x)))))
+                                        ; Save the current frame.
+      (setq new-frame (selected-frame))
+
+                                        ; When displaying the number of clients and frames:
+                                        ; subtract 1 from the clients for this client.
+                                        ; subtract 2 from the frames this frame (that we just created) and the default frame.
+      (when ( or (not active-clients-or-frames)
+              (yes-or-no-p (format "There are currently %d clients and %d frames.  Exit anyway?"
+                                   (- (length server-clients) 1)
+                                   (- (length (frame-list)) 2))))
+                                        ; If the user quits during the save dialog then don't exit emacs.
+                                        ; Still close the terminal though.
+        (let((inhibit-quit t))
+                                        ; Save buffers
+          (with-local-quit
+            (save-some-buffers))
+          (if quit-flag
+              (setq quit-flag nil)
+                                        ; Kill all remaining clients
+            (progn
+              (dolist (client server-clients)
+                (server-delete-client client))
+              (kill-emacs)))))
+
+      (when (or modified-buffers active-clients-or-frames) (delete-frame new-frame))))
+
+  (defun modified-buffers-exist ()
+    "Check to see if there are any buffers that have been modified.
+It will return true if there are and nil otherwise.
+Buffers that have 'buffer-offer-save' set to nil are ignored."
+    (let (modified-found)
+      (dolist (buffer (buffer-list))
+        (when (and (buffer-live-p buffer)
+                   (buffer-modified-p buffer)
+                   (not (buffer-base-buffer buffer))
+                   (or
+                    (buffer-file-name buffer)
+                    (progn
+                      (set-buffer buffer)
+                      (and buffer-offer-save (> (buffer-size) 0)))))
+          (setq modified-found t)))
+      modified-found)))
 (add-to-list 'load-path "~/.emacs.d/inits")
-(require '00-init)
 (leaf emacs
   :custom ((make-backup-files . nil)
            (indent-tabs-mode . nil)
@@ -280,7 +363,7 @@
 ;; (require '10-hl-todo)
 ;; (require '10-editorconfig)
 ;; (require '10-smart-mode-line)
-(require '10-tramp)
+;; (require '10-tramp)
 ;; (require '10-ripgrep)
 ;; (require '20-eshell)
 (leaf vterm
