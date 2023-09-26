@@ -49,7 +49,7 @@
 (require 'myutils)
 (add-to-list 'load-path "~/.emacs.d/inits")
 (require '00-init)
-(leaf *init
+(leaf emacs
   :custom ((make-backup-files . nil)
            (indent-tabs-mode . nil)
            (select-enable-clipboard . t)
@@ -60,44 +60,43 @@
            (tab-width . 2)
            (truncate-lines . t)
            (truncate-partial-width-windows . t)
+           (inhibit-startup-screen . t)
            (enable-recusive-minibuffers . t))
   :config
   (defalias 'yes-or-no-p 'y-or-n-p)
   (defvaralias 'c-basic-offset 'tab-width)
   (defvaralias 'cperl-indent-level 'tab-width)
   (set-language-environment "Japanese")
-  (prefer-coding-system 'utf-8))
-(leaf *line-numbers
-  :disabled t
-  :global-minor-mode global-display-line-numbers-mode
-  :config
-  (leaf *line-numbers-resize-advice
-    :defvar text-scale-mode text-scale-mode-step text-scale-mode-amount
-    :defun face-remap-add-relative face-remap-remove-relative my/resize-line-number
-    :after face-remap
+  (prefer-coding-system 'utf-8)
+  (leaf whitespace
+    :require t
+    :global-minor-mode global-whitespace-mode
+    :blackout t
+    :custom
+    ((show-trailing-whitespace . t)
+     (whitespace-style . '(face trailing indentation tab-mark))))
+  (leaf hl-line
+    :global-minor-mode global-hl-line-mode)
+  (leaf *bars
     :config
-    (defvar my/line-number-remapping nil)
-    (make-local-variable 'my/line-number-remapping)
-    (defun my/resize-line-number (&rest _rest)
-      "Advice to resize line numbers."
-      (when my/line-number-remapping
-        (face-remap-remove-relative my/line-number-remapping))
-      (setq-local my/line-number-remapping
-                  (and text-scale-mode
-                       (face-remap-add-relative 'line-number
-                                                :height
-                                                (expt text-scale-mode-step
-                                                      text-scale-mode-amount))))
-      (force-window-update (current-buffer)))
-    (advice-add 'text-scale-mode :after #'my/resize-line-number)))
-(require '01-graphics)
+    (tool-bar-mode -1)
+    (menu-bar-mode -1)
+    (scroll-bar-mode -1)))
+;; (require '01-graphics)
 (leaf *graphics
   :config
+  (leaf *theme
+    :config
+    (leaf modus-themes
+      :ensure t
+      :require t
+      :config
+      (load-theme 'modus-vivendi :no-confirm)))
   (leaf *font
     :config
     (setq use-default-font-for-symbols nil)
-    (add-to-list 'default-frame-alist '(font . "UDEV Gothic 35 NFLG-14"))
-    (set-face-attribute 'default nil :font "UDEV Gothic 35 NFLG-14")
+    (add-to-list 'default-frame-alist '(font . "Source Han Code JP-12"))
+    (set-face-attribute 'default nil :font "Source Han Code JP-12")
     ;; (set-fontset-font t 'ascii (font-spec :family "Ricty Diminished" :size 14))
     ;; (set-fontset-font t 'japanese-jisx0208 (font-spec :family "Ricty Diminished"))
     (set-fontset-font t 'unicode (font-spec :family "Noto Sans CJK JP") nil 'append)))
@@ -164,7 +163,7 @@
   (leaf evil-leader
     :ensure t
     :after evil
-    :global-minor-mode global-evil-leader-mode
+    :global-minor-mode t
     :defun evil-leader/set-leader
     :config
     (evil-leader/set-leader "<SPC>")
@@ -315,22 +314,23 @@
 ;; (require '20-uim)
 ;; (require '20-company)
 (leaf company
-  :ensure t
-  :global-minor-mode global-company-mode
+  :ensure nil
   :custom ((company-selection-wrap-around . t)
            ;; (company-backends . '(company-capf company-yasnippet company-files company-dabbrev-code))
            (company-minimum-prefix-length . 2)
            (company-idle-delay . 0.3))
-  :bind (:company-active-map
-         ("<tab>" . 'company-select-next-if-tooltip-visible-or-complete-selection)
-         ("TAB" . 'company-select-next-if-tooltip-visible-or-complete-selection))
+  :bind
+  ("C-c c t" . #'company-mode)
+  (:company-active-map
+   ("<tab>" . #'company-select-next-if-tooltip-visible-or-complete-selection)
+   ("TAB" . #'company-select-next-if-tooltip-visible-or-complete-selection))
   :config
   (leaf company-box
     :hook (company-mode . company-box-mode)))
 
-(require '20-yasnippet)
+;; (require '20-yasnippet)
 ;; (require '20-flymake)
-(require '20-flycheck)
+;; (require '20-flycheck)
 ;; (require '20-smartparens)
 ;; (require '20-rainbow-delimiters)
 (leaf rainbow-delimiters
@@ -365,8 +365,22 @@
         "p w \"" 'my/sp-wrap-dquote
         "p u u" 'sp-unwrap-sexp
         "p u b" 'sp-backward-unwrap-sexp))))
-(require '20-highlight-indent-guides)
-(require '20-magit)
+;; (require '20-highlight-indent-guides)
+(leaf highlight-indent-guides
+  :ensure t
+  :require t
+  :blackout t
+  :hook
+  ((prog-mode-hook . highlight-indent-guides-mode)
+   (highlight-indent-guides-mode-hook . highlight-indent-guides-auto-set-faces))
+  :custom ((highlight-indent-guides-method . 'fill)))
+;; (require '20-magit)
+(leaf git-commit
+  :ensure t)
+(leaf magit
+  :ensure t
+  :bind
+  (("C-x g" . #'magit-status)))
 ;; (require '20-google-translate)
 ;; (require '30-bison)
 ;; (require '30-cmake)
@@ -376,15 +390,34 @@
   (leaf company-posframe
     :ensure t
     :after company
-    :global-minor-mode t
+    :hook (company-mode-hook . company-posframe-mode)
     :blackout t)
   (leaf ddskk-posframe
     :ensure t
     :after skk
     :global-minor-mode t
     :blackout t))
-(leaf eglot
+(leaf yasnippet
   :ensure t
+  :global-minor-mode yas-global-mode
+  :bind ((:yas-minor-mode-map
+          ("M-TAB" . #'yas-expand))))
+(leaf lsp-bridge
+  ;; :straight (lsp-bridge
+  ;;            :host github
+  ;;            :repo "manateelazycat/lsp-bridge"
+  ;;            :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
+  ;;            :build (:not compile))
+  :after yasnippet
+  :defun global-lsp-bridge-mode
+  :init (global-lsp-bridge-mode)
+  :custom ((lsp-bridge-tex-lsp-server . "digestif"))
+  :config
+  (leaf markdown-mode
+    :ensure t))
+(leaf eglot
+  :disabled t
+  :ensure nil
   :config
   (leaf flycheck-eglot
     :ensure t
@@ -392,8 +425,8 @@
     :custom ((flycheck-eglot-exclusive . nil))
     :global-minor-mode global-flycheck-eglot-mode))
 (leaf lsp-mode
-  :ensure t
-  :disabled nil
+  :disabled t
+  :ensure nil
   :custom
   ((lsp-auto-guess-root . t)
    (lsp-use-plist . t)
@@ -444,17 +477,17 @@
     :config
     (evil-org-set-key-theme
      '(navigation insert textobjects additional calendar))))
-(require '30-yaml)
+;; (require '30-yaml)
 ;; (require '30-emacslisp)
 ;; (require '30-common-lisp)
-(require '30-scheme)
+;; (require '30-scheme)
 ;; (require '30-agda)
 ;; (require '30-ocaml)
 ;; (require '30-sml)
 ;; (require '30-fsharp)
-(require '30-markdown)
+;; (require '30-markdown)
 ;; (require '30-purescript)
-(require '30-coq)
+;; (require '30-coq)
 ;; (require '30-maude)
 ;; (require '30-lean)
 ;; (require '30-pdf)
@@ -469,14 +502,14 @@
     (defun my/elisp-mode-hook-fun ()
       (hs-minor-mode 1)
       (smartparens-strict-mode 1)
-      (flycheck-mode 1))
+      (flycheck-mode -1))
     (add-hook 'emacs-lisp-mode-hook #'my/elisp-mode-hook-fun))
   (leaf *rust
     :config
     (leaf rust-mode
       :ensure t
       :require t
-      :hook 'eglot-ensure
+      ;; :hook 'eglot-ensure
       :custom
       ((rust-indent-offset . 4)))
     (leaf cargo
@@ -515,7 +548,7 @@
       :config
       (add-hook 'LaTeX-mode-hook #'turn-on-reftex)
       (leaf pdf-tools
-        :ensure t
+        :ensure nil
         :require t
         :custom
         ((TeX-view-program-selection . '((output-pdf "PDF Tools")))
@@ -532,6 +565,7 @@
       ;;                                      :help "Run ClutTeX")))
       :hook ((LaTeX-mode-hook . auctex-cluttex-mode)))
     (leaf *latex-lsp
+      :disabled t
       :config
       (add-hook 'LaTeX-mode-hook #'eglot-ensure)
       (add-hook 'plain-TeX-mode-hook #'eglot-ensure))))
@@ -564,14 +598,15 @@
 ;;             "m b" 'lsp-latex-build
 ;;             "m f" 'lsp-latex-forward-search))))
 ;;(require '31-eglot)
-(require '32-c++)
+;; (require '32-c++)
 ;; (require '32-rust)
-(require '32-haskell)
+;; (require '32-haskell)
 ;; (require '32-scala)
 ;; (require '32-typescript)
 ;; (require '32-latex)
 
 (leaf editorconfig
+  :disabled t
   :ensure t)
 (leaf copilot
   :straight (copilot
