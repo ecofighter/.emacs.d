@@ -158,8 +158,21 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :custom
     ((show-trailing-whitespace . t)
      (whitespace-style . '(face trailing indentation tab-mark))))
+  (leaf display-line-numbers
+    :ensure nil
+    :global-minor-mode global-display-line-numbers-mode)
   (leaf hl-line
     :global-minor-mode global-hl-line-mode)
+  (leaf hl-todo
+    :ensure t
+    :global-minor-mode global-hl-todo-mode)
+  (leaf treesit
+    :ensure nil
+    :custom (treesit-font-lock-level . 4)
+    :config
+    (leaf treesit-auto
+      :ensure t
+      :global-minor-mode global-treesit-auto-mode))
   (leaf *bars
     :config
     (tool-bar-mode -1)
@@ -201,6 +214,8 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf evil
   :ensure t
   :require t
+  :init
+  (setq evil-want-keybinding nil)
   :custom
   ((evil-want-C-i-jump . t)
    (evil-overriding-maps . nil)
@@ -336,6 +351,17 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
                      ("*Help*" :align right :ratio 0.5 :select t)
                      ("*Completions*" :align below :ratio 0.3)
                      ("*latex-math-preview-expression*" :align below :ratio 0.3 :noselect t))))
+(leaf switch-window
+  :ensure t
+  :custom (switch-window-shortcut-style . 'qwert)
+  :bind
+  ("C-x o" . #'switch-window))
+(leaf ace-window
+  :ensure t
+  :after evil-leader
+  :config
+  (evil-leader/set-key
+    "a" #'ace-window))
 (leaf winner
   :ensure nil
   :require t
@@ -365,6 +391,31 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 ;; (require '10-editorconfig)
 ;; (require '10-smart-mode-line)
 ;; (require '10-tramp)
+(leaf tramp
+  :ensure t
+  :config
+  (leaf *tramp-wslhost-from-wsl
+    :when (and
+           (equal system-type 'gnu/linux)
+           (equal system-name "waltraute"))
+    :after tramp
+    :config
+    (let ((winhost-addr (shell-command-to-string
+                         "ip route | grep 'default via' | grep -Eo '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}' | tr -d '\n'")))
+      (setf (alist-get "wslhost" tramp-methods nil nil #'equal)
+            `((tramp-login-program "ssh")
+              (tramp-login-args (("-l" "%u")
+                                 ("-p" "%p")
+                                 ("-e" "none")
+                                 ("-t")
+                                 ,winhost-addr))
+              ;;(tramp-async-args (("-q")))
+              ;;(tramp-direct-async t)
+              (tramp-remote-shell "powershell.exe")
+              (tramp-remote-shell-login ("-File -"))
+              (tramp-remote-shell-args ("-Command"))
+              (tramp-connection-timeout 5)
+              (tramp-session-timeout 5))))))
 ;; (require '10-ripgrep)
 ;; (require '20-eshell)
 (leaf vterm
@@ -476,6 +527,8 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
    (highlight-indent-guides-mode-hook . highlight-indent-guides-auto-set-faces))
   :custom ((highlight-indent-guides-method . 'fill)))
 ;; (require '20-magit)
+(leaf transient
+  :ensure t)
 (leaf git-commit
   :ensure t)
 (leaf magit
@@ -502,7 +555,10 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :ensure t
   :global-minor-mode yas-global-mode
   :bind ((:yas-minor-mode-map
-          ("M-TAB" . #'yas-expand))))
+          ("M-TAB" . #'yas-expand)))
+  :config
+  (leaf yasnippet-snippets
+    :ensure t))
 (leaf lsp-bridge
   ;; :straight (lsp-bridge
   ;;            :host github
