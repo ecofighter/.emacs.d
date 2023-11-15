@@ -1,29 +1,30 @@
 ;;; init.el -- my config -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 6))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (setq gc-cons-threshold 100000000)
 (setq read-process-output-max (* 1024 1024))
 (setq garbage-collection-messages t)
 (setq package-enable-at-startup nil)
-
 (require 'package)
 (when (fboundp 'native-comp-available-p)
   (when (native-comp-available-p)
     (customize-set-variable 'package-native-compile t)))
+
+(eval-and-compile
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+        (bootstrap-version 6))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+          (url-retrieve-synchronously
+           "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+           'silent 'inhibit-cookies)
+        (goto-char (point-max))
+        (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage)))
+
 (eval-and-compile
   (customize-set-variable
    'package-archives '(("melpa"        . "https://melpa.org/packages/")
@@ -36,6 +37,8 @@
   (leaf leaf-keywords
     :ensure t
     :config
+    (leaf hydra :ensure t)
+    (leaf el-get :ensure t)
     (leaf blackout :ensure t)
     (leaf-keywords-init)))
 
@@ -131,8 +134,24 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
                       (and buffer-offer-save (> (buffer-size) 0)))))
           (setq modified-found t)))
       modified-found)))
-(add-to-list 'load-path "~/.emacs.d/inits")
+;;(add-to-list 'load-path "~/.emacs.d/inits")
 (leaf emacs
+  :init
+  ;; credit: yorickvP on Github
+  ; (defvar my/wl-copy-process nil)
+  ; (defun my/wl-copy (text)
+  ;   (setq my/wl-copy-process (make-process :name "wl-copy"
+  ;                                          :buffer nil
+  ;                                          :command '("wl-copy" "-f" "-n")
+  ;                                          :connection-type 'pipe))
+  ;   (process-send-string my/wl-copy-process text)
+  ;   (process-send-eof my/wl-copy-process))
+  ; (defun my/wl-paste ()
+  ;   (if (and my/wl-copy-process (process-live-p my/wl-copy-process))
+  ;       nil ; should return nil if we're the current paste owner
+  ;     (shell-command-to-string "wl-paste -n | tr -d \r")))
+  ; (setq interprogram-cut-function #'my/wl-copy)
+  ; (setq interprogram-paste-function #'my/wl-paste)
   :custom ((make-backup-files . nil)
            (indent-tabs-mode . nil)
            (select-enable-clipboard . t)
@@ -140,11 +159,13 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
            (split-width-threshold . 80)
            (vc-handled-backends quote nil)
            (fill-column . 80)
-           (tab-width . 2)
+           (tab-width . 4)
            (truncate-lines . t)
            (truncate-partial-width-windows . t)
            (inhibit-startup-screen . t)
-           (enable-recusive-minibuffers . t))
+           (enable-recusive-minibuffers . t)
+           (completion-cycle-threshold . 3)
+           (tab-always-indent . 'complete))
   :config
   (defalias 'yes-or-no-p 'y-or-n-p)
   (defvaralias 'c-basic-offset 'tab-width)
@@ -194,18 +215,30 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (leaf *font
     :config
     (setq use-default-font-for-symbols nil)
-    (add-to-list 'default-frame-alist '(font . "Source Han Code JP-12"))
-    (set-face-attribute 'default nil :font "Source Han Code JP-12")
+    (add-to-list 'default-frame-alist '(font . "Source Han Code JP-10"))
+    (set-face-attribute 'default nil :font "Source Han Code JP-10")
     ;; (set-fontset-font t 'ascii (font-spec :family "Ricty Diminished" :size 14))
     ;; (set-fontset-font t 'japanese-jisx0208 (font-spec :family "Ricty Diminished"))
     (set-fontset-font t 'unicode (font-spec :family "Noto Sans CJK JP") nil 'append)))
+(leaf *platform-spec
+  :config
+  (leaf *wsl-url-handler
+    :when (or
+           (equal system-name "waltraute")
+           t)
+    :after browse-url
+    :config
+    (defun my/browse-url-via-powershell (url &rest args)
+      (shell-command (concat "powershell.exe start \"" url "\"")))
+    (setf browse-url-browser-function #'my/browse-url-via-powershell)))
 (leaf exec-path-from-shell
   :ensure t
   :unless (equal system-type 'windows-nt)
   :require exec-path-from-shell
   :defun exec-path-from-shell-initialize
   :custom ((exec-path-from-shell-arguments . nil)
-           (exec-path-from-shell-check-startup-files . nil))
+           (exec-path-from-shell-check-startup-files . nil)
+           (exec-path-from-shell-variables . '("PATH" "MANPATH" "LD_LIBRARY_PATH")))
   :config
   ;;(add-to-list 'exec-path-from-shell-variables "CAML_LD_LIBRARY_PATH")
   (exec-path-from-shell-initialize))
@@ -268,7 +301,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     (evil-leader/set-leader "<SPC>")
     (evil-leader/set-key "C-i" 'previous-buffer)
     (evil-leader/set-key "<backtab>" 'next-buffer)
-    (evil-leader/set-key "<SPC>" 'counsel-M-x)
+    (evil-leader/set-key "<SPC>" 'execute-extended-command)
     (evil-leader/set-key
       "q q" 'my/exit
       "q Q" 'save-buffers-kill-emacs
@@ -293,9 +326,10 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     (etcc-on)))
 (leaf treemacs
   :ensure t
+  :hook (treemacs-mode-hook . (lambda () (display-line-numbers-mode -1)))
   :config
-  (add-hook 'treemacs-mode-hook
-            (lambda () (display-line-numbers-mode -1)))
+  ;; (add-hook 'treemacs-mode-hook
+  ;;           (lambda () (display-line-numbers-mode -1)))
   (leaf treemacs-evil
     :ensure t
     :after evil
@@ -315,10 +349,9 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :bind (:vertico-map (("C-h" . 'vertico-directory-up)))
     :global-minor-mode vertico-mode)
   (leaf embark
-    :ensure t
-    :bind
-    (("C-." . 'embark-act)
-     ("C-;" . 'embark-dwim)))
+    :config
+    (evil-leader/set-key
+      "e" 'embark-act))
   (leaf consult
     :ensure t
     :after vertico
@@ -340,8 +373,127 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :global-minor-mode marginalia-mode)
   (leaf orderless
     :ensure t
+    :require t
     :custom
-    ((completion-styles . '(substring orderless basic)))))
+    ((completion-styles . '(substring orderless basic))
+     (completion-category-overrides . '((file (styles basic partial-completion)))))))
+(leaf *completion
+  :config
+  (leaf corfu
+    :ensure t
+    :global-minor-mode global-corfu-mode
+    :hook (corfu-mode-hook . corfu-popupinfo-mode)
+    :custom ((corfu-auto . t)
+             (corfu-auto-delay . 0.3)
+             (corfu-auto-prefix . 3)
+             (corfu-cycle . t))
+    :config
+    (leaf corfu-terminal
+      :straight (corfu-terminal
+                 :type git
+                 :repo "https://codeberg.org/akib/emacs-corfu-terminal.git")
+      :after corfu
+      :hook (corfu-mode-hook . corfu-terminal-mode)))
+  (leaf cape
+    :ensure t
+    :require t
+    :config
+    (defvar my/merged-capf)
+    (let* ((noncachedfuns '(#'cape-dabbrev))
+           (cachedfuns '(#'cape-file #'cape-rfc1345 #'cape-tex))
+           (mergedfuns (eval `(cape-capf-super (cape-capf-buster (cape-capf-super ,@noncachedfuns)) (cape-capf-super ,@cachedfuns)))))
+      (setq my/merged-capf mergedfuns)
+      (add-to-list 'completion-at-point-functions my/merged-capf)))
+  (leaf lsp-bridge
+    :disabled t
+    :straight (lsp-bridge
+               :host github
+               :repo "manateelazycat/lsp-bridge"
+               :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
+               :build (:not compile))
+    :ensure nil
+    :defun global-lsp-bridge-mode
+    ;; :init (global-lsp-bridge-mode)
+    :hook ((lsp-bridge-mode-hook . (lambda () (corfu-mode -1)))
+           (LaTeX-mode-hook . lsp-bridge-mode))
+    :custom ((lsp-bridge-tex-lsp-server . "digestif")
+             (lsp-bridge-c-lsp-server . "clangd")
+             (acm-candidate-match-function . 'orderless-flex)
+             (acm-enable-copilot . nil)
+             (lsp-bridge-multi-lang-server-mode-list . '(((python-mode python-ts-mode) . lsp-bridge-python-multi-lsp-server)
+                                                         ((qml-mode qml-ts-mode) . "qmlls_javascript")
+                                                         ((js-mode javascript-mode) . "typescript_eslint"))))
+    :config
+    (leaf *lsp-bridge-evil-state
+      :after evil evil-leader
+      :config
+      (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs)
+      (evil-leader/set-key
+        "l d" #'lsp-bridge-diagnostic-list))
+    (leaf markdown-mode
+      :ensure t))
+  (leaf eglot
+    :disabled nil
+    :ensure t
+    :custom ((eglot-autoshutdown . t))
+    :config
+    (leaf flycheck-eglot
+      :disabled t
+      :ensure t
+      :after (flycheck eglot)
+      :custom ((flycheck-eglot-exclusive . nil))
+      :global-minor-mode global-flycheck-eglot-mode))
+  (leaf realgud
+    :ensure t
+    :config
+    (leaf realgud-lldb
+      :ensure t
+      :require t))
+  (leaf lsp-mode
+    :disabled t
+    :ensure nil
+    :custom
+    ((lsp-auto-guess-root . t)
+     (lsp-use-plist . t)
+     (lsp-semantic-tokens-enable . t)
+     (lsp-enable-snippet . t)
+     (lsp-diagnostics-provider . :flycheck)
+     (lsp-enable-completion . t)
+     (lsp-completion-provider . :capf)
+     (lsp-modeline-diagnostics-scope . :file))
+    :defun lsp-enable-which-key-integration
+    :config
+    (leaf *lsp-keybinds
+      :custom
+      ((lsp-keymap-prefix . "C-c l"))
+      :bind
+      ;; (:lsp-mode-map
+      ;;  ("C-c l" . lsp-command-map))
+      ;;(define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
+      :config
+      (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
+    (leaf lsp-ui
+      :ensure t
+      :custom
+      ((lsp-ui-doc-enable . t)
+       (lsp-ui-doc-use-childframe . t)
+       (lsp-ui-doc-use-webkit . nil))
+      :bind ((:lsp-ui-mode-map
+              ([remap xref-find-definitions]
+               . lsp-ui-peek-find-definitions)
+              ([remap xref-find-references]
+               . lsp-ui-peek-find-references)))
+      :config
+      (add-hook 'lsp-mode-hook #'lsp-ui-mode))
+    (leaf lsp-treemacs
+      :ensure t
+      :after treemacs
+      :config
+      (add-hook 'lsp-mode-hook #'lsp-treemacs-sync-mode))))
+(leaf *aspell
+  :config
+  (leaf flycheck-aspell
+    :ensure t))
 (leaf shackle
   :ensure t
   :global-minor-mode shackle-mode
@@ -464,6 +616,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 ;; (require '20-uim)
 ;; (require '20-company)
 (leaf company
+  :disabled t
   :ensure nil
   :custom ((company-selection-wrap-around . t)
            ;; (company-backends . '(company-capf company-yasnippet company-files company-dabbrev-code))
@@ -475,12 +628,22 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
    ("<tab>" . #'company-select-next-if-tooltip-visible-or-complete-selection)
    ("TAB" . #'company-select-next-if-tooltip-visible-or-complete-selection))
   :config
+  (leaf company-posframe
+    :ensure t
+    :after company
+    :hook (company-mode-hook . company-posframe-mode)
+    :blackout t)
   (leaf company-box
     :hook (company-mode-hook . company-box-mode)))
-
 ;; (require '20-yasnippet)
 ;; (require '20-flymake)
 ;; (require '20-flycheck)
+(leaf flymake
+  :ensure t
+  :config
+  (leaf flymake-diagnostic-at-point
+    :ensure t
+    :hook (flymake-mode-hook . flymake-diagnostic-at-point-mode)))
 (leaf flycheck
   :ensure t)
 ;; (require '20-smartparens)
@@ -535,17 +698,22 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :ensure t
   :bind
   (("C-x g" . #'magit-status)))
+(leaf projectile
+  :ensure t
+  :hook ((prog-mode-hook . projectile-mode)
+         (text-mode-hook . projectile-mode))
+  :config
+  (leaf *projectile-evil-leader
+    :after evil-leader
+    :config
+    (evil-define-key 'normal 'projectile-mode-map
+      (kbd "SPC P") #'projectile-command-map)))
 ;; (require '20-google-translate)
 ;; (require '30-bison)
 ;; (require '30-cmake)
 (leaf posframe
   :ensure t
   :config
-  (leaf company-posframe
-    :ensure t
-    :after company
-    :hook (company-mode-hook . company-posframe-mode)
-    :blackout t)
   (leaf ddskk-posframe
     :ensure t
     :after skk
@@ -559,75 +727,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :config
   (leaf yasnippet-snippets
     :ensure t))
-(leaf lsp-bridge
-  ;; :straight (lsp-bridge
-  ;;            :host github
-  ;;            :repo "manateelazycat/lsp-bridge"
-  ;;            :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
-  ;;            :build (:not compile))
-  :ensure t
-  :after yasnippet
-  :defun global-lsp-bridge-mode
-  :init (global-lsp-bridge-mode)
-  :custom ((lsp-bridge-tex-lsp-server . "digestif"))
-  :config
-  (leaf *lsp-bridge-evil-state
-    :after evil evil-leader
-    :config
-    (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs)
-    (evil-leader/set-key
-      "l d" #'lsp-bridge-diagnostic-list))
-  (leaf markdown-mode
-    :ensure t))
-(leaf eglot
-  :disabled t
-  :ensure t
-  :config
-  (leaf flycheck-eglot
-    :ensure t
-    :after (flycheck eglot)
-    :custom ((flycheck-eglot-exclusive . nil))
-    :global-minor-mode global-flycheck-eglot-mode))
-(leaf lsp-mode
-  :disabled t
-  :ensure nil
-  :custom
-  ((lsp-auto-guess-root . t)
-   (lsp-use-plist . t)
-   (lsp-enable-snippet . t)
-   (lsp-diagnostics-provider . :flycheck)
-   (lsp-enable-completion . t)
-   (lsp-completion-provider . :capf)
-   (lsp-modeline-diagnostics-scope . :file))
-  :defun lsp-enable-which-key-integration
-  :defer-config
-  (leaf *lsp-keybinds
-    :custom
-    ((lsp-keymap-prefix . "C-c l"))
-    :bind
-    ;; (:lsp-mode-map
-    ;;  ("C-c l" . lsp-command-map))
-    ;;(define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
-    :config
-    (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
-  (leaf lsp-ui
-    :ensure t
-    :custom
-    ((lsp-ui-doc-enable . t)
-     (lsp-ui-doc-use-childframe . t)
-     (lsp-ui-doc-use-webkit . nil))
-    :bind ((:lsp-ui-mode-map
-            ([remap xref-find-definitions]
-             . lsp-ui-peek-find-definitions)
-            ([remap xref-find-references]
-             . lsp-ui-peek-find-references)))
-    :config
-    (add-hook 'lsp-mode-hook #'lsp-ui-mode))
-  (leaf lsp-treemacs
-    :ensure t
-    :after treemacs
-    :config
-    (add-hook 'lsp-mode-hook #'lsp-treemacs-sync-mode)))
 ;;(require '30-org)
 (leaf org
   :ensure t
@@ -641,6 +740,19 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :config
     (evil-org-set-key-theme
      '(navigation insert textobjects additional calendar))))
+(leaf pdf-tools
+  :ensure t
+  :hook (pdf-view-mode-hook . (lambda () (display-line-numbers-mode -1))))
+(leaf *docker
+  :config
+  (leaf docker
+    :ensure t)
+  (leaf lsp-docker
+    :ensure t)
+  (leaf docker-tramp
+    :ensure t)
+  (leaf dockerfile-mode
+    :ensure t))
 ;; (require '30-yaml)
 ;; (require '30-emacslisp)
 ;; (require '30-common-lisp)
@@ -658,6 +770,16 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 ;; (require '31-lsp)
 (leaf *languages
   :config
+  (leaf nix-mode
+    :ensure t)
+  (leaf *c/cpp
+    :ensure nil
+    :config
+    (leaf cmake-mode
+      :ensure t))
+  (leaf web-mode
+    :ensure t
+    :mode ("\\.csp\\'" "\\html\\'"))
   (leaf *elisp
     :ensure smartparens
     :require smartparens-config
@@ -733,12 +855,21 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
       ;;  (auctex-cluttex-ClutTeX-command . '("ClutTeX" "cluttex.exe -e %(cluttexengine) %(cluttexbib) %(cluttexindex) %S %t" auctex-cluttex--TeX-run-ClutTeX nil
       ;;                                      (plain-tex-mode latex-mode)
       ;;                                      :help "Run ClutTeX")))
-      :hook ((LaTeX-mode-hook . auctex-cluttex-mode)))
+      :hook ((LaTeX-mode-hook . auctex-cluttex-mode))
+      :config
+      (defun my/run-after-compilation-finished-funcs (&rest args)
+        "run AUCTeX's TeX-after-compilation-finished-functions hook. Ignore all ARGS"
+        (unless TeX-error-list
+          (run-hook-with-args 'TeX-after-compilation-finished-functions
+                              (with-current-buffer TeX-command-buffer
+                                (expand-file-name
+                                 (TeX-active-master (TeX-output-extension)))))))
+      (advice-add #'auctex-cluttex--TeX-ClutTeX-sentinel :after #'my/run-after-compilation-finished-funcs))
     (leaf *latex-lsp
       :disabled t
       :config
-      (add-hook 'LaTeX-mode-hook #'eglot-ensure)
-      (add-hook 'plain-TeX-mode-hook #'eglot-ensure))))
+      (add-hook 'LaTeX-mode-hook #'lsp-bridge-mode)
+      (add-hook 'plain-TeX-mode-hook #'lsp-bridge-mode))))
 ;; (leaf lsp-latex
 ;;     :ensure t
 ;;     :commands lsp-latex-build lsp-latex-forward-search
@@ -779,10 +910,12 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :disabled t
   :ensure t)
 (leaf copilot
+  :disabled t
   :straight (copilot
              :host github
              :repo "zerolfx/copilot.el"
-             :files ("dist" "*.el"))
+             :files ("*.el" "dist"))
+  :global-minor-mode global-copilot-mode
   :bind (:copilot-completion-map
          ("<tab>" . 'copilot-accept-completion)
          ("TAB" . 'copilot-accept-completion)))
