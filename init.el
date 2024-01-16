@@ -820,6 +820,13 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
       :ensure t
       :after fsharp-mode
       :require t))
+  (leaf *sagemath
+    :config
+    (leaf sage-shell-mode
+      :ensure t
+      :custom
+      ((sage-shell:use-prompt-toolkit . nil)
+       (sage-shell:use-simple-prompt . t))))
   (leaf *latex
     :config
     (leaf auctex
@@ -870,52 +877,16 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
       :config
       (add-hook 'LaTeX-mode-hook #'lsp-bridge-mode)
       (add-hook 'plain-TeX-mode-hook #'lsp-bridge-mode))))
-;; (leaf lsp-latex
-;;     :ensure t
-;;     :commands lsp-latex-build lsp-latex-forward-search
-;;     :defun my/start-server
-;;     :custom
-;;     ((lsp-latex-build-executable . "cluttex")
-;;      (lsp-latex-build-args . '("-e" "lualatex" "-interaction=nonstopmode" "-synctex=1" "%f"))
-;;      (lsp-latex-forward-search-executable . `,(pcase system-type
-;;                                                 ('windows-nt "C:\\Users\\ecofi\\AppData\\Local\\SumatraPDF\\SumatraPDF.exe")
-;;                                                 ('gnu/linux "zathura")))
-;;      (lsp-latex-forward-search-args . `,(pcase system-type
-;;                                           ('windows-nt '("-reuse-instance" "%p" "-forward-search" "%f" "%l"))
-;;                                           ('gnu/linux '("--synctex-forward" "%l:1:%f" "%p")))))
-;;     :init
-;;     (defun my/start-server ()
-;;       (unless (server-running-p)
-;;         (server-start)))
-;;     (add-hook 'LaTeX-mode-hook #'my/start-server)
-;;     (add-hook 'plain-TeX-mode-hook #'lsp)
-;;     (add-hook 'LaTeX-mode-hook #'lsp)
-;;     (add-hook 'bibtex-mode-hook #'lsp)
-;;     (leaf *lsp-latex-keybinds
-;;       :after evil-leader
-;;       :config
-;;       `,(dolist (mode '(latex-mode tex-mode))
-;;           (evil-leader/set-key-for-mode mode
-;;             "m b" 'lsp-latex-build
-;;             "m f" 'lsp-latex-forward-search))))
-;;(require '31-eglot)
-;; (require '32-c++)
-;; (require '32-rust)
-;; (require '32-haskell)
-;; (require '32-scala)
-;; (require '32-typescript)
-;; (require '32-latex)
-
 (leaf editorconfig
-  :disabled t
+  :ensure t)
+(leaf gptel
   :ensure t)
 (leaf copilot
-  :disabled t
   :straight (copilot
              :host github
-             :repo "zerolfx/copilot.el"
-             :files ("*.el" "dist"))
-  :global-minor-mode global-copilot-mode
+             :repo "copilot-emacs/copilot.el"
+             :files ("dist" "*.el"))
+  :hook (prog-mode-hook . copilot-mode)
   :bind (:copilot-completion-map
          ("<tab>" . 'copilot-accept-completion)
          ("TAB" . 'copilot-accept-completion)))
