@@ -635,9 +635,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :blackout t)
   (leaf company-box
     :hook (company-mode-hook . company-box-mode)))
-;; (require '20-yasnippet)
-;; (require '20-flymake)
-;; (require '20-flycheck)
 (leaf flymake
   :ensure t
   :config
@@ -646,8 +643,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :hook (flymake-mode-hook . flymake-diagnostic-at-point-mode)))
 (leaf flycheck
   :ensure t)
-;; (require '20-smartparens)
-;; (require '20-rainbow-delimiters)
 (leaf rainbow-delimiters
   :ensure t
   :hook (prog-mode-hook . rainbow-delimiters-mode))
@@ -680,7 +675,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
         "p w \"" 'my/sp-wrap-dquote
         "p u u" 'sp-unwrap-sexp
         "p u b" 'sp-backward-unwrap-sexp))))
-;; (require '20-highlight-indent-guides)
 (leaf highlight-indent-guides
   :ensure t
   :require t
@@ -689,7 +683,11 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   ((prog-mode-hook . highlight-indent-guides-mode)
    (highlight-indent-guides-mode-hook . highlight-indent-guides-auto-set-faces))
   :custom ((highlight-indent-guides-method . 'fill)))
-;; (require '20-magit)
+(leaf visual-fill-column
+  :ensure t
+  :hook (visual-line-mode-hook . visual-fill-column-mode)
+  :custom ((visual-fill-column-width . 80)
+           (visual-fill-column-center-text . t)))
 (leaf transient
   :ensure t)
 (leaf git-commit
@@ -893,6 +891,8 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 
 (leaf package-utils
   :ensure t)
+
+(load custom-file)
 (garbage-collect)
 (provide 'init)
 ;;; init.el ends here
