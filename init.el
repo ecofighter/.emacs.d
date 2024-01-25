@@ -138,20 +138,20 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf emacs
   :init
   ;; credit: yorickvP on Github
-  ; (defvar my/wl-copy-process nil)
-  ; (defun my/wl-copy (text)
-  ;   (setq my/wl-copy-process (make-process :name "wl-copy"
-  ;                                          :buffer nil
-  ;                                          :command '("wl-copy" "-f" "-n")
-  ;                                          :connection-type 'pipe))
-  ;   (process-send-string my/wl-copy-process text)
-  ;   (process-send-eof my/wl-copy-process))
-  ; (defun my/wl-paste ()
-  ;   (if (and my/wl-copy-process (process-live-p my/wl-copy-process))
-  ;       nil ; should return nil if we're the current paste owner
-  ;     (shell-command-to-string "wl-paste -n | tr -d \r")))
-  ; (setq interprogram-cut-function #'my/wl-copy)
-  ; (setq interprogram-paste-function #'my/wl-paste)
+                                        ; (defvar my/wl-copy-process nil)
+                                        ; (defun my/wl-copy (text)
+                                        ;   (setq my/wl-copy-process (make-process :name "wl-copy"
+                                        ;                                          :buffer nil
+                                        ;                                          :command '("wl-copy" "-f" "-n")
+                                        ;                                          :connection-type 'pipe))
+                                        ;   (process-send-string my/wl-copy-process text)
+                                        ;   (process-send-eof my/wl-copy-process))
+                                        ; (defun my/wl-paste ()
+                                        ;   (if (and my/wl-copy-process (process-live-p my/wl-copy-process))
+                                        ;       nil ; should return nil if we're the current paste owner
+                                        ;     (shell-command-to-string "wl-paste -n | tr -d \r")))
+                                        ; (setq interprogram-cut-function #'my/wl-copy)
+                                        ; (setq interprogram-paste-function #'my/wl-paste)
   :custom ((make-backup-files . nil)
            (indent-tabs-mode . nil)
            (select-enable-clipboard . t)
@@ -247,10 +247,9 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf evil
   :ensure t
   :require t
-  :init
-  (setq evil-want-keybinding nil)
   :custom
   ((evil-want-C-i-jump . t)
+   (evil-want-keybinding . nil)
    (evil-overriding-maps . nil)
    (evil-want-integration . t)
    (evil-want-keybinding . nil)
@@ -272,7 +271,17 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
    ("k" . evil-previous-visual-line)
    ("gk" . evil-previous-line)
    ("gc" . tab-bar-new-tab))
+  (:evil-normal-state-map
+   ("<leader><leader>" . execute-extended-command)
+   ("<leader>C-i" . previous-buffer)
+   ("<leader><backtab>" . next-buffer)
+   ("<leader>kk" . kill-buffer-and-window)
+   ("<leader>kb" . kill-buffer)
+   ("<leader>kf" . delete-frame)
+   ("<leader>kt" . toggle-frame-maximized)
+   ("<leader>qq" . my/exit))
   :config
+  (evil-set-leader 'normal (kbd "SPC"))
   (define-key evil-normal-state-map (kbd "M-.")
               `(menu-item "" evil-repeat-pop :filter
                           ,(lambda (cmd) (if (eq last-command 'evil-repeat-pop) cmd))))
@@ -293,23 +302,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :custom
     :config
     (evil-collection-init))
-  (leaf evil-leader
-    :ensure t
-    :global-minor-mode global-evil-leader-mode
-    :defun evil-leader/set-leader
-    :config
-    (evil-leader/set-leader "<SPC>")
-    (evil-leader/set-key "C-i" 'previous-buffer)
-    (evil-leader/set-key "<backtab>" 'next-buffer)
-    (evil-leader/set-key "<SPC>" 'execute-extended-command)
-    (evil-leader/set-key
-      "q q" 'my/exit
-      "q Q" 'save-buffers-kill-emacs
-      "q f" 'delete-frame
-      "q t" 'toggle-frame-maximized)
-    (evil-leader/set-key
-      "k k" 'kill-buffer-and-window
-      "k b" 'kill-buffer))
   (leaf evil-anzu
     :ensure t
     :after evil
@@ -328,43 +320,33 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :ensure t
   :hook (treemacs-mode-hook . (lambda () (display-line-numbers-mode -1)))
   :config
-  ;; (add-hook 'treemacs-mode-hook
-  ;;           (lambda () (display-line-numbers-mode -1)))
   (leaf treemacs-evil
     :ensure t
     :after evil
-    :require t)
-  (leaf *treemacs-evil-keyconfig
-    :after evil-leader
-    :config
-    (evil-leader/set-key
-      "t t" 'treemacs
-      "t s" 'treemacs-select-window)))
-;;(require '10-ivy)
+    :require t
+    :bind
+    (("<leader>tt" . treemacs)
+     ("<leader>ts" . treemacs-select-window))))
 (leaf *fido
   :config
-  ;;(fido-vertical-mode 1)
   (leaf vertico
     :ensure t
     :bind (:vertico-map (("C-h" . 'vertico-directory-up)))
     :global-minor-mode vertico-mode)
   (leaf embark
-    :config
-    (evil-leader/set-key
-      "e" 'embark-act))
+    :bind
+    (("<leader>e" . embark-act)))
   (leaf consult
     :ensure t
     :after vertico
+    :bind
+    (("<leader>is" . consult-line)
+     ("<leader>ii" . consult-imenu)
+     ("<leader>iI" . consult-imenu-multi)
+     ("<leader>ip" . consult-yank-from-kill-ring)
+     ("<leader>il" . consult-compile-error)
+     ("<leader>ig" . consult-ripgrep))
     :config
-    (leaf *consult-leader-key
-      :after evil-leader
-      :config (evil-leader/set-key
-                "i s" 'consult-line
-                "i i" 'consult-imenu
-                "i I" 'consult-imenu-multi
-                "i p" 'consult-yank-from-kill-ring
-                "i l" 'consult-compile-error
-                "i g" 'consult-ripgrep))
     (leaf embark-consult
       :ensure t
       :hook ((embark-collect-mode-hook . consult-preview-at-point-mode))))
@@ -425,11 +407,11 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
                                                          ((js-mode javascript-mode) . "typescript_eslint"))))
     :config
     (leaf *lsp-bridge-evil-state
-      :after evil evil-leader
+      :after evil
+      :bind
+      (("<leader>ld" . lsp-bridge-diagnostic-list))
       :config
-      (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs)
-      (evil-leader/set-key
-        "l d" #'lsp-bridge-diagnostic-list))
+      (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs))
     (leaf markdown-mode
       :ensure t))
   (leaf eglot
@@ -510,34 +492,33 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   ("C-x o" . #'switch-window))
 (leaf ace-window
   :ensure t
-  :after evil-leader
-  :config
-  (evil-leader/set-key
-    "a" #'ace-window))
+  :bind
+  (("<leader>a" . #'ace-window)))
 (leaf winner
   :ensure nil
   :require t
   :global-minor-mode winner-mode
-  :config
-  (leaf *winner-evil-leader
-    :after evil-leader
-    :config
-    (evil-leader/set-key
-      "w s" 'delete-other-windows
-      "w u" 'winner-undo
-      "w r" 'winner-redo
-      "w >" 'enlarge-window-horizontally
-      "w <" 'shrink-window-horizontally
-      "w ." 'enlarge-window
-      "w ," 'shrink-window
-      "w =" 'balance-windows)))
+  :bind
+  (("<leader>ws" . delete-otherwindows)
+   ("<leader>wu" . winner-undo)
+   ("<leader>wr" . winner-redo)
+   ("<leader>w>" . enlarge-window-horizontally)
+   ("<leader>w<" . shrink-window-horizontally)
+   ("<leader>w." . enlarge-window)
+   ("<leader>w," . shrink-window)
+   ("<leader>w=" . balance-windows)))
 (leaf which-key
   :ensure t
   :global-minor-mode which-key-mode
-  :config
-  (which-key-setup-side-window-bottom)
+  :init
   (leaf which-key-posframe
     :ensure t
+    :after which-key
+    :custom
+    ((which-key-posframe-poshandler . #'posframe-poshandler-frame-bottom-center)
+     (which-key-posframe-border-width . 5)
+     (which-key-posframe-parameters . '((left-fringe . 2)
+                                        (right-fringe . 2))))
     :hook (which-key-mode-hook . which-key-posframe-mode)))
 ;; (require '10-hl-todo)
 ;; (require '10-editorconfig)
@@ -573,14 +554,11 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf vterm
   :ensure t)
 (leaf eshell
+  :bind
+  (("<leader>'" . eshell))
   :config
   (leaf eshell-vterm
-    :ensure t)
-  (leaf *eshell-evil-leader
-    :after evil-leader
-    :config
-    (evil-leader/set-key
-      "'" 'eshell)))
+    :ensure t))
 ;;(require '20-ddskk)
 (leaf ddskk
   :ensure t
@@ -659,22 +637,18 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :ensure t
     :after evil
     :hook (smartparens-enabled-hook . evil-smartparens-mode)
-    :config
-    (leaf *smartparens-evil-leader
-      :after evil-leader
-      :config
-      (evil-leader/set-key
-        "p f s" 'sp-forward-slurp-sexp
-        "p f b" 'sp-forward-barf-sexp
-        "p b s" 'sp-backward-slurp-sexp
-        "p b b" 'sp-backward-barf-sexp
-        "p b u" 'sp-backward-unwrap-sexp
-        "p w (" 'sp-wrap-round
-        "p w [" 'sp-wrap-square
-        "p w {" 'sp-wrap-curly
-        "p w \"" 'my/sp-wrap-dquote
-        "p u u" 'sp-unwrap-sexp
-        "p u b" 'sp-backward-unwrap-sexp))))
+    :bind
+    (("<leader>sfs" . sp-forward-slurp-sexp)
+     ("<leader>sfb" . sp-forward-barf-sexp)
+     ("<leader>sbs" . sp-backward-slurp-sexp)
+     ("<leader>sbb" . sp-backward-barf-sexp)
+     ("<leader>sbu" . sp-backward-unwrap-sexp)
+     ("<leader>sw(" . sp-wrap-round)
+     ("<leader>sw[" . sp-wrap-square)
+     ("<leader>sw{" . sp-wrap-curly)
+     ("<leader>sw\"" . sp-wrap-dquote)
+     ("<leader>suu" . sp-unwrap-sexp)
+     ("<leader>sub" . sp-backward-unwrap-sexp))))
 (leaf highlight-indent-guides
   :ensure t
   :require t
@@ -700,12 +674,16 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :ensure t
   :hook ((prog-mode-hook . projectile-mode)
          (text-mode-hook . projectile-mode))
-  :config
-  (leaf *projectile-evil-leader
-    :after evil-leader
-    :config
-    (evil-define-key 'normal 'projectile-mode-map
-      (kbd "SPC P") #'projectile-command-map)))
+  :bind
+  (:projectile-mode-map
+   ("<leader>pp" . #'projectile-command-map)
+   ("<leader>pf" . #'projectile-find-file)
+   ("<leader>ps" . #'projectile-switch-project)
+   ("<leader>pb" . #'projectile-switch-to-buffer)
+   ("<leader>pd" . #'projectile-dired)
+   ("<leader>pg" . #'projectile-ripgrep)
+   ("<leader>pc" . #'projectile-compile-project)
+   ("<leader>pr" . #'projectile-replace)))
 ;; (require '20-google-translate)
 ;; (require '30-bison)
 ;; (require '30-cmake)
@@ -878,7 +856,9 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf editorconfig
   :ensure t)
 (leaf gptel
-  :ensure t)
+  :ensure t
+  :bind
+  (("<leader>gg" . gptel-menu)))
 (leaf copilot
   :straight (copilot
              :host github
