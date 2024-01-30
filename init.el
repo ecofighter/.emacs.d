@@ -281,7 +281,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
    ("<leader>kt" . toggle-frame-maximized)
    ("<leader>qq" . my/exit))
   :config
-  (evil-set-leader 'normal (kbd "SPC"))
+  (evil-set-leader '(normal visual) (kbd "SPC"))
   (define-key evil-normal-state-map (kbd "M-.")
               `(menu-item "" evil-repeat-pop :filter
                           ,(lambda (cmd) (if (eq last-command 'evil-repeat-pop) cmd))))
@@ -499,7 +499,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :require t
   :global-minor-mode winner-mode
   :bind
-  (("<leader>ws" . delete-otherwindows)
+  (("<leader>ws" . delete-other-windows)
    ("<leader>wu" . winner-undo)
    ("<leader>wr" . winner-redo)
    ("<leader>w>" . enlarge-window-horizontally)
@@ -643,12 +643,13 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
      ("<leader>sbs" . sp-backward-slurp-sexp)
      ("<leader>sbb" . sp-backward-barf-sexp)
      ("<leader>sbu" . sp-backward-unwrap-sexp)
+     ("<leader>suu" . sp-unwrap-sexp)
+     ("<leader>sub" . sp-backward-unwrap-sexp))
+    (:evil-visual-state-map
      ("<leader>sw(" . sp-wrap-round)
      ("<leader>sw[" . sp-wrap-square)
      ("<leader>sw{" . sp-wrap-curly)
-     ("<leader>sw\"" . sp-wrap-dquote)
-     ("<leader>suu" . sp-unwrap-sexp)
-     ("<leader>sub" . sp-backward-unwrap-sexp))))
+     ("<leader>sw\"" . sp-wrap-dquote))))
 (leaf highlight-indent-guides
   :ensure t
   :require t
