@@ -859,7 +859,11 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf gptel
   :ensure t
   :bind
-  (("<leader>gg" . gptel-menu)))
+  (("<leader>gg" . gptel-menu))
+  :config
+  (gptel-make-anthropic "Claude"
+    :stream t
+    :key #'gptel-api-key-from-auth-source))
 (leaf copilot
   :straight (copilot
              :host github
