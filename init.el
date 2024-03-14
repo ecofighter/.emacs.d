@@ -98,10 +98,10 @@ be prompted."
                                         ; When displaying the number of clients and frames:
                                         ; subtract 1 from the clients for this client.
                                         ; subtract 2 from the frames this frame (that we just created) and the default frame.
-      (when ( or (not active-clients-or-frames)
-              (yes-or-no-p (format "There are currently %d clients and %d frames.  Exit anyway?"
-                                   (- (length server-clients) 1)
-                                   (- (length (frame-list)) 2))))
+      (when (or (not active-clients-or-frames)
+                (yes-or-no-p (format "There are currently %d clients and %d frames.  Exit anyway?"
+                                     (- (length server-clients) 1)
+                                     (- (length (frame-list)) 2))))
                                         ; If the user quits during the save dialog then don't exit emacs.
                                         ; Still close the terminal though.
         (let((inhibit-quit t))
@@ -136,6 +136,20 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
       modified-found)))
 ;;(add-to-list 'load-path "~/.emacs.d/inits")
 (leaf emacs
+  :custom ((make-backup-files . nil)
+           (indent-tabs-mode . nil)
+           (select-enable-clipboard . t)
+           (x-select-enable-clipboard-manager . t)
+           (split-width-threshold . 80)
+           (vc-handled-backends quote nil)
+           (fill-column . 80)
+           (tab-width . 4)
+           (truncate-lines . t)
+           (truncate-partial-width-windows . t)
+           (inhibit-startup-screen . t)
+           (enable-recusive-minibuffers . t)
+           (completion-cycle-threshold . 3)
+           (tab-always-indent . 'complete))
   :init
   ;; credit: yorickvP on Github
                                         ; (defvar my/wl-copy-process nil)
@@ -152,21 +166,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
                                         ;     (shell-command-to-string "wl-paste -n | tr -d \r")))
                                         ; (setq interprogram-cut-function #'my/wl-copy)
                                         ; (setq interprogram-paste-function #'my/wl-paste)
-  :custom ((make-backup-files . nil)
-           (indent-tabs-mode . nil)
-           (select-enable-clipboard . t)
-           (x-select-enable-clipboard-manager . t)
-           (split-width-threshold . 80)
-           (vc-handled-backends quote nil)
-           (fill-column . 80)
-           (tab-width . 4)
-           (truncate-lines . t)
-           (truncate-partial-width-windows . t)
-           (inhibit-startup-screen . t)
-           (enable-recusive-minibuffers . t)
-           (completion-cycle-threshold . 3)
-           (tab-always-indent . 'complete))
-  :config
   (defalias 'yes-or-no-p 'y-or-n-p)
   (defvaralias 'c-basic-offset 'tab-width)
   (defvaralias 'cperl-indent-level 'tab-width)
@@ -200,10 +199,11 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     (menu-bar-mode -1)
     (scroll-bar-mode -1)))
 (leaf *graphics
-  :config
+  :init
   (leaf *theme
     :config
     (leaf mood-line
+      :disabled t
       :ensure t
       :init
       (mood-line-mode))
@@ -213,13 +213,32 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
       :config
       (load-theme 'modus-vivendi-tinted :no-confirm)))
   (leaf *font
-    :config
-    (setq use-default-font-for-symbols nil)
-    (add-to-list 'default-frame-alist '(font . "Source Han Code JP-10"))
-    (set-face-attribute 'default nil :font "Source Han Code JP-10")
+    :init
+    (setq use-default-font-for-symbols t)
+    ;; (add-to-list 'default-frame-alist '(font . "Moralerspace Neon-11"))
+    (set-face-attribute 'default nil :family "Moralerspace Neon" :height 110)
     ;; (set-fontset-font t 'ascii (font-spec :family "Ricty Diminished" :size 14))
     ;; (set-fontset-font t 'japanese-jisx0208 (font-spec :family "Ricty Diminished"))
-    (set-fontset-font t 'unicode (font-spec :family "Noto Sans CJK JP") nil 'append)))
+    ;; (set-fontset-font t 'unicode (font-spec :family "Noto Sans CJK JP") nil 'append)
+    (leaf *composition-table
+      :init
+      (let ((table (make-char-table nil)))
+        (set-char-table-range table t `(["[-.,:;A-Z_a-z><=!&|+?/\\]+" 0 font-shape-gstring]))
+        (set-char-table-parent table composition-function-table)
+        (setq composition-function-table table))
+      ;; (set-char-table-range composition-function-table t `(["[,-.;A-Z_a-z]+" 0 font-shape-gstring]))
+      ;; (defun set-buffer-local-composition-table (value)
+      ;;   (let ((table (make-char-table nil)))
+      ;;     (set-char-table-range table t `([,value 0 font-shape-gstring]))
+      ;;     (set-char-table-parent table composition-function-table)
+      ;;     (setq-local composition-function-table table)))
+      ;; (defun set-prog-mode-table ()
+      ;;   (set-buffer-local-composition-table "[-.,:;A-Z_a-z><=!&|+?/\\]+"))
+      ;; (add-hook 'prog-mode-hook #'set-prog-mode-table)
+      )
+    (leaf ligature
+      :ensure t
+      :global-minor-mode global-ligature-mode)))
 (leaf *platform-spec
   :config
   (leaf *wsl-url-handler
@@ -869,7 +888,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
              :host github
              :repo "copilot-emacs/copilot.el"
              :files ("dist" "*.el"))
-  :hook (prog-mode-hook . copilot-mode)
+  ;; :hook (prog-mode-hook . copilot-mode)
   :bind (:copilot-completion-map
          ("<tab>" . 'copilot-accept-completion)
          ("TAB" . 'copilot-accept-completion)))
