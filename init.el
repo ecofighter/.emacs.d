@@ -1,15 +1,15 @@
 ;;; init.el -- my config -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
+(defconst my/saved-file-name-handler-alist file-name-handler-alist)
+(setq file-name-handler-alist nil)
+
 (setq custom-file (locate-user-emacs-file "custom.el"))
-(setq gc-cons-threshold 100000000)
-(setq read-process-output-max (* 1024 1024))
-(setq garbage-collection-messages t)
-(setq package-enable-at-startup nil)
 (require 'package)
+(setq package-enable-at-startup nil)
 (when (fboundp 'native-comp-available-p)
   (when (native-comp-available-p)
-    (customize-set-variable 'package-native-compile t)))
+    (setq package-native-compile t)))
 
 (eval-and-compile
   (defvar bootstrap-version)
@@ -212,33 +212,10 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
       :require t
       :config
       (load-theme 'modus-vivendi-tinted :no-confirm)))
-  (leaf *font
-    :init
-    (setq use-default-font-for-symbols t)
-    ;; (add-to-list 'default-frame-alist '(font . "Moralerspace Neon-11"))
-    (set-face-attribute 'default nil :family "Moralerspace Neon" :height 110)
-    ;; (set-fontset-font t 'ascii (font-spec :family "Ricty Diminished" :size 14))
-    ;; (set-fontset-font t 'japanese-jisx0208 (font-spec :family "Ricty Diminished"))
-    ;; (set-fontset-font t 'unicode (font-spec :family "Noto Sans CJK JP") nil 'append)
-    (leaf *composition-table
-      :init
-      (let ((table (make-char-table nil)))
-        (set-char-table-range table t `(["[-.,:;A-Z_a-z><=!&|+?/\\]+" 0 font-shape-gstring]))
-        (set-char-table-parent table composition-function-table)
-        (setq composition-function-table table))
-      ;; (set-char-table-range composition-function-table t `(["[,-.;A-Z_a-z]+" 0 font-shape-gstring]))
-      ;; (defun set-buffer-local-composition-table (value)
-      ;;   (let ((table (make-char-table nil)))
-      ;;     (set-char-table-range table t `([,value 0 font-shape-gstring]))
-      ;;     (set-char-table-parent table composition-function-table)
-      ;;     (setq-local composition-function-table table)))
-      ;; (defun set-prog-mode-table ()
-      ;;   (set-buffer-local-composition-table "[-.,:;A-Z_a-z><=!&|+?/\\]+"))
-      ;; (add-hook 'prog-mode-hook #'set-prog-mode-table)
-      )
-    (leaf ligature
+(leaf ligature
       :ensure t
-      :global-minor-mode global-ligature-mode)))
+      :global-minor-mode global-ligature-mode)
+  )
 (leaf *platform-spec
   :config
   (leaf *wsl-url-handler
@@ -445,6 +422,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
       :custom ((flycheck-eglot-exclusive . nil))
       :global-minor-mode global-flycheck-eglot-mode))
   (leaf realgud
+    :disabled t
     :ensure t
     :config
     (leaf realgud-lldb
@@ -456,6 +434,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :custom
     ((lsp-auto-guess-root . t)
      (lsp-use-plist . t)
+     (lsp-log-io . nil)
      (lsp-semantic-tokens-enable . t)
      (lsp-enable-snippet . t)
      (lsp-diagnostics-provider . :flycheck)
@@ -745,8 +724,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :ensure t)
   (leaf lsp-docker
     :ensure t)
-  (leaf docker-tramp
-    :ensure t)
   (leaf dockerfile-mode
     :ensure t))
 ;; (require '30-yaml)
@@ -897,6 +874,8 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :ensure t)
 
 (load custom-file)
+(setq file-name-handler-alist my/saved-file-name-handler-alist)
+(setq gc-cons-threshold 16777216)
 (garbage-collect)
 (provide 'init)
 ;;; init.el ends here
