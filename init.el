@@ -330,6 +330,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :bind (:vertico-map (("C-h" . 'vertico-directory-up)))
     :global-minor-mode vertico-mode)
   (leaf embark
+    :ensure t
     :bind
     (("<leader>e" . embark-act)))
   (leaf consult
