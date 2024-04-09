@@ -132,6 +132,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
            (select-enable-clipboard . t)
            (x-select-enable-clipboard-manager . t)
            (use-file-dialog . nil)
+           (use-short-answers . t)
            (split-width-threshold . 80)
            (vc-handled-backends . '(Git))
            (fill-column . 80)
@@ -148,7 +149,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
            (completion-cycle-threshold . 3)
            (tab-always-indent . 'complete))
   :init
-  (defalias 'yes-or-no-p 'y-or-n-p)
   (defvaralias 'c-basic-offset 'tab-width)
   (defvaralias 'cperl-indent-level 'tab-width)
   (set-language-environment "Japanese")
