@@ -262,6 +262,8 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :ensure t
     :require t
     :after perpective))
+(leaf vundo
+  :ensure t)
 (leaf *fido
   :config
   (leaf vertico
@@ -915,6 +917,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     (meow-leader-define-key
      '("a" . ace-window)
      '("e" . embark-act)
+     '("u" . vundo)
      '("i" . meow-consult-mode))))
 
 (leaf package-utils
