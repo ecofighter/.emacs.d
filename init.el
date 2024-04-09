@@ -38,8 +38,6 @@
   (leaf leaf-keywords
     :ensure t
     :config
-    (leaf hydra :ensure t)
-    (leaf el-get :ensure t)
     (leaf blackout :ensure t)
     (leaf-keywords-init)))
 (leaf auto-compile
@@ -248,90 +246,19 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     (consult-customize consult--source-buffer :hidden t :default nil)
     (add-to-list 'consult-buffer-sources persp-consult-source))
   (persp-mode 1))
-(leaf evil
-  :disabled t
-  :ensure t
-  :require t
-  :custom
-  ((evil-want-C-i-jump . t)
-   (evil-want-keybinding . nil)
-   (evil-overriding-maps . nil)
-   (evil-want-integration . t)
-   (evil-want-keybinding . nil)
-   (evil-normal-state-tag . "<N>")
-   (evil-insert-state-tag . `,(propertize "<I>" 'face '((:background "#076678"))))
-   (evil-visual-state-tag . `,(propertize "<V>" 'face '((:background "#fe8019" :foreground "#232323"))))
-   (evil-replace-state-tag . `,(propertize "<R>" 'face '((:background "#8f3f71"))))
-   (evil-operator-state-tag . `,(propertize "<O>" 'face '((:background "#3f3f3f"))))
-   (evil-emacs-state-tag . `,(propertize "<E>" 'face '((:background "#ba45ea" :foreground "#efefef"))))
-   (evil-mode-line-format . '(before . mode-line-front-space)))
-  :global-minor-mode evil-mode
-  :defvar evil-normal-state-map
-  :bind
-  (:evil-insert-state-map
-   ("C-h" . evil-delete-backward-char))
-  (:evil-motion-state-map
-   ("j" . evil-next-visual-line)
-   ("gj" . evil-next-line)
-   ("k" . evil-previous-visual-line)
-   ("gk" . evil-previous-line)
-   ("gc" . tab-bar-new-tab))
-  (:evil-normal-state-map
-   ("<leader><leader>" . execute-extended-command)
-   ("<leader>C-i" . previous-buffer)
-   ("<leader><backtab>" . next-buffer)
-   ("<leader>kk" . kill-buffer-and-window)
-   ("<leader>kb" . kill-buffer)
-   ("<leader>kf" . delete-frame)
-   ("<leader>kt" . toggle-frame-maximized)
-   ("<leader>qq" . my/exit))
-  :config
-  (evil-set-leader '(normal visual) (kbd "SPC"))
-  (define-key evil-normal-state-map (kbd "M-.")
-              `(menu-item "" evil-repeat-pop :filter
-                          ,(lambda (cmd) (if (eq last-command 'evil-repeat-pop) cmd))))
-  (leaf undo-fu
-    :emacs< 28
-    :ensure t
-    :require t
-    :custom
-    ((evil-undo-system . 'undo-fu)))
-  (leaf *emacs-undo
-    :emacs>= 28
-    :custom
-    ((evil-undo-system . 'undo-redo)))
-  (leaf evil-collection
-    :ensure t
-    :after evil
-    :defun evil-collection-init
-    :custom
-    :config
-    (evil-collection-init))
-  (leaf evil-anzu
-    :ensure t
-    :after evil
-    :require t
-    :global-minor-mode global-anzu-mode
-    :blackout anzu-mode)
-  (leaf evil-terminal-cursor-changer
-    :ensure t
-    :unless (window-system)
-    :after evil
-    :require t
-    :defun etcc-on
-    :config
-    (etcc-on)))
 (leaf treemacs
   :ensure t
+  :require t
   :hook (treemacs-mode-hook . (lambda () (display-line-numbers-mode -1)))
-  :init
-  (leaf treemacs-evil
+  :bind (("C-x t t" . treemacs-select-window)
+         ("C-x t q" . treemacs))
+  :config
+  (leaf treemacs-magit
     :ensure t
-    :after evil
-    :require t
-    :bind
-    (("<leader>tt" . treemacs)
-     ("<leader>ts" . treemacs-select-window))))
+    :after magit)
+  (leaf treemacs-perspective
+    :ensure t
+    :after perpective))
 (leaf *fido
   :config
   (leaf vertico
@@ -394,34 +321,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
            (mergedfuns (eval `(cape-capf-super (cape-capf-buster (cape-capf-super ,@noncachedfuns)) (cape-capf-super ,@cachedfuns)))))
       (setq my/merged-capf mergedfuns)
       (add-to-list 'completion-at-point-functions my/merged-capf)))
-  (leaf lsp-bridge
-    :disabled t
-    :straight (lsp-bridge
-               :host github
-               :repo "manateelazycat/lsp-bridge"
-               :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
-               :build (:not compile))
-    :ensure nil
-    :defun global-lsp-bridge-mode
-    ;; :init (global-lsp-bridge-mode)
-    :hook ((lsp-bridge-mode-hook . (lambda () (corfu-mode -1)))
-           (LaTeX-mode-hook . lsp-bridge-mode))
-    :custom ((lsp-bridge-tex-lsp-server . "digestif")
-             (lsp-bridge-c-lsp-server . "clangd")
-             (acm-candidate-match-function . 'orderless-flex)
-             (acm-enable-copilot . nil)
-             (lsp-bridge-multi-lang-server-mode-list . '(((python-mode python-ts-mode) . lsp-bridge-python-multi-lsp-server)
-                                                         ((qml-mode qml-ts-mode) . "qmlls_javascript")
-                                                         ((js-mode javascript-mode) . "typescript_eslint"))))
-    :config
-    (leaf *lsp-bridge-evil-state
-      :after evil
-      :bind
-      (("<leader>ld" . lsp-bridge-diagnostic-list))
-      :config
-      (evil-set-initial-state 'lsp-bridge-ref-mode 'emacs))
-    (leaf markdown-mode
-      :ensure t))
   (leaf eglot
     :disabled nil
     :ensure t
@@ -441,8 +340,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
       :ensure t
       :require t))
   (leaf lsp-mode
-    :disabled t
-    :ensure nil
+    :ensure t
     :custom
     ((lsp-auto-guess-root . t)
      (lsp-use-plist . t)
@@ -651,7 +549,19 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf spacious-padding
   :disabled t
   :ensure t
-  :global-minor-mode spacious-padding-mode)
+  :global-minor-mode spacious-padding-mode
+  :config
+  (setq spacious-padding-widths
+        '( :internal-border-width 15
+           :header-line-width 4
+           :mode-line-width 6
+           :tab-width 4
+           :right-divider-width 30
+           :scroll-bar-width 8
+           :fringe-width 8))
+  (setq spacious-padding-subtle-mode-line
+        `( :mode-line-active 'default
+         :mode-line-inactive vertical-border)))
 (leaf visual-fill-column
   :ensure t
   :hook (visual-line-mode-hook . visual-fill-column-mode)
@@ -664,7 +574,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf magit
   :ensure t
   :bind
-  (("C-x g" . #'magit-status))
+  (("C-x m" . #'magit-status))
   :init
   (leaf difftastic
     :ensure t
@@ -895,6 +805,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf meow
   :ensure t
   :require t
+  :custom ((meow-use-clipboard . t))
   :config
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
@@ -991,6 +902,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
          (,COMMAND)
          (meow-normal-mode)))
     (leaf *meow-consult
+      :after consult
       :config
       (setq meow-consult-keymap (make-keymap))
       (meow-define-state consult
