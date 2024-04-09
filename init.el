@@ -29,8 +29,13 @@
 (eval-and-compile
   (customize-set-variable
    'package-archives '(("melpa"        . "https://melpa.org/packages/")
-                       ;;("org"          . "https://orgmode.org/elpa/")
+                       ("nongnu"       . "https://elpa.nongnu.org/nongnu/")
+                       ("gnu-devel"    . "https://elpa.gnu.org/devel/")
                        ("gnu"          . "https://elpa.gnu.org/packages/")))
+  (customize-set-variable
+   'package-archive-priorities '(("gnu-devel" . 3)
+                                 ("melpa" . 2)
+                                 ("nongnu" . 1)))
   (package-initialize)
   (unless (package-installed-p 'leaf)
     (package-refresh-contents)
