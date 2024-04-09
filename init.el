@@ -263,6 +263,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :config
   (leaf vertico
     :ensure t
+    :require t
     :bind (:vertico-map (("C-h" . 'vertico-directory-up)
                          ("C-m" . 'vertico-exit)
                          ("C-j" . 'vertico-exit-input)))
@@ -273,7 +274,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     (("<leader>e" . embark-act)))
   (leaf consult
     :ensure t
-    :after vertico
+    :require t
     :bind
     (("<leader>is" . consult-line)
      ("<leader>ii" . consult-imenu)
