@@ -34,12 +34,7 @@
   (package-initialize)
   (unless (package-installed-p 'leaf)
     (package-refresh-contents)
-    (package-install 'leaf))
-  (leaf leaf-keywords
-    :ensure t
-    :config
-    (leaf blackout :ensure t)
-    (leaf-keywords-init)))
+    (package-install 'leaf)))
 (leaf auto-compile
   :ensure t
   :custom ((auto-compile-native-compile . t))
@@ -170,7 +165,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (leaf whitespace
     :require t
     :global-minor-mode global-whitespace-mode
-    :blackout t
     :custom
     ((show-trailing-whitespace . t)
      (whitespace-style . '(face trailing indentation tab-mark))))
@@ -497,8 +491,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (leaf company-posframe
     :ensure t
     :after company
-    :hook (company-mode-hook . company-posframe-mode)
-    :blackout t)
+    :hook (company-mode-hook . company-posframe-mode))
   (leaf company-box
     :hook (company-mode-hook . company-box-mode)))
 (leaf flymake
@@ -541,7 +534,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf highlight-indent-guides
   :ensure t
   :require t
-  :blackout t
   :hook
   ((prog-mode-hook . highlight-indent-guides-mode)
    (highlight-indent-guides-mode-hook . highlight-indent-guides-auto-set-faces))
@@ -612,8 +604,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (leaf ddskk-posframe
     :ensure t
     :after skk
-    :global-minor-mode t
-    :blackout t))
+    :global-minor-mode t))
 (leaf tempel
   :ensure t
   :init
@@ -904,7 +895,8 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
      '("a" . ace-window)
      '("e" . embark-act)
      '("u" . vundo)
-     '("i i" . consult-imenu))))
+     '("i i" . consult-imenu)
+     '("i p" . consult-yank-from-kill-ring))))
 
 (leaf package-utils
   :ensure t)
