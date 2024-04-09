@@ -220,7 +220,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :config
   (leaf *wsl-url-handler
     :when (or
-           (equal system-name "waltraute")
+           (equal (system-name) "waltraute")
            t)
     :after browse-url
     :config
@@ -524,30 +524,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 ;; (require '10-smart-mode-line)
 ;; (require '10-tramp)
 (leaf tramp
-  :ensure t
-  :config
-  (leaf *tramp-wslhost-from-wsl
-    :when (and
-           (equal system-type 'gnu/linux)
-           (equal system-name "waltraute"))
-    :after tramp
-    :config
-    (let ((winhost-addr (shell-command-to-string
-                         "ip route | grep 'default via' | grep -Eo '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}' | tr -d '\n'")))
-      (setf (alist-get "wslhost" tramp-methods nil nil #'equal)
-            `((tramp-login-program "ssh")
-              (tramp-login-args (("-l" "%u")
-                                 ("-p" "%p")
-                                 ("-e" "none")
-                                 ("-t")
-                                 ,winhost-addr))
-              ;;(tramp-async-args (("-q")))
-              ;;(tramp-direct-async t)
-              (tramp-remote-shell "powershell.exe")
-              (tramp-remote-shell-login ("-File -"))
-              (tramp-remote-shell-args ("-Command"))
-              (tramp-connection-timeout 5)
-              (tramp-session-timeout 5))))))
+  :ensure t)
 ;; (require '10-ripgrep)
 ;; (require '20-eshell)
 (leaf vterm
@@ -727,6 +704,9 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :config
   ;; (leaf org-plus-contrib
   ;;   :ensure t)
+  (leaf org-modern
+    :ensure t
+    :hook ((org-mode-hook . org-modern-mode)))
   (leaf evil-org
     :ensure t
     :hook ((org-mode-hook . evil-org-mode))
