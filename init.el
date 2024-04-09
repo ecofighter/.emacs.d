@@ -899,30 +899,12 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (meow-global-mode 1)
   (leaf *meow-leader-maps
     :config
-    (defmacro my/run-and-exit (COMMAND)
-      "Define a new command which run the COMMAND once and exit to the normal mode."
-      `(lambda ()
-         (interactive)
-         (,COMMAND)
-         (meow-normal-mode)))
-    (leaf *meow-consult
-      :after consult
-      :config
-      (setq meow-consult-keymap (make-keymap))
-      (meow-define-state consult
-        "meow state for interacting with consult"
-        :lighter " [C]"
-        :keymap meow-consult-keymap)
-      (setq meow-cursor-type-consult 'hollow)
-      (meow-define-keys 'consult
-        '("<escape>" . meow-normal-mode)
-        `("i" . ,(my/run-and-exit consult-imenu))))
     (meow-leader-define-key
      '("=" . apheleia-format-buffer)
      '("a" . ace-window)
      '("e" . embark-act)
      '("u" . vundo)
-     '("i" . meow-consult-mode))))
+     '("i i" . consult-imenu))))
 
 (leaf package-utils
   :ensure t)
