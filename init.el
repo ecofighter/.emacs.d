@@ -653,7 +653,19 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf magit
   :ensure t
   :bind
-  (("C-x g" . #'magit-status)))
+  (("C-x g" . #'magit-status))
+  :init
+  (leaf difftastic
+    :ensure t
+    :after magit
+    :bind
+    (:magit-blame-read-only-mode-map
+     ("D" . 'difftastic-magit-show)
+     ("S" . 'difftastic-magit-show)))
+  :config
+  (transient-append-suffix 'magit-diff '(-1 -1)
+    [("D" "Difftastic diff (dwim)" difftastic-magit-diff)
+     ("S" "Difftastic show" difftastic-magit-show)]))
 (leaf projectile
   :ensure t
   :hook ((prog-mode-hook . projectile-mode)
