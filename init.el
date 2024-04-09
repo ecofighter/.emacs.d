@@ -885,7 +885,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf meow
   :ensure t
   :require t
-  :custom ((meow-keypad-ctrl-meta-prefix . nil))
   :config
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
@@ -968,7 +967,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
      '("Y" . meow-sync-grab)
      '("z" . meow-pop-selection)
      '("'" . repeat)
-     '("/" . isearch)
+     '("/" . consult-line)
      '("<escape>" . ignore)))
   (meow-setup)
   (meow-setup-indicator)
@@ -994,8 +993,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
         `("i" . ,(my/run-and-exit consult-imenu))))
     (meow-leader-define-key
      '("a" . ace-window)
-     '("i" . meow-consult-mode)
-     '("g" . magit-status))))
+     '("i" . meow-consult-mode))))
 
 (leaf package-utils
   :ensure t)
