@@ -547,21 +547,20 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :ensure t
   :global-minor-mode perfect-margin-mode)
 (leaf spacious-padding
-  :disabled t
   :ensure t
   :global-minor-mode spacious-padding-mode
   :config
   (setq spacious-padding-widths
-        '( :internal-border-width 15
-           :header-line-width 4
-           :mode-line-width 6
-           :tab-width 4
-           :right-divider-width 30
-           :scroll-bar-width 8
-           :fringe-width 8))
+        '(:internal-border-width 15
+          :header-line-width 4
+          :mode-line-width 6
+          :tab-width 4
+          :right-divider-width 30
+          :scroll-bar-width 8
+          :fringe-width 8))
   (setq spacious-padding-subtle-mode-line
-        `( :mode-line-active 'default
-         :mode-line-inactive vertical-border)))
+        `(:mode-line-active 'default
+          :mode-line-inactive vertical-border)))
 (leaf visual-fill-column
   :ensure t
   :hook (visual-line-mode-hook . visual-fill-column-mode)
