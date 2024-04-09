@@ -463,25 +463,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 ;; (require '20-fcitx)
 ;; (require '20-uim)
 ;; (require '20-company)
-(leaf company
-  :disabled t
-  :ensure nil
-  :custom ((company-selection-wrap-around . t)
-           ;; (company-backends . '(company-capf company-yasnippet company-files company-dabbrev-code))
-           (company-minimum-prefix-length . 2)
-           (company-idle-delay . 0.3))
-  :bind
-  ("C-c c t" . #'company-mode)
-  (:company-active-map
-   ("<tab>" . #'company-select-next-if-tooltip-visible-or-complete-selection)
-   ("TAB" . #'company-select-next-if-tooltip-visible-or-complete-selection))
-  :config
-  (leaf company-posframe
-    :ensure t
-    :after company
-    :hook (company-mode-hook . company-posframe-mode))
-  (leaf company-box
-    :hook (company-mode-hook . company-box-mode)))
 (leaf flymake
   :ensure t
   :config
@@ -556,7 +537,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf magit
   :ensure t
   :bind
-  (("C-x m" . #'magit-status))
+  (("C-x g" . #'magit-status))
   :init
   (leaf difftastic
     :ensure t
