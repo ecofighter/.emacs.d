@@ -393,11 +393,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
                      ("*Help*" :align right :ratio 0.5 :select t)
                      ("*Completions*" :align below :ratio 0.3)
                      ("*latex-math-preview-expression*" :align below :ratio 0.3 :noselect t))))
-(leaf switch-window
-  :ensure t
-  :custom (switch-window-shortcut-style . 'qwert)
-  :bind
-  ("C-x o" . #'switch-window))
 (leaf ace-window
   :ensure t
   :bind
