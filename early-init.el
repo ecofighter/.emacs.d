@@ -11,7 +11,6 @@
 (setq garbage-collection-messages t)
 
 (setq use-default-font-for-symbols t)
-;; (add-to-list 'default-frame-alist '(font . "Moralerspace Neon-11"))
 (set-face-attribute 'default nil :family "Moralerspace Neon" :height 160)
 ;; (set-fontset-font t 'ascii (font-spec :family "Ricty Diminished" :size 14))
 ;; (set-fontset-font t 'japanese-jisx0208 (font-spec :family "Ricty Diminished"))
