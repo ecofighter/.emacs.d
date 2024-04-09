@@ -240,6 +240,16 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (exec-path-from-shell-initialize))
 (leaf tab-bar-mode
   :global-minor-mode t)
+(leaf perspective
+  :ensure t
+  :config
+  (customize-set-variable 'persp-mode-prefix-key (kbd "C-x x"))
+  (leaf *perspective-consult
+    :after consult
+    :defer-config
+    (consult-customize consult--source-buffer :hidden t :default nil)
+    (add-to-list 'consult-buffer-sources persp-consult-source))
+  (persp-mode 1))
 (leaf evil
   :disabled t
   :ensure t
@@ -328,7 +338,9 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :config
   (leaf vertico
     :ensure t
-    :bind (:vertico-map (("C-h" . 'vertico-directory-up)))
+    :bind (:vertico-map (("C-h" . 'vertico-directory-up)
+                         ("C-m" . 'vertico-exit)
+                         ("C-j" . 'vertico-exit-input)))
     :global-minor-mode vertico-mode)
   (leaf embark
     :ensure t
