@@ -238,8 +238,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :config
   ;;(add-to-list 'exec-path-from-shell-variables "CAML_LD_LIBRARY_PATH")
   (exec-path-from-shell-initialize))
-(leaf tab-bar-mode
-  :global-minor-mode t)
 (leaf perspective
   :ensure t
   :config
