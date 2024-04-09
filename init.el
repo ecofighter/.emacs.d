@@ -1,5 +1,5 @@
 ;;; init.el -- my config -*- lexical-binding: t -*-
-;;; Commentary:
+;;; Commentary: using leaf.el
 ;;; Code:
 (defconst my/saved-file-name-handler-alist file-name-handler-alist)
 (setq file-name-handler-alist nil)
@@ -7,6 +7,7 @@
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (require 'package)
 (setq package-enable-at-startup nil)
+(setq package-install-upgrade-built-in t)
 (when (fboundp 'native-comp-available-p)
   (when (native-comp-available-p)
     (setq package-native-compile t)))
@@ -41,6 +42,11 @@
     (leaf el-get :ensure t)
     (leaf blackout :ensure t)
     (leaf-keywords-init)))
+(leaf auto-compile
+  :ensure t
+  :global-minor-mode (auto-compile-on-load-mode auto-compile-on-save-mode)
+  :config
+  (setq load-prefer-newer t))
 
 (leaf *mymacros
   :init
@@ -140,32 +146,23 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
            (indent-tabs-mode . nil)
            (select-enable-clipboard . t)
            (x-select-enable-clipboard-manager . t)
+           (use-file-dialog . nil)
            (split-width-threshold . 80)
-           (vc-handled-backends quote nil)
+           (vc-handled-backends . '(Git))
            (fill-column . 80)
            (tab-width . 4)
            (truncate-lines . t)
            (truncate-partial-width-windows . t)
            (inhibit-startup-screen . t)
+           (inhibit-x-resources . t)
+           (inhibit-startup-buffer-menu . t)
+           (blink-matching-paren . nil)
+           (auto-mode-case-fold . nil)
+           (bidi-inhibit-bpa . t)
            (enable-recusive-minibuffers . t)
            (completion-cycle-threshold . 3)
            (tab-always-indent . 'complete))
   :init
-  ;; credit: yorickvP on Github
-                                        ; (defvar my/wl-copy-process nil)
-                                        ; (defun my/wl-copy (text)
-                                        ;   (setq my/wl-copy-process (make-process :name "wl-copy"
-                                        ;                                          :buffer nil
-                                        ;                                          :command '("wl-copy" "-f" "-n")
-                                        ;                                          :connection-type 'pipe))
-                                        ;   (process-send-string my/wl-copy-process text)
-                                        ;   (process-send-eof my/wl-copy-process))
-                                        ; (defun my/wl-paste ()
-                                        ;   (if (and my/wl-copy-process (process-live-p my/wl-copy-process))
-                                        ;       nil ; should return nil if we're the current paste owner
-                                        ;     (shell-command-to-string "wl-paste -n | tr -d \r")))
-                                        ; (setq interprogram-cut-function #'my/wl-copy)
-                                        ; (setq interprogram-paste-function #'my/wl-paste)
   (defalias 'yes-or-no-p 'y-or-n-p)
   (defvaralias 'c-basic-offset 'tab-width)
   (defvaralias 'cperl-indent-level 'tab-width)
@@ -179,19 +176,20 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     ((show-trailing-whitespace . t)
      (whitespace-style . '(face trailing indentation tab-mark))))
   (leaf display-line-numbers
-    :ensure nil
     :global-minor-mode global-display-line-numbers-mode)
   (leaf hl-line
     :global-minor-mode global-hl-line-mode)
   (leaf hl-todo
     :ensure t
     :global-minor-mode global-hl-todo-mode)
+  (leaf paren
+    :global-minor-mode show-paren-mode)
   (leaf treesit
-    :ensure nil
     :custom (treesit-font-lock-level . 4)
     :config
     (leaf treesit-auto
       :ensure t
+      :custom ((treesit-auto-install . 'prompt))
       :global-minor-mode global-treesit-auto-mode))
   (leaf *bars
     :config
@@ -212,10 +210,12 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
       :require t
       :config
       (load-theme 'modus-vivendi-tinted :no-confirm)))
-(leaf ligature
-      :ensure t
-      :global-minor-mode global-ligature-mode)
-  )
+  (leaf minions
+    :ensure t
+    :global-minor-mode minions-mode)
+  (leaf ligature
+    :ensure t
+    :global-minor-mode global-ligature-mode))
 (leaf *platform-spec
   :config
   (leaf *wsl-url-handler
@@ -315,7 +315,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf treemacs
   :ensure t
   :hook (treemacs-mode-hook . (lambda () (display-line-numbers-mode -1)))
-  :config
+  :init
   (leaf treemacs-evil
     :ensure t
     :after evil
@@ -657,6 +657,13 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   ((prog-mode-hook . highlight-indent-guides-mode)
    (highlight-indent-guides-mode-hook . highlight-indent-guides-auto-set-faces))
   :custom ((highlight-indent-guides-method . 'fill)))
+(leaf perfect-margin
+  :ensure t
+  :global-minor-mode perfect-margin-mode)
+(leaf spacious-padding
+  :disabled t
+  :ensure t
+  :global-minor-mode spacious-padding-mode)
 (leaf visual-fill-column
   :ensure t
   :hook (visual-line-mode-hook . visual-fill-column-mode)

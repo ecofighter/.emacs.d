@@ -1,10 +1,15 @@
+;;; early-init.el --- my early-init-file -*- lexical-binding: t -*-
+;;; Commentary:
+;;; Code:
 (with-eval-after-load 'comp
+  (setq native-comp-async-report-warnings-errors 'silent)
   (setq native-comp-async-jobs-number 4)
   (setq native-comp-speed 3))
 (setq gc-cons-threshold 100000000)
 (setq read-process-output-max (* 1024 1024))
 (setenv "LSP_USE_PLISTS" "true")
-;; (setq garbage-collection-messages t)
+(setq garbage-collection-messages t)
+
 (setq use-default-font-for-symbols t)
 ;; (add-to-list 'default-frame-alist '(font . "Moralerspace Neon-11"))
 (set-face-attribute 'default nil :family "Moralerspace Neon" :height 160)
@@ -24,3 +29,5 @@
 ;; (defun set-prog-mode-table ()
 ;;   (set-buffer-local-composition-table "[-.,:;A-Z_a-z><=!&|+?/\\]+"))
 ;; (add-hook 'prog-mode-hook #'set-prog-mode-table)
+(provide 'early-init)
+;;; early-init.el ends here
