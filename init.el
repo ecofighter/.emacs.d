@@ -13,20 +13,6 @@
     (setq package-native-compile t)))
 
 (eval-and-compile
-  (defvar bootstrap-version)
-  (let ((bootstrap-file
-         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-        (bootstrap-version 6))
-    (unless (file-exists-p bootstrap-file)
-      (with-current-buffer
-          (url-retrieve-synchronously
-           "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-           'silent 'inhibit-cookies)
-        (goto-char (point-max))
-        (eval-print-last-sexp)))
-    (load bootstrap-file nil 'nomessage)))
-
-(eval-and-compile
   (customize-set-variable
    'package-archives '(("melpa"        . "https://melpa.org/packages/")
                        ("nongnu"       . "https://elpa.nongnu.org/nongnu/")
@@ -312,10 +298,9 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
              (corfu-auto-prefix . 3)
              (corfu-cycle . t))
     :config
-    (leaf corfu-terminal
-      :straight (corfu-terminal
-                 :type git
-                 :repo "https://codeberg.org/akib/emacs-corfu-terminal.git")
+    (leaf *corfu-terminal
+      :vc (corfu-terminal
+           :url "https://codeberg.org/akib/emacs-corfu-terminal.git")
       :after corfu
       :hook (corfu-mode-hook . corfu-terminal-mode)))
   (leaf cape
@@ -792,16 +777,12 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (gptel-make-anthropic "Claude"
     :stream t
     :key #'gptel-api-key-from-auth-source))
-(leaf copilot
-  :straight (copilot
-             :host github
-             :repo "copilot-emacs/copilot.el"
-             :files ("dist" "*.el"))
+(leaf *copilot
+  :vc (copilot
+       :url "https://github.com/copilot-emacs/copilot.el")
   ;; :hook (prog-mode-hook . copilot-mode)
   :bind (:copilot-completion-map
-         ("<tab>" . 'copilot-accept-completion)
-         ("TAB" . 'copilot-accept-completion)))
-
+         ("<tab>" . 'copilot-accept-completion)))
 (leaf meow
   :ensure t
   :require t
@@ -902,9 +883,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
      '("u" . vundo)
      '("i i" . consult-imenu)
      '("i p" . consult-yank-from-kill-ring))))
-
-(leaf package-utils
-  :ensure t)
 
 (load custom-file)
 (setq file-name-handler-alist my/saved-file-name-handler-alist)
