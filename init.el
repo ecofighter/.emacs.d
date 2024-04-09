@@ -386,9 +386,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
                      ("*Completions*" :align below :ratio 0.3)
                      ("*latex-math-preview-expression*" :align below :ratio 0.3 :noselect t))))
 (leaf ace-window
-  :ensure t
-  :bind
-  (("<leader>a" . #'ace-window)))
+  :ensure t)
 (leaf winner
   :ensure nil
   :require t
