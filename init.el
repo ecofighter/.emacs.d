@@ -702,15 +702,26 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :after skk
     :global-minor-mode t
     :blackout t))
-(leaf yasnippet
+(leaf tempel
   :ensure t
-  :global-minor-mode yas-global-mode
-  :bind ((:yas-minor-mode-map
-          ("M-TAB" . #'yas-expand)))
-  :config
-  (leaf yasnippet-snippets
+  :init
+  (defun tempel-setup-capf ()
+    ;; Add the Tempel Capf to `completion-at-point-functions'.
+    ;; `tempel-expand' only triggers on exact matches. Alternatively use
+    ;; `tempel-complete' if you want to see all matches, but then you
+    ;; should also configure `tempel-trigger-prefix', such that Tempel
+    ;; does not trigger too often when you don't expect it. NOTE: We add
+    ;; `tempel-expand' *before* the main programming mode Capf, such
+    ;; that it will be tried first.
+    (setq-local completion-at-point-functions
+                (cons #'tempel-expand
+                      completion-at-point-functions)))
+
+  (add-hook 'conf-mode-hook 'tempel-setup-capf)
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf)
+  (leaf tempel-collection
     :ensure t))
-;;(require '30-org)
 (leaf org
   :ensure t
   :config
