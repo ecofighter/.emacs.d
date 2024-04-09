@@ -42,6 +42,7 @@
     (leaf-keywords-init)))
 (leaf auto-compile
   :ensure t
+  :custom ((auto-compile-native-compile . t))
   :global-minor-mode (auto-compile-on-load-mode auto-compile-on-save-mode)
   :config
   (setq load-prefer-newer t))
@@ -263,6 +264,9 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :after perpective))
 (leaf vundo
   :ensure t)
+(leaf apheleia
+  :ensure t
+  :global-minor-mode apheleia-global-mode)
 (leaf *fido
   :config
   (leaf vertico
@@ -551,15 +555,15 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :config
   (setq spacious-padding-widths
         '(:internal-border-width 15
-          :header-line-width 4
-          :mode-line-width 6
-          :tab-width 4
-          :right-divider-width 30
-          :scroll-bar-width 8
-          :fringe-width 8))
+                                 :header-line-width 4
+                                 :mode-line-width 6
+                                 :tab-width 4
+                                 :right-divider-width 30
+                                 :scroll-bar-width 8
+                                 :fringe-width 8))
   (setq spacious-padding-subtle-mode-line
         `(:mode-line-active 'default
-          :mode-line-inactive vertical-border)))
+                            :mode-line-inactive vertical-border)))
 (leaf visual-fill-column
   :ensure t
   :hook (visual-line-mode-hook . visual-fill-column-mode)
@@ -914,6 +918,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
         '("<escape>" . meow-normal-mode)
         `("i" . ,(my/run-and-exit consult-imenu))))
     (meow-leader-define-key
+     '("=" . apheleia-format-buffer)
      '("a" . ace-window)
      '("e" . embark-act)
      '("u" . vundo)
