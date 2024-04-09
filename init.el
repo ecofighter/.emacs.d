@@ -218,8 +218,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :config
   (leaf *wsl-url-handler
     :when (or
-           (equal (system-name) "waltraute")
-           t)
+           (equal (system-name) "waltraute"))
     :after browse-url
     :config
     (defun my/browse-url-via-powershell (url &rest args)
