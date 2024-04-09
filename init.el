@@ -240,6 +240,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :ensure t
   :config
   (customize-set-variable 'persp-mode-prefix-key (kbd "C-x x"))
+  (customize-set-variable 'persp-sort 'created)
   (leaf *perspective-consult
     :after consult
     :defer-config
@@ -255,9 +256,11 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :config
   (leaf treemacs-magit
     :ensure t
+    :require t
     :after magit)
   (leaf treemacs-perspective
     :ensure t
+    :require t
     :after perpective))
 (leaf *fido
   :config
@@ -270,8 +273,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :global-minor-mode vertico-mode)
   (leaf embark
     :ensure t
-    :bind
-    (("<leader>e" . embark-act)))
+    :require t)
   (leaf consult
     :ensure t
     :require t
@@ -626,7 +628,9 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (add-hook 'prog-mode-hook 'tempel-setup-capf)
   (add-hook 'text-mode-hook 'tempel-setup-capf)
   (leaf tempel-collection
-    :ensure t))
+    :ensure t
+    :require t
+    :after tempel))
 (leaf org
   :ensure t
   :config
@@ -910,6 +914,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
         `("i" . ,(my/run-and-exit consult-imenu))))
     (meow-leader-define-key
      '("a" . ace-window)
+     '("e" . embark-act)
      '("i" . meow-consult-mode))))
 
 (leaf package-utils
