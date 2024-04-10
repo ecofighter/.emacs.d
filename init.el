@@ -321,7 +321,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     (leaf corfu-terminal
       :vc (corfu-terminal
            :url "https://codeberg.org/akib/emacs-corfu-terminal.git")
-      :require t
       :after corfu
       :hook (corfu-mode-hook . corfu-terminal-mode)))
   (leaf cape
@@ -547,11 +546,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (setq spacious-padding-subtle-mode-line
         `(:mode-line-active 'default
                             :mode-line-inactive vertical-border)))
-(leaf visual-fill-column
-  :ensure t
-  :hook (visual-line-mode-hook . visual-fill-column-mode)
-  :custom ((visual-fill-column-width . 80)
-           (visual-fill-column-center-text . t)))
 (leaf transient
   :ensure t)
 (leaf git-commit
