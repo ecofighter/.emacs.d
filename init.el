@@ -229,7 +229,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :global-minor-mode global-ligature-mode)
   (leaf perfect-margin
     :ensure t
-    :custom (perfect-margin-visible-width . 90)
+    :custom (perfect-margin-visible-width . 100)
     :global-minor-mode perfect-margin-mode)
   (leaf spacious-padding
     :ensure t
@@ -616,21 +616,18 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :after tempel))
 (leaf org
   :ensure t
+  :custom
+  (org-startup-indented . t)
   :config
-  ;; (leaf org-plus-contrib
-  ;;   :ensure t)
-  (leaf org-indent
-    :ensure nil
-    :hook (org-mode-hook . org-indent-mode))
   (leaf org-modern
     :ensure t
-    :hook ((org-mode-hook . org-modern-mode)))
+    :hook (org-mode-hook . org-modern-mode))
   (leaf org-modern-indent
     :ensure t
     :vc (org-modern-indent
          :url "https://github.com/jdtsmith/org-modern-indent")
-    :after org-modern org-indent
-    :hook (org-mode-hook . org-modern-indent-mode)))
+    :config
+    (add-hook 'org-mode-hook #'org-modern-indent-mode 90)))
 (leaf pdf-tools
   :ensure t
   :hook (pdf-view-mode-hook . (lambda () (display-line-numbers-mode -1))))
