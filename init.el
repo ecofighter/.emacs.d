@@ -161,6 +161,31 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (defvaralias 'cperl-indent-level 'tab-width)
   (set-language-environment "Japanese")
   (prefer-coding-system 'utf-8)
+  (leaf treesit
+    :custom (treesit-font-lock-level . 4)
+    :config
+    (leaf treesit-auto
+      :ensure t
+      :custom ((treesit-auto-install . 'prompt))
+      :global-minor-mode global-treesit-auto-mode)))
+(leaf *theme
+  :config
+  (leaf *bars
+    :config
+    (tool-bar-mode -1)
+    (menu-bar-mode -1)
+    (scroll-bar-mode -1))
+  (leaf modus-themes
+    :ensure t
+    :require t
+    :config
+    (load-theme 'modus-vivendi-tinted :no-confirm))
+  (leaf minions
+    :ensure t
+    :global-minor-mode minions-mode)
+  (leaf rainbow-delimiters
+    :ensure t
+    :hook (prog-mode-hook . rainbow-delimiters-mode))
   (leaf whitespace
     :require t
     :global-minor-mode global-whitespace-mode
@@ -173,36 +198,22 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :global-minor-mode global-hl-line-mode)
   (leaf hl-todo
     :ensure t
-    :global-minor-mode global-hl-todo-mode)
-  (leaf treesit
-    :custom (treesit-font-lock-level . 4)
-    :config
-    (leaf treesit-auto
-      :ensure t
-      :custom ((treesit-auto-install . 'prompt))
-      :global-minor-mode global-treesit-auto-mode))
-  (leaf *bars
-    :config
-    (tool-bar-mode -1)
-    (menu-bar-mode -1)
-    (scroll-bar-mode -1)))
-(leaf *theme
-  :config
-  (leaf modus-themes
-    :ensure t
-    :require t
-    :config
-    (load-theme 'modus-vivendi-tinted :no-confirm))
-  (leaf minions
-    :ensure t
-    :global-minor-mode minions-mode))
+    :global-minor-mode global-hl-todo-mode))
 (leaf *graphics
-  :when (display-graphic-p)
   :config
   (leaf fontaine
     :ensure t
+    :when (display-graphic-p)
+    :require t
     :global-minor-mode fontaine-mode
+    :hook (enable-theme-functions . fontaine-apply-current-preset)
     :config
+    (let ((table (make-char-table nil)))
+      (set-char-table-range table t `(["[-.,:;A-Z_a-z><=!&|+?/\\]+" 0 font-shape-gstring]))
+      (set-char-table-parent table composition-function-table)
+      (setq composition-function-table table))
+    (setq fontaine-latest-state-file
+          (locate-user-emacs-file "fontaine-latest-state.eld"))
     (setq fontaine-presets
           '((regular
              :default-family "Moralerspace Neon NF"
@@ -211,7 +222,8 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
              :italic-family "Moralerspace Neon NF")
             (large
              :default-family "Moralerspace Neon NF"
-             :variable-pitch-family "IBM Plex Sans"))))
+             :variable-pitch-family "IBM Plex Sans")))
+    (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular)))
   (leaf ligature
     :ensure t
     :global-minor-mode global-ligature-mode))
@@ -328,6 +340,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
                     (meow-escape-or-normal-modal))))
     (leaf corfu-terminal
       :ensure t
+      :unless (display-graphic-p)
       :vc (corfu-terminal
            :url "https://codeberg.org/akib/emacs-corfu-terminal.git")
       :after corfu
@@ -505,9 +518,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf elec-pair
   :ensure nil
   :global-minor-mode electric-pair-mode)
-(leaf rainbow-delimiters
-  :ensure t
-  :hook (prog-mode-hook . rainbow-delimiters-mode))
 (leaf puni
   :ensure t
   :global-minor-mode puni-global-mode
