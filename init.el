@@ -254,6 +254,8 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :ensure t
     :require t
     :after perpective))
+(leaf imenu-list
+  :ensure t)
 (leaf vundo
   :ensure t)
 (leaf apheleia
@@ -270,7 +272,10 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :global-minor-mode vertico-mode)
   (leaf embark
     :ensure t
-    :require t)
+    :require t
+    :bind
+    ("C-." . 'embark-act)
+    ("C-," . 'embark-dwim))
   (leaf consult
     :ensure t
     :require t
@@ -305,6 +310,14 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
              (corfu-auto-prefix . 3)
              (corfu-cycle . t))
     :config
+    (leaf *corfu-meow-espace
+      :after meow
+      :config
+      (define-key corfu-map (kbd "<escape>")
+                  (lambda ()
+                    (interactive)
+                    (corfu-quit)
+                    (meow-escape-or-normal-modal))))
     (leaf corfu-terminal
       :vc (corfu-terminal
            :url "https://codeberg.org/akib/emacs-corfu-terminal.git")
@@ -866,9 +879,12 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :config
     (meow-leader-define-key
      '("=" . apheleia-format-buffer)
+     '("q" . previous-buffer)
+     '("Q" . next-buffer)
      '("w" . ace-window)
      '("e" . embark-act)
      '("u" . vundo)
+     '("I" . imenu-list)
      '("i i" . consult-imenu)
      '("i p" . consult-yank-from-kill-ring))))
 
