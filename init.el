@@ -860,7 +860,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
      '("Y" . meow-sync-grab)
      '("z" . meow-pop-selection)
      '("'" . repeat)
-     '("/" . consult-line)
+     '("/" . isearch-forward-regexp)
      '("<escape>" . ignore)))
   (meow-setup)
   (meow-setup-indicator)
