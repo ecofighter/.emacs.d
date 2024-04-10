@@ -200,10 +200,10 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :ensure t
     :global-minor-mode global-hl-todo-mode))
 (leaf *graphics
+  :when (display-graphic-p)
   :config
   (leaf fontaine
     :ensure t
-    :when (display-graphic-p)
     :require t
     :global-minor-mode fontaine-mode
     :hook (enable-theme-functions . fontaine-apply-current-preset)
@@ -226,7 +226,26 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular)))
   (leaf ligature
     :ensure t
-    :global-minor-mode global-ligature-mode))
+    :global-minor-mode global-ligature-mode)
+  (leaf perfect-margin
+    :ensure t
+    :custom (perfect-margin-visible-width . 90)
+    :global-minor-mode perfect-margin-mode)
+  (leaf spacious-padding
+    :ensure t
+    :global-minor-mode spacious-padding-mode
+    :config
+    (setq spacious-padding-widths
+          '(:internal-border-width 15
+                                   :header-line-width 4
+                                   :mode-line-width 6
+                                   :tab-width 4
+                                   :right-divider-width 30
+                                   :scroll-bar-width 8
+                                   :fringe-width 8))
+    (setq spacious-padding-subtle-mode-line
+          `(:mode-line-active 'default
+                              :mode-line-inactive vertical-border))))
 (leaf *platform-spec
   :config
   (leaf *wsl-url-handler
@@ -529,25 +548,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   ((prog-mode-hook . highlight-indent-guides-mode)
    (highlight-indent-guides-mode-hook . highlight-indent-guides-auto-set-faces))
   :custom ((highlight-indent-guides-method . 'fill)))
-(leaf perfect-margin
-  :ensure t
-  :custom (perfect-margin-visible-width . 90)
-  :global-minor-mode perfect-margin-mode)
-(leaf spacious-padding
-  :ensure t
-  :global-minor-mode spacious-padding-mode
-  :config
-  (setq spacious-padding-widths
-        '(:internal-border-width 15
-                                 :header-line-width 4
-                                 :mode-line-width 6
-                                 :tab-width 4
-                                 :right-divider-width 30
-                                 :scroll-bar-width 8
-                                 :fringe-width 8))
-  (setq spacious-padding-subtle-mode-line
-        `(:mode-line-active 'default
-                            :mode-line-inactive vertical-border)))
 (leaf transient
   :ensure t)
 (leaf git-commit
@@ -630,14 +630,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :vc (org-modern-indent
          :url "https://github.com/jdtsmith/org-modern-indent")
     :after org-modern org-indent
-    :hook (org-mode-hook . org-modern-indent-mode))
-  (leaf evil-org
-    :ensure t
-    :hook ((org-mode-hook . evil-org-mode))
-    :defun evil-org-set-key-theme
-    :config
-    (evil-org-set-key-theme
-     '(navigation insert textobjects additional calendar))))
+    :hook (org-mode-hook . org-modern-indent-mode)))
 (leaf pdf-tools
   :ensure t
   :hook (pdf-view-mode-hook . (lambda () (display-line-numbers-mode -1))))
@@ -886,7 +879,9 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
      '("u" . vundo)
      '("I" . imenu-list)
      '("i i" . consult-imenu)
-     '("i p" . consult-yank-from-kill-ring))))
+     '("i p" . consult-yank-from-kill-ring)
+     '("a a" . avy-goto-char)
+     '("a l" . avy-goto-line))))
 
 (load custom-file)
 (setq file-name-handler-alist my/saved-file-name-handler-alist)
