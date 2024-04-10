@@ -4,7 +4,7 @@
 (with-eval-after-load 'comp
   (setq native-comp-async-report-warnings-errors 'silent)
   (setq native-comp-async-jobs-number 4)
-  (setq native-comp-speed 3))
+  (setq native-comp-speed 2))
 (setq gc-cons-threshold 100000000)
 (setq read-process-output-max (* 1024 1024))
 (setenv "LSP_USE_PLISTS" "true")
