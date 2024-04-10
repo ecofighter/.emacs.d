@@ -769,6 +769,8 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :ensure t
   :vc (copilot
        :url "https://github.com/copilot-emacs/copilot.el")
+  :custom
+  (copilot-indent-offset-warning-disable . t)
   :hook
   (prog-mode-hook . copilot-mode)
   (conf-mode-hook . copilot-mode)
