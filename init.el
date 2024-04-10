@@ -26,13 +26,20 @@
   (unless (package-installed-p 'leaf)
     (package-refresh-contents)
     (package-install 'leaf)))
+
+(leaf leaf
+  :ensure t
+  :require t
+  :config
+  (leaf leaf-tree
+    :ensure t
+    :require t))
 (leaf auto-compile
   :ensure t
   :custom ((auto-compile-native-compile . t))
   :global-minor-mode (auto-compile-on-load-mode auto-compile-on-save-mode)
   :config
   (setq load-prefer-newer t))
-
 (leaf *mymacros
   :init
   (defvar *my/package-refreshed* nil)
@@ -298,9 +305,10 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
              (corfu-auto-prefix . 3)
              (corfu-cycle . t))
     :config
-    (leaf *corfu-terminal
+    (leaf corfu-terminal
       :vc (corfu-terminal
            :url "https://codeberg.org/akib/emacs-corfu-terminal.git")
+      :require t
       :after corfu
       :hook (corfu-mode-hook . corfu-terminal-mode)))
   (leaf cape
@@ -756,7 +764,8 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (gptel-make-anthropic "Claude"
     :stream t
     :key #'gptel-api-key-from-auth-source))
-(leaf *copilot
+(leaf copilot
+  :require t
   :vc (copilot
        :url "https://github.com/copilot-emacs/copilot.el")
   ;; :hook (prog-mode-hook . copilot-mode)
@@ -857,7 +866,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :config
     (meow-leader-define-key
      '("=" . apheleia-format-buffer)
-     '("a" . ace-window)
+     '("w" . ace-window)
      '("e" . embark-act)
      '("u" . vundo)
      '("i i" . consult-imenu)
