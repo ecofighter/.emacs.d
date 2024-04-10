@@ -530,6 +530,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :custom ((highlight-indent-guides-method . 'fill)))
 (leaf perfect-margin
   :ensure t
+  :custom (perfect-margin-visible-width . 90)
   :global-minor-mode perfect-margin-mode)
 (leaf spacious-padding
   :ensure t
@@ -778,10 +779,11 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :stream t
     :key #'gptel-api-key-from-auth-source))
 (leaf copilot
-  :require t
   :vc (copilot
        :url "https://github.com/copilot-emacs/copilot.el")
-  ;; :hook (prog-mode-hook . copilot-mode)
+  :hook
+  (prog-mode-hook . copilot-mode)
+  (conf-mode-hook . copilot-mode)
   :bind (:copilot-completion-map
          ("<tab>" . 'copilot-accept-completion)))
 (leaf meow
