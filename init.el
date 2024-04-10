@@ -1,5 +1,6 @@
 ;;; init.el -- my config -*- lexical-binding: t -*-
-;;; Commentary: using leaf.el
+;;; Commentary:
+;;; using leaf.el
 ;;; Code:
 (defconst my/saved-file-name-handler-alist file-name-handler-alist)
 (setq file-name-handler-alist nil)
@@ -173,8 +174,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (leaf hl-todo
     :ensure t
     :global-minor-mode global-hl-todo-mode)
-  (leaf paren
-    :global-minor-mode show-paren-mode)
   (leaf treesit
     :custom (treesit-font-lock-level . 4)
     :config
@@ -202,7 +201,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :config
   (leaf fontaine
     :ensure t
-    :hook (kill-emacs-hook . fontaine-store-latest-preset)
+    :global-minor-mode fontaine-mode
     :config
     (setq fontaine-presets
           '((regular
@@ -212,8 +211,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
              :italic-family "Moralerspace Neon NF")
             (large
              :default-family "Moralerspace Neon NF"
-             :variable-pitch-family "IBM Plex Sans")))
-    (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular)))
+             :variable-pitch-family "IBM Plex Sans"))))
   (leaf ligature
     :ensure t
     :global-minor-mode global-ligature-mode))
@@ -501,6 +499,12 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :hook (flymake-mode-hook . flymake-diagnostic-at-point-mode)))
 (leaf flycheck
   :ensure t)
+(leaf paren
+  :ensure nil
+  :global-minor-mode show-paren-mode)
+(leaf elec-pair
+  :ensure nil
+  :global-minor-mode electric-pair-mode)
 (leaf rainbow-delimiters
   :ensure t
   :hook (prog-mode-hook . rainbow-delimiters-mode))
