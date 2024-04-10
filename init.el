@@ -187,23 +187,33 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     (tool-bar-mode -1)
     (menu-bar-mode -1)
     (scroll-bar-mode -1)))
-(leaf *graphics
-  :init
-  (leaf *theme
+(leaf *theme
+  :config
+  (leaf modus-themes
+    :ensure t
+    :require t
     :config
-    (leaf mood-line
-      :disabled t
-      :ensure t
-      :init
-      (mood-line-mode))
-    (leaf modus-themes
-      :ensure t
-      :require t
-      :config
-      (load-theme 'modus-vivendi-tinted :no-confirm)))
+    (load-theme 'modus-vivendi-tinted :no-confirm))
   (leaf minions
     :ensure t
-    :global-minor-mode minions-mode)
+    :global-minor-mode minions-mode))
+(leaf *graphics
+  :when (display-graphic-p)
+  :config
+  (leaf fontaine
+    :ensure t
+    :hook (kill-emacs-hook . fontaine-store-latest-preset)
+    :config
+    (setq fontaine-presets
+          '((regular
+             :default-family "Moralerspace Neon NF"
+             :fixed-pitch-family "Moralerspace Neon NF"
+             :variable-pitch-family "IBM Plex Sans"
+             :italic-family "Moralerspace Neon NF")
+            (large
+             :default-family "Moralerspace Neon NF"
+             :variable-pitch-family "IBM Plex Sans")))
+    (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular)))
   (leaf ligature
     :ensure t
     :global-minor-mode global-ligature-mode))
