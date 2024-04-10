@@ -198,7 +198,11 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :global-minor-mode global-hl-line-mode)
   (leaf hl-todo
     :ensure t
-    :global-minor-mode global-hl-todo-mode))
+    :global-minor-mode global-hl-todo-mode)
+  (leaf perfect-margin
+    :ensure t
+    :custom (perfect-margin-visible-width . 100)
+    :global-minor-mode perfect-margin-mode))
 (leaf *graphics
   :when (display-graphic-p)
   :config
@@ -227,10 +231,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (leaf ligature
     :ensure t
     :global-minor-mode global-ligature-mode)
-  (leaf perfect-margin
-    :ensure t
-    :custom (perfect-margin-visible-width . 100)
-    :global-minor-mode perfect-margin-mode)
   (leaf spacious-padding
     :ensure t
     :global-minor-mode spacious-padding-mode
