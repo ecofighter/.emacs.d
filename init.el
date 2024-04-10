@@ -319,6 +319,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
                     (corfu-quit)
                     (meow-escape-or-normal-modal))))
     (leaf corfu-terminal
+      :ensure t
       :vc (corfu-terminal
            :url "https://codeberg.org/akib/emacs-corfu-terminal.git")
       :after corfu
@@ -444,8 +445,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf vterm
   :ensure t)
 (leaf eshell
-  :bind
-  (("<leader>'" . eshell))
+  :ensure t
   :config
   (leaf eshell-vterm
     :ensure t))
@@ -494,32 +494,10 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf rainbow-delimiters
   :ensure t
   :hook (prog-mode-hook . rainbow-delimiters-mode))
-(leaf smartparens
+(leaf puni
   :ensure t
-  :global-minor-mode smartparens-global-mode
-  :defun my/sp-wrap-dquote sp-wrap-with-pair
-  :require smartparens-config
-  :config
-  (defun my/sp-wrap-dquote ()
-    (interactive)
-    (sp-wrap-with-pair "\""))
-  (leaf evil-smartparens
-    :ensure t
-    :after evil
-    :hook (smartparens-enabled-hook . evil-smartparens-mode)
-    :bind
-    (("<leader>sfs" . sp-forward-slurp-sexp)
-     ("<leader>sfb" . sp-forward-barf-sexp)
-     ("<leader>sbs" . sp-backward-slurp-sexp)
-     ("<leader>sbb" . sp-backward-barf-sexp)
-     ("<leader>sbu" . sp-backward-unwrap-sexp)
-     ("<leader>suu" . sp-unwrap-sexp)
-     ("<leader>sub" . sp-backward-unwrap-sexp))
-    (:evil-visual-state-map
-     ("<leader>sw(" . sp-wrap-round)
-     ("<leader>sw[" . sp-wrap-square)
-     ("<leader>sw{" . sp-wrap-curly)
-     ("<leader>sw\"" . sp-wrap-dquote))))
+  :global-minor-mode puni-global-mode
+  :hook (vterm-mode-hook . puni-disable-puni-mode))
 (leaf highlight-indent-guides
   :ensure t
   :require t
@@ -617,9 +595,18 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :config
   ;; (leaf org-plus-contrib
   ;;   :ensure t)
+  (leaf org-indent
+    :ensure nil
+    :hook (org-mode-hook . org-indent-mode))
   (leaf org-modern
     :ensure t
     :hook ((org-mode-hook . org-modern-mode)))
+  (leaf org-modern-indent
+    :ensure t
+    :vc (org-modern-indent
+         :url "https://github.com/jdtsmith/org-modern-indent")
+    :after org-modern org-indent
+    :hook (org-mode-hook . org-modern-indent-mode))
   (leaf evil-org
     :ensure t
     :hook ((org-mode-hook . evil-org-mode))
@@ -666,15 +653,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :ensure t
     :mode ("\\.csp\\'" "\\html\\'"))
   (leaf *elisp
-    :ensure smartparens
-    :require smartparens-config
-    :defun my/elisp-mode-hook-fun
-    :config
-    (defun my/elisp-mode-hook-fun ()
-      (hs-minor-mode 1)
-      (smartparens-strict-mode 1)
-      (flycheck-mode -1))
-    (add-hook 'emacs-lisp-mode-hook #'my/elisp-mode-hook-fun))
+    :config)
   (leaf *haskell
     :config
     (leaf haskell-mode
@@ -773,6 +752,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :stream t
     :key #'gptel-api-key-from-auth-source))
 (leaf copilot
+  :ensure t
   :vc (copilot
        :url "https://github.com/copilot-emacs/copilot.el")
   :hook
