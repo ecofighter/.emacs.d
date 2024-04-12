@@ -1,6 +1,8 @@
 ;;; init.el -- my config -*- lexical-binding: t -*-
+
 ;;; Commentary:
-;;; using leaf.el
+;; using leaf.el
+
 ;;; Code:
 (defconst my/saved-file-name-handler-alist file-name-handler-alist)
 (setq file-name-handler-alist nil)
@@ -55,25 +57,45 @@
               (package-refresh-contents)
               (setq *my/package-refreshed* t))
             (package-install ,package)))))))
+(leaf server
+  :ensure nil
+  :require t
+  :defun server-edit server-delete-client
+  :defvar server-clients)
 (leaf *myutils
+  :defun modified-buffers-exist my/exit
   :config
   (defun my/reopen-with-sudo ()
     "Reopen buffer with sudo."
     (interactive)
     (find-file (concat "/sudo::"
                        (expand-file-name (buffer-file-name)))))
-  (require 'server)
+  (defun modified-buffers-exist ()
+    "Check to see if there are any buffers that have been modified.
+It will return true if there are and nil otherwise.
+Buffers that have `buffer-offer-save' set to nil are ignored."
+    (let (modified-found)
+      (dolist (buffer (buffer-list))
+        (when (and (buffer-live-p buffer)
+                   (buffer-modified-p buffer)
+                   (not (buffer-base-buffer buffer))
+                   (or
+                    (buffer-file-name buffer)
+                    (progn
+                      (set-buffer buffer)
+                      (and buffer-offer-save (> (buffer-size) 0)))))
+          (setq modified-found t)))
+      modified-found))
   (defun my/exit ()
     "Exit from Emacs window.
-this sxec 'server-edit' when in client, or 'save-buffers-kill-emacs'."
+this sxec `server-edit' when in client, or `save-buffers-kill-emacs'."
     (interactive)
     (if server-clients
         (server-edit)
       (save-buffers-kill-emacs)))
-
   (defun client-save-kill-emacs (&optional display)
     "Save buffers and shutdown the Emacs daemon, use DISPLAY if passed.
-It should be called using emacsclient -e '(client-save-kill-emacs)'.
+It should be called using emacsclient -e `(client-save-kill-emacs)'.
 This function will check to see if there are any modified buffers or active
 clients or frame.  If so an x window will be opened and the user will
 be prompted."
@@ -85,12 +107,9 @@ be prompted."
                                        (> (length (frame-list)) 1)))
                                         ; Create a new frame if prompts are needed.
       (when (or modified-buffers active-clients-or-frames)
-        (when (not (eq window-system 'x))
-          (message "Initializing x windows system.")
-          (x-initialize-window-system))
         (when (not display) (setq display (getenv "DISPLAY")))
         (message "Opening frame on display: %s" display)
-        (select-frame (make-frame-on-display display '((window-system . x)))))
+        (select-frame (make-frame-on-display display)))
                                         ; Save the current frame.
       (setq new-frame (selected-frame))
 
@@ -114,25 +133,7 @@ be prompted."
               (dolist (client server-clients)
                 (server-delete-client client))
               (kill-emacs)))))
-
-      (when (or modified-buffers active-clients-or-frames) (delete-frame new-frame))))
-
-  (defun modified-buffers-exist ()
-    "Check to see if there are any buffers that have been modified.
-It will return true if there are and nil otherwise.
-Buffers that have 'buffer-offer-save' set to nil are ignored."
-    (let (modified-found)
-      (dolist (buffer (buffer-list))
-        (when (and (buffer-live-p buffer)
-                   (buffer-modified-p buffer)
-                   (not (buffer-base-buffer buffer))
-                   (or
-                    (buffer-file-name buffer)
-                    (progn
-                      (set-buffer buffer)
-                      (and buffer-offer-save (> (buffer-size) 0)))))
-          (setq modified-found t)))
-      modified-found)))
+      (when (or modified-buffers active-clients-or-frames) (delete-frame new-frame)))))
 ;;(add-to-list 'load-path "~/.emacs.d/inits")
 (leaf emacs
   :custom ((make-backup-files . nil)
@@ -149,6 +150,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
            (truncate-partial-width-windows . t)
            (inhibit-startup-screen . t)
            (inhibit-x-resources . t)
+           (inhibit-compacting-font-caches . t)
            (inhibit-startup-buffer-menu . t)
            (blink-matching-paren . nil)
            (auto-mode-case-fold . nil)
@@ -176,10 +178,68 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     (menu-bar-mode -1)
     (scroll-bar-mode -1))
   (leaf modus-themes
+    :disabled t
     :ensure t
     :require t
     :config
     (load-theme 'modus-vivendi-tinted :no-confirm))
+  (leaf ef-themes
+    :ensure t
+    :require t
+    :custom
+    (ef-themes-headings .'((0 variable-pitch light 1.9)
+                           (1 variable-pitch light 1.8)
+                           (2 variable-pitch regular 1.7)
+                           (3 variable-pitch regular 1.6)
+                           (4 variable-pitch regular 1.5)
+                           (5 variable-pitch 1.4) ; absence of weight means `bold'
+                           (6 variable-pitch 1.3)
+                           (7 variable-pitch 1.2)
+                           (t variable-pitch 1.1)))
+    (ef-themes-mixed-fonts . t)
+    (ef-themes-variable-pitch-ui . t)
+    :config
+    (mapc #'disable-theme custom-enabled-themes)
+    (load-theme 'ef-winter :no-confirm))
+  (leaf nerd-icons
+    :ensure t
+    :config
+    (leaf nerd-icons-completion
+      :ensure t
+      :global-minor-mode nerd-icons-completion-mode)
+    (leaf nerd-icons-dired
+      :ensure t
+      :hook (dired-mode-hook . nerd-icons-dired-mode)))
+  (leaf doom-modeline
+    :ensure t
+    :global-minor-mode doom-modeline-mode
+    :custom
+    ((doom-modeline-height . 25)
+     (doom-modeline-bar-width . 4)
+     (doom-modeline-buffer-file-name-style . 'truncate-with-project)
+     (doom-modeline-icon . t)
+     (doom-modeline-buffer-modification-icon . t)
+     (doom-modeline-buffer-state-icon . t)
+     (doom-modeline-buffer-encoding . t)
+     (doom-modeline-buffer-major-mode . t)
+     (doom-modeline-major-mode-icon . t)
+     (doom-modeline-major-mode-color-icon . t)
+     (doom-modeline-buffer-minor-modes . nil)
+     (doom-modeline-indent-info . nil)
+     (doom-modeline-lsp . t)
+     (doom-modeline-github . nil)
+     (doom-modeline-gnus . nil)
+     (doom-modeline-irc . nil)
+     (doom-modeline-mu4e . nil)
+     (doom-modeline-persp-name . t)
+     (doom-modeline-persp-icon . t)
+     (doom-modeline-project-detection . 'auto)
+     (doom-modeline-unicode-fallback . nil)))
+  (leaf hide-mode-line
+    :ensure t
+    :hook
+    (treemacs-mode-hook . hide-mode-line-mode)
+    (imenu-list-minor-mode-hook . hide-mode-line-mode))
   (leaf minions
     :ensure t
     :global-minor-mode minions-mode)
@@ -187,11 +247,10 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :ensure t
     :hook (prog-mode-hook . rainbow-delimiters-mode))
   (leaf whitespace
-    :require t
     :global-minor-mode global-whitespace-mode
     :custom
-    ((show-trailing-whitespace . t)
-     (whitespace-style . '(face trailing indentation tab-mark))))
+    (show-trailing-whitespace . t)
+    (whitespace-style . '(face trailing)))
   (leaf display-line-numbers
     :global-minor-mode global-display-line-numbers-mode)
   (leaf hl-line
@@ -211,22 +270,21 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :require t
     :global-minor-mode fontaine-mode
     :hook (enable-theme-functions . fontaine-apply-current-preset)
+    :custom
+    (fontaine-latest-state-file . `,(locate-user-emacs-file "fontaine-latest-state.eld"))
+    (fontaine-presets . '((regular
+                           :default-family "Moralerspace Neon"
+                           :fixed-pitch-family "Moralerspace Neon"
+                           :variable-pitch-family "IBM Plex Sans JP"
+                           :italic-family "Moralerspace Neon")
+                          (large
+                           :default-family "Moralerspace Neon"
+                           :variable-pitch-family "IBM Plex Sans JP")))
     :config
     (let ((table (make-char-table nil)))
       (set-char-table-range table t `(["[-.,:;A-Z_a-z><=!&|+?/\\]+" 0 font-shape-gstring]))
       (set-char-table-parent table composition-function-table)
       (setq composition-function-table table))
-    (setq fontaine-latest-state-file
-          (locate-user-emacs-file "fontaine-latest-state.eld"))
-    (setq fontaine-presets
-          '((regular
-             :default-family "Moralerspace Neon NF"
-             :fixed-pitch-family "Moralerspace Neon NF"
-             :variable-pitch-family "IBM Plex Sans"
-             :italic-family "Moralerspace Neon NF")
-            (large
-             :default-family "Moralerspace Neon NF"
-             :variable-pitch-family "IBM Plex Sans")))
     (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular)))
   (leaf ligature
     :ensure t
@@ -234,114 +292,81 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (leaf spacious-padding
     :ensure t
     :global-minor-mode spacious-padding-mode
-    :config
-    (setq spacious-padding-widths
-          '(:internal-border-width 15
-                                   :header-line-width 4
-                                   :mode-line-width 6
-                                   :tab-width 4
-                                   :right-divider-width 30
-                                   :scroll-bar-width 8
-                                   :fringe-width 8))
-    (setq spacious-padding-subtle-mode-line
-          `(:mode-line-active 'default
-                              :mode-line-inactive vertical-border))))
+    :custom
+    (spacious-padding-widths .
+                             '(:internal-border-width 15
+                                                      :header-line-width 4
+                                                      :mode-line-width 6
+                                                      :tab-width 4
+                                                      :right-divider-width 30
+                                                      :scroll-bar-width 8
+                                                      :fringe-width 8))
+    ( spacious-padding-subtle-mode-line .
+      '(:mode-line-active 'default
+                          :mode-line-inactive vertical-border))))
 (leaf *platform-spec
   :config
   (leaf *wsl-url-handler
     :when (or
-           (equal (system-name) "waltraute"))
+           (getenv "WSL_DISTRO_NAME")
+           (eq system-type 'windows-nt))
     :after browse-url
+    :defun my/browse-url-via-powershell
     :config
-    (defun my/browse-url-via-powershell (url &rest args)
+    (defun my/browse-url-via-powershell (url &rest _args)
       (shell-command (concat "powershell.exe start \"" url "\"")))
     (setf browse-url-browser-function #'my/browse-url-via-powershell)))
 (leaf exec-path-from-shell
   :ensure t
-  :unless (equal system-type 'windows-nt)
-  :require exec-path-from-shell
+  :unless (eq system-type 'windows-nt)
   :defun exec-path-from-shell-initialize
-  :custom ((exec-path-from-shell-arguments . nil)
-           (exec-path-from-shell-check-startup-files . nil)
-           (exec-path-from-shell-variables . '("PATH" "MANPATH" "LD_LIBRARY_PATH")))
-  :config
-  ;;(add-to-list 'exec-path-from-shell-variables "CAML_LD_LIBRARY_PATH")
-  (exec-path-from-shell-initialize))
-(leaf perspective
+  :hook (after-init-hook . exec-path-from-shell-initialize)
+  :custom
+  (exec-path-from-shell-arguments . nil)
+  (exec-path-from-shell-check-startup-files . nil)
+  (exec-path-from-shell-variables . '("PATH" "MANPATH" "LD_LIBRARY_PATH")))
+(leaf vertico
   :ensure t
-  :config
-  (customize-set-variable 'persp-mode-prefix-key (kbd "C-x x"))
-  (customize-set-variable 'persp-sort 'created)
-  (leaf *perspective-consult
-    :after consult
-    :defer-config
-    (consult-customize consult--source-buffer :hidden t :default nil)
-    (add-to-list 'consult-buffer-sources persp-consult-source))
-  (persp-mode 1))
-(leaf treemacs
+  :bind (:vertico-map (("C-h" . 'vertico-directory-up)
+                       ("C-m" . 'vertico-exit)
+                       ("C-j" . 'vertico-exit-input)))
+  :global-minor-mode vertico-mode)
+(leaf embark
   :ensure t
-  :require t
-  :hook (treemacs-mode-hook . (lambda () (display-line-numbers-mode -1)))
-  :bind (("C-x t t" . treemacs-select-window)
-         ("C-x t q" . treemacs))
-  :config
-  (leaf treemacs-magit
-    :ensure t
-    :require t
-    :after magit)
-  (leaf treemacs-perspective
-    :ensure t
-    :require t
-    :after perpective))
-(leaf imenu-list
-  :ensure t)
-(leaf vundo
-  :ensure t)
-(leaf apheleia
+  :bind
+  ("C-." . 'embark-act)
+  ("C-," . 'embark-dwim))
+(leaf consult
   :ensure t
-  :global-minor-mode apheleia-global-mode)
-(leaf *fido
+  :defun
+  consult-customize
+  consult--customize-put
+  :defvar consult--source-buffer consult-buffer-sources
+  :bind
+  (("<leader>is" . consult-line)
+   ("<leader>ii" . consult-imenu)
+   ("<leader>iI" . consult-imenu-multi)
+   ("<leader>ip" . consult-yank-from-kill-ring)
+   ("<leader>il" . consult-compile-error)
+   ("<leader>ig" . consult-ripgrep))
   :config
-  (leaf vertico
+  (leaf embark-consult
     :ensure t
-    :require t
-    :bind (:vertico-map (("C-h" . 'vertico-directory-up)
-                         ("C-m" . 'vertico-exit)
-                         ("C-j" . 'vertico-exit-input)))
-    :global-minor-mode vertico-mode)
-  (leaf embark
-    :ensure t
-    :require t
-    :bind
-    ("C-." . 'embark-act)
-    ("C-," . 'embark-dwim))
-  (leaf consult
-    :ensure t
-    :require t
-    :bind
-    (("<leader>is" . consult-line)
-     ("<leader>ii" . consult-imenu)
-     ("<leader>iI" . consult-imenu-multi)
-     ("<leader>ip" . consult-yank-from-kill-ring)
-     ("<leader>il" . consult-compile-error)
-     ("<leader>ig" . consult-ripgrep))
-    :config
-    (leaf embark-consult
-      :ensure t
-      :hook ((embark-collect-mode-hook . consult-preview-at-point-mode))))
-  (leaf marginalia
-    :ensure t
-    :global-minor-mode marginalia-mode)
-  (leaf orderless
-    :ensure t
-    :require t
-    :custom
-    ((completion-styles . '(substring orderless basic))
-     (completion-category-overrides . '((file (styles basic partial-completion)))))))
+    :hook ((embark-collect-mode-hook . consult-preview-at-point-mode))))
+(leaf marginalia
+  :ensure t
+  :global-minor-mode marginalia-mode)
+(leaf orderless
+  :ensure t
+  :custom
+  (completion-styles . '(substring orderless basic))
+  (completion-category-overrides . '((file (styles basic partial-completion)))))
 (leaf *completion
   :config
   (leaf corfu
     :ensure t
+    :defun corfu-quit
+    :defvar corfu-map corfu-margin-formatters
     :global-minor-mode global-corfu-mode
     :hook (corfu-mode-hook . corfu-popupinfo-mode)
     :custom ((corfu-auto . t)
@@ -352,11 +377,19 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     (leaf *corfu-meow-espace
       :after meow
       :config
+      (eval-when-compile
+        (declare-function meow-escape-or-normal-modal "meow-command"))
       (define-key corfu-map (kbd "<escape>")
                   (lambda ()
                     (interactive)
                     (corfu-quit)
                     (meow-escape-or-normal-modal))))
+    (leaf nerd-icons-corfu
+      :ensure t
+      :after nerd-icons
+      :defun nerd-icons-corfu-formatter
+      :config
+      (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
     (leaf corfu-terminal
       :ensure t
       :unless (display-graphic-p)
@@ -366,7 +399,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
       :hook (corfu-mode-hook . corfu-terminal-mode)))
   (leaf cape
     :ensure t
-    :require t
     :config
     (defvar my/merged-capf)
     (let* ((noncachedfuns '(#'cape-dabbrev))
@@ -377,14 +409,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   (leaf eglot
     :disabled nil
     :ensure t
-    :custom ((eglot-autoshutdown . t))
-    :config
-    (leaf flycheck-eglot
-      :disabled t
-      :ensure t
-      :after (flycheck eglot)
-      :custom ((flycheck-eglot-exclusive . nil))
-      :global-minor-mode global-flycheck-eglot-mode))
+    :custom ((eglot-autoshutdown . t)))
   (leaf realgud
     :disabled t
     :ensure t
@@ -396,13 +421,15 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :ensure t
     :custom
     ((lsp-auto-guess-root . t)
+     (lsp-document-sync-method . 'incremental)
+     (lsp-response-timeout . 5)
      (lsp-use-plist . t)
      (lsp-log-io . nil)
      (lsp-semantic-tokens-enable . t)
      (lsp-enable-snippet . t)
-     (lsp-diagnostics-provider . :flycheck)
+     (lsp-diagnostics-provider . :flymake)
      (lsp-enable-completion . t)
-     (lsp-completion-provider . :capf)
+     (lsp-completion-provider . :none)
      (lsp-modeline-diagnostics-scope . :file))
     :defun lsp-enable-which-key-integration
     :config
@@ -419,8 +446,14 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
       :ensure t
       :custom
       ((lsp-ui-doc-enable . t)
+       (lsp-ui-doc-header . t)
+       (lsp-ui-doc-include-signature . t)
        (lsp-ui-doc-use-childframe . t)
-       (lsp-ui-doc-use-webkit . nil))
+       (lsp-ui-doc-use-webkit . t)
+       (lsp-ui-flycheck-enable . nil)
+       (lsp-ui-imenu-enable . nil)
+       (lsp-ui-peek-enable . t)
+       (lsp-ui-peek-fontify . 'on-demand))
       :bind ((:lsp-ui-mode-map
               ([remap xref-find-definitions]
                . lsp-ui-peek-find-definitions)
@@ -433,10 +466,41 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
       :after treemacs
       :config
       (add-hook 'lsp-mode-hook #'lsp-treemacs-sync-mode))))
-(leaf *aspell
+(leaf perspective
+  :ensure t
+  :defvar persp-consult-source
+  :custom
+  (persp-mode-prefix-key . `,(kbd "C-x x"))
+  (persp-sort . 'created)
+  :global-minor-mode persp-mode
   :config
-  (leaf flycheck-aspell
-    :ensure t))
+  (leaf *perspective-consult
+    :after consult perspective
+    :config
+    (eval-when-compile
+      (require 'consult))
+    (consult-customize consult--source-buffer :hidden t :default nil)
+    (add-to-list 'consult-buffer-sources persp-consult-source)))
+(leaf treemacs
+  :ensure t
+  :hook (treemacs-mode-hook . (lambda () (display-line-numbers-mode -1)))
+  :bind
+  ("C-x t t" . treemacs-select-window)
+  ("C-x t q" . treemacs)
+  :config
+  (leaf treemacs-magit
+    :ensure t
+    :after magit)
+  (leaf treemacs-perspective
+    :ensure t
+    :after perpective))
+(leaf imenu-list
+  :ensure t)
+(leaf vundo
+  :ensure t)
+(leaf apheleia
+  :ensure t
+  :global-minor-mode apheleia-global-mode)
 (leaf shackle
   :ensure t
   :global-minor-mode shackle-mode
@@ -450,7 +514,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :ensure t)
 (leaf winner
   :ensure nil
-  :require t
   :global-minor-mode winner-mode
   :bind
   (("<leader>ws" . delete-other-windows)
@@ -464,24 +527,20 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf which-key
   :ensure t
   :global-minor-mode which-key-mode
-  :init
+  :config
   (leaf which-key-posframe
     :ensure t
-    :after which-key
+    :init
+    (eval-when-compile
+      (declare-function posframe-poshandler-frame-bottom-center "poframe"))
     :custom
-    ((which-key-posframe-poshandler . #'posframe-poshandler-frame-bottom-center)
-     (which-key-posframe-border-width . 5)
-     (which-key-posframe-parameters . '((left-fringe . 2)
-                                        (right-fringe . 2))))
+    (which-key-posframe-poshandler . #'posframe-poshandler-frame-bottom-center)
+    (which-key-posframe-border-width . 5)
+    (which-key-posframe-parameters . '((left-fringe . 2)
+                                       (right-fringe . 2)))
     :hook (which-key-mode-hook . which-key-posframe-mode)))
-;; (require '10-hl-todo)
-;; (require '10-editorconfig)
-;; (require '10-smart-mode-line)
-;; (require '10-tramp)
 (leaf tramp
   :ensure t)
-;; (require '10-ripgrep)
-;; (require '20-eshell)
 (leaf vterm
   :ensure t)
 (leaf eshell
@@ -489,7 +548,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :config
   (leaf eshell-vterm
     :ensure t))
-;;(require '20-ddskk)
 (leaf ddskk
   :ensure t
   :defvar skk-isearch-mode-enable
@@ -504,33 +562,36 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
    (skk-cdb-large-jisyo . "~/.emacs.d/SKK-JISYO.XL.cdb"))
   :bind (("C-x j" . skk-mode)
          ("C-x J" . skk-auto-fill-mode))
-  :init
+  :config
+  (leaf ddskk-posframe
+    :ensure t posframe
+    :global-minor-mode t)
   (leaf *skk-isearch
-    :after skk
-    :config
-    (add-hook 'isearch-mode-hook
-              #'(lambda ()
-                  (when (and (boundp 'skk-mode)
-                             skk-mode
-                             skk-isearch-mode-enable)
-                    (skk-isearch-mode-setup))))
-    (add-hook 'isearch-mode-end-hook
-              #'(lambda ()
-                  (when (and (featurep 'skk-isearch)
-                             skk-isearch-mode-enable)
-                    (skk-isearch-mode-cleanup))))))
+    :hook
+    (isearch-mode-hook . #'(lambda ()
+                             (when (and (boundp 'skk-mode)
+                                        skk-mode
+                                        skk-isearch-mode-enable)
+                               (skk-isearch-mode-setup))))
+    (isearch-mode-end-hook . #'(lambda ()
+                                 (when (and (featurep 'skk-isearch)
+                                            skk-isearch-mode-enable)
+                                   (skk-isearch-mode-cleanup))))))
 ;; (require '20-migemo)
 ;; (require '20-fcitx)
 ;; (require '20-uim)
 ;; (require '20-company)
 (leaf flymake
   :ensure t
+  :hook (prog-mode-hook . flymake-mode)
   :config
+  (leaf flymake-collection
+    :ensure t
+    :require t
+    :after flymake)
   (leaf flymake-diagnostic-at-point
     :ensure t
     :hook (flymake-mode-hook . flymake-diagnostic-at-point-mode)))
-(leaf flycheck
-  :ensure t)
 (leaf paren
   :ensure nil
   :global-minor-mode show-paren-mode)
@@ -543,11 +604,12 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :hook (vterm-mode-hook . puni-disable-puni-mode))
 (leaf highlight-indent-guides
   :ensure t
-  :require t
   :hook
-  ((prog-mode-hook . highlight-indent-guides-mode)
-   (highlight-indent-guides-mode-hook . highlight-indent-guides-auto-set-faces))
-  :custom ((highlight-indent-guides-method . 'fill)))
+  ((prog-mode-hook conf-mode-hook) . highlight-indent-guides-mode)
+  :custom
+  (highlight-indent-guides-auto-enabled . t)
+  (highlight-indent-guides-responsive . t)
+  (highlight-indent-guides-method . 'fill))
 (leaf transient
   :ensure t)
 (leaf git-commit
@@ -588,10 +650,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf posframe
   :ensure t
   :config
-  (leaf ddskk-posframe
-    :ensure t
-    :after skk
-    :global-minor-mode t))
+  )
 (leaf tempel
   :ensure t
   :init
@@ -627,7 +686,14 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
     :vc (org-modern-indent
          :url "https://github.com/jdtsmith/org-modern-indent")
     :config
-    (add-hook 'org-mode-hook #'org-modern-indent-mode 90)))
+    (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
+  (leaf org-roam
+    :ensure t
+    :custom
+    ((org-roam-directory . "~/org/roam/")
+     (org-roam-db-location . "~/.emacs.d/org-roam.db"))
+    :config
+    (org-roam-db-autosync-mode)))
 (leaf pdf-tools
   :ensure t
   :hook (pdf-view-mode-hook . (lambda () (display-line-numbers-mode -1))))
@@ -720,36 +786,38 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
        (TeX-auto-save . t)
        (reftex-plug-into-AUCTeX . t))
       :ensure t
-      :defvar TeX-view-program-list
-      :defun TeX-revert-document-buffer
+      :defvar TeX-view-program-list TeX-error-list TeX-command-buffer
+      :defun TeX-revert-document-buffer TeX-active-master TeX-output-extension
+      :hook (LaTeX-mode-hook . turn-on-reftex)
       :config
-      (add-hook 'LaTeX-mode-hook #'turn-on-reftex)
       (leaf pdf-tools
         :ensure t
-        :require t
+        :hook (TeX-after-compilation-finished-functions . TeX-revert-document-buffer)
         :custom
         ((TeX-view-program-selection . '((output-pdf "PDF Tools")))
          (TeX-view-program-list . '(("PDF Tools" TeX-pdf-tools-sync-view))))
         :config
-        (pdf-tools-install)
-        (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)))
-    (leaf auctex-cluttex
-      :ensure t
-      :custom
-      ;; ((auctex-cluttex-program . "cluttex.exe")
-      ;;  (auctex-cluttex-ClutTeX-command . '("ClutTeX" "cluttex.exe -e %(cluttexengine) %(cluttexbib) %(cluttexindex) %S %t" auctex-cluttex--TeX-run-ClutTeX nil
-      ;;                                      (plain-tex-mode latex-mode)
-      ;;                                      :help "Run ClutTeX")))
-      :hook ((LaTeX-mode-hook . auctex-cluttex-mode))
-      :config
-      (defun my/run-after-compilation-finished-funcs (&rest args)
-        "run AUCTeX's TeX-after-compilation-finished-functions hook. Ignore all ARGS"
-        (unless TeX-error-list
-          (run-hook-with-args 'TeX-after-compilation-finished-functions
-                              (with-current-buffer TeX-command-buffer
-                                (expand-file-name
-                                 (TeX-active-master (TeX-output-extension)))))))
-      (advice-add #'auctex-cluttex--TeX-ClutTeX-sentinel :after #'my/run-after-compilation-finished-funcs))
+        (pdf-tools-install))
+      (leaf auctex-cluttex
+        :ensure t
+        ;; :custom
+        ;; ((auctex-cluttex-program . "cluttex.exe")
+        ;;  (auctex-cluttex-ClutTeX-command . '("ClutTeX" "cluttex.exe -e %(cluttexengine) %(cluttexbib) %(cluttexindex) %S %t" auctex-cluttex--TeX-run-ClutTeX nil
+        ;;                                      (plain-tex-mode latex-mode)
+        ;;                                      :help "Run ClutTeX")))
+        :hook (LaTeX-mode-hook . auctex-cluttex-mode)
+        :defun
+        auctex-cluttex--TeX-ClutTeX-sentinel
+        :advice
+        (:after auctex-cluttex--TeX-ClutTeX-sentinel my/run-after-compilation-finished-funcs)
+        :config
+        (defun my/run-after-compilation-finished-funcs (&rest _args)
+          "run AUCTeX's TeX-after-compilation-finished-functions hook. Ignore all ARGS"
+          (unless TeX-error-list
+            (run-hook-with-args 'TeX-after-compilation-finished-functions
+                                (with-current-buffer TeX-command-buffer
+                                  (expand-file-name
+                                   (TeX-active-master (TeX-output-extension)))))))))
     (leaf *latex-lsp
       :disabled t
       :config
@@ -759,6 +827,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
   :ensure t)
 (leaf gptel
   :ensure t
+  :defun gptel-api-key-from-auth-source
   :bind
   (("<leader>gg" . gptel-menu))
   :config
@@ -779,7 +848,15 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
 (leaf meow
   :ensure t
   :require t
-  :custom ((meow-use-clipboard . t))
+  :custom (meow-use-clipboard . t)
+  :defun
+  (meow-setup . init)
+  (meow-motion-overwrite-define-key . meow-helpers)
+  (meow-leader-define-key . meow-helpers)
+  (meow-normal-define-key . meow-helpers)
+  :defvar
+  meow-cheatsheet-layout
+  meow-cheatsheet-layout-qwerty
   :config
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
@@ -865,7 +942,6 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
      '("/" . isearch-forward-regexp)
      '("<escape>" . ignore)))
   (meow-setup)
-  (meow-setup-indicator)
   (meow-global-mode 1)
   (leaf *meow-leader-maps
     :config
@@ -877,6 +953,7 @@ Buffers that have 'buffer-offer-save' set to nil are ignored."
      '("e" . embark-act)
      '("u" . vundo)
      '("I" . imenu-list)
+     '("i e" . consult-flymake)
      '("i i" . consult-imenu)
      '("i p" . consult-yank-from-kill-ring)
      '("a a" . avy-goto-char)
