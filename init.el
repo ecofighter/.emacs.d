@@ -39,7 +39,7 @@
     :require t))
 (leaf auto-compile
   :ensure t
-  :custom ((auto-compile-native-compile . t))
+  :custom (auto-compile-native-compile . t)
   :global-minor-mode (auto-compile-on-load-mode auto-compile-on-save-mode)
   :config
   (setq load-prefer-newer t))
@@ -137,6 +137,8 @@ be prompted."
 ;;(add-to-list 'load-path "~/.emacs.d/inits")
 (leaf emacs
   :custom ((make-backup-files . nil)
+           (fast-but-imprecise-scrolling . t)
+           (process-adaptive-read-buffering . t)
            (indent-tabs-mode . nil)
            (select-enable-clipboard . t)
            (x-select-enable-clipboard-manager . t)
@@ -144,10 +146,10 @@ be prompted."
            (use-short-answers . t)
            (split-width-threshold . 80)
            (vc-handled-backends . '(Git))
-           (fill-column . 80)
+           (fill-column . 100)
            (tab-width . 4)
-           (truncate-lines . t)
-           (truncate-partial-width-windows . t)
+           (truncate-lines . nil)
+           (truncate-partial-width-windows . nil)
            (inhibit-startup-screen . t)
            (inhibit-x-resources . t)
            (inhibit-compacting-font-caches . t)
@@ -223,7 +225,7 @@ be prompted."
      (doom-modeline-buffer-encoding . t)
      (doom-modeline-buffer-major-mode . t)
      (doom-modeline-major-mode-icon . t)
-     (doom-modeline-major-mode-color-icon . t)
+     (doom-modeline-major-mode-color-icon . nil)
      (doom-modeline-buffer-minor-modes . nil)
      (doom-modeline-indent-info . nil)
      (doom-modeline-lsp . t)
@@ -238,8 +240,7 @@ be prompted."
   (leaf hide-mode-line
     :ensure t
     :hook
-    (treemacs-mode-hook . hide-mode-line-mode)
-    (imenu-list-minor-mode-hook . hide-mode-line-mode))
+    (imenu-list-major-mode-hook . hide-mode-line-mode))
   (leaf minions
     :ensure t
     :global-minor-mode minions-mode)
@@ -272,19 +273,26 @@ be prompted."
     :hook (enable-theme-functions . fontaine-apply-current-preset)
     :custom
     (fontaine-latest-state-file . `,(locate-user-emacs-file "fontaine-latest-state.eld"))
-    (fontaine-presets . '((regular
-                           :default-family "Moralerspace Neon"
-                           :fixed-pitch-family "Moralerspace Neon"
+    (fontaine-presets . '((source-han
+                           :default-family "Source Han Code JP"
+                           :fixed-pitch-family "Source Han Mono"
+                           :variable-pitch-family "Source Han Sans"
+                           :italic-family "Source Han Sans")
+                          (ibmplex
+                           :default-family "PlemolJP"
+                           :fixed-pitch-family "PlemolJP"
                            :variable-pitch-family "IBM Plex Sans JP"
-                           :italic-family "Moralerspace Neon")
-                          (large
-                           :default-family "Moralerspace Neon"
-                           :variable-pitch-family "IBM Plex Sans JP")))
+                           :italic-family "PlemolJP")
+                          (sarasa
+                           :default-family "Sarasa Mono J"
+                           :fixed-pitch-family "Sarasa Mono J"
+                           :variable-pitch-family "Sarasa Gothic J"
+                           :italic-family "Sarasa Mono J")))
     :config
-    (let ((table (make-char-table nil)))
-      (set-char-table-range table t `(["[-.,:;A-Z_a-z><=!&|+?/\\]+" 0 font-shape-gstring]))
-      (set-char-table-parent table composition-function-table)
-      (setq composition-function-table table))
+    ;; (let ((table (make-char-table nil)))
+    ;;   (set-char-table-range table t `(["[-.,:;A-Z_a-z><=!&|+?/\\]+" 0 font-shape-gstring]))
+    ;;   (set-char-table-parent table composition-function-table)
+    ;;   (setq composition-function-table table))
     (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular)))
   (leaf ligature
     :ensure t
@@ -293,20 +301,42 @@ be prompted."
     :ensure t
     :global-minor-mode spacious-padding-mode
     :custom
-    (spacious-padding-widths .
-                             '(:internal-border-width 15
-                                                      :header-line-width 4
-                                                      :mode-line-width 6
-                                                      :tab-width 4
-                                                      :right-divider-width 30
-                                                      :scroll-bar-width 8
-                                                      :fringe-width 8))
-    ( spacious-padding-subtle-mode-line .
-      '(:mode-line-active 'default
-                          :mode-line-inactive vertical-border))))
+    (spacious-padding-widths . '(:internal-border-width 15
+                                                        :header-line-width 4
+                                                        :mode-line-width 6
+                                                        :tab-width 4
+                                                        :right-divider-width 30
+                                                        :scroll-bar-width 8
+                                                        :fringe-width 8))
+    (spacious-padding-subtle-mode-line . '(:mode-line-active 'default
+                                                             :mode-line-inactive vertical-border)))
+  (leaf posframe
+    :ensure t
+    :defun posframe-poshandler-frame-bottom-center
+    :require t))
 (leaf *platform-spec
   :config
-  (leaf *wsl-url-handler
+  (leaf *wayland-clipboard
+    :when (getenv "WAYLAND_DISPLAY")
+    :defvar wl-copy-process
+    :config
+    ;; credit: yorickvP on Github
+    (setq wl-copy-process nil)
+    (defun wl-copy (text)
+      (setq wl-copy-process (make-process :name "wl-copy"
+                                          :buffer nil
+                                          :command '("wl-copy" "-f" "-n")
+                                          :connection-type 'pipe
+                                          :noquery t))
+      (process-send-string wl-copy-process text)
+      (process-send-eof wl-copy-process))
+    (defun wl-paste ()
+      (if (and wl-copy-process (process-live-p wl-copy-process))
+          nil ; should return nil if we're the current paste owner
+        (shell-command-to-string "wl-paste -n | tr -d \r")))
+    (setq interprogram-cut-function 'wl-copy)
+    (setq interprogram-paste-function 'wl-paste))
+  (leaf *pwsh-url-handler
     :when (or
            (getenv "WSL_DISTRO_NAME")
            (eq system-type 'windows-nt))
@@ -330,7 +360,12 @@ be prompted."
   :bind (:vertico-map (("C-h" . 'vertico-directory-up)
                        ("C-m" . 'vertico-exit)
                        ("C-j" . 'vertico-exit-input)))
-  :global-minor-mode vertico-mode)
+  :global-minor-mode vertico-mode
+  :config
+  (leaf vertico-posframe
+    :ensure t
+    :after posframe
+    :hook (vertico-mode-hook . vertico-posframe-mode)))
 (leaf embark
   :ensure t
   :bind
@@ -342,17 +377,10 @@ be prompted."
   consult-customize
   consult--customize-put
   :defvar consult--source-buffer consult-buffer-sources
-  :bind
-  (("<leader>is" . consult-line)
-   ("<leader>ii" . consult-imenu)
-   ("<leader>iI" . consult-imenu-multi)
-   ("<leader>ip" . consult-yank-from-kill-ring)
-   ("<leader>il" . consult-compile-error)
-   ("<leader>ig" . consult-ripgrep))
   :config
   (leaf embark-consult
     :ensure t
-    :hook ((embark-collect-mode-hook . consult-preview-at-point-mode))))
+    :hook (embark-collect-mode-hook . consult-preview-at-point-mode)))
 (leaf marginalia
   :ensure t
   :global-minor-mode marginalia-mode)
@@ -417,55 +445,7 @@ be prompted."
     (leaf realgud-lldb
       :ensure t
       :require t))
-  (leaf lsp-mode
-    :ensure t
-    :custom
-    ((lsp-auto-guess-root . t)
-     (lsp-document-sync-method . 'incremental)
-     (lsp-response-timeout . 5)
-     (lsp-use-plist . t)
-     (lsp-log-io . nil)
-     (lsp-semantic-tokens-enable . t)
-     (lsp-enable-snippet . t)
-     (lsp-diagnostics-provider . :flymake)
-     (lsp-enable-completion . t)
-     (lsp-completion-provider . :none)
-     (lsp-modeline-diagnostics-scope . :file))
-    :defun lsp-enable-which-key-integration
-    :config
-    (leaf *lsp-keybinds
-      :custom
-      ((lsp-keymap-prefix . "C-c l"))
-      :bind
-      ;; (:lsp-mode-map
-      ;;  ("C-c l" . lsp-command-map))
-      ;;(define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
-      :config
-      (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration))
-    (leaf lsp-ui
-      :ensure t
-      :custom
-      ((lsp-ui-doc-enable . t)
-       (lsp-ui-doc-header . t)
-       (lsp-ui-doc-include-signature . t)
-       (lsp-ui-doc-use-childframe . t)
-       (lsp-ui-doc-use-webkit . t)
-       (lsp-ui-flycheck-enable . nil)
-       (lsp-ui-imenu-enable . nil)
-       (lsp-ui-peek-enable . t)
-       (lsp-ui-peek-fontify . 'on-demand))
-      :bind ((:lsp-ui-mode-map
-              ([remap xref-find-definitions]
-               . lsp-ui-peek-find-definitions)
-              ([remap xref-find-references]
-               . lsp-ui-peek-find-references)))
-      :config
-      (add-hook 'lsp-mode-hook #'lsp-ui-mode))
-    (leaf lsp-treemacs
-      :ensure t
-      :after treemacs
-      :config
-      (add-hook 'lsp-mode-hook #'lsp-treemacs-sync-mode))))
+  )
 (leaf perspective
   :ensure t
   :defvar persp-consult-source
@@ -530,9 +510,7 @@ be prompted."
   :config
   (leaf which-key-posframe
     :ensure t
-    :init
-    (eval-when-compile
-      (declare-function posframe-poshandler-frame-bottom-center "poframe"))
+    :after posframe
     :custom
     (which-key-posframe-poshandler . #'posframe-poshandler-frame-bottom-center)
     (which-key-posframe-border-width . 5)
@@ -564,7 +542,8 @@ be prompted."
          ("C-x J" . skk-auto-fill-mode))
   :config
   (leaf ddskk-posframe
-    :ensure t posframe
+    :ensure t
+    :after posframe
     :global-minor-mode t)
   (leaf *skk-isearch
     :hook
@@ -582,6 +561,7 @@ be prompted."
 ;; (require '20-uim)
 ;; (require '20-company)
 (leaf flymake
+  :disabled t
   :ensure t
   :hook (prog-mode-hook . flymake-mode)
   :config
@@ -589,9 +569,21 @@ be prompted."
     :ensure t
     :require t
     :after flymake)
+  (leaf flymake-popon
+    :ensure t
+    :hook (flymake-mode-hook . flymake-popon-mode))
   (leaf flymake-diagnostic-at-point
+    :disabled t
     :ensure t
     :hook (flymake-mode-hook . flymake-diagnostic-at-point-mode)))
+(leaf flycheck
+  :ensure t
+  :global-minor-mode global-flycheck-mode
+  :config
+  (leaf flycheck-posframe
+    :ensure t
+    :after posframe
+    :hook (flycheck-mode-hook . flycheck-posframe-mode)))
 (leaf paren
   :ensure nil
   :global-minor-mode show-paren-mode)
@@ -632,8 +624,8 @@ be prompted."
      ("S" "Difftastic show" difftastic-magit-show)]))
 (leaf projectile
   :ensure t
-  :hook ((prog-mode-hook . projectile-mode)
-         (text-mode-hook . projectile-mode))
+  :hook
+  ((prog-mode-hook conf-mode-hook text-mode-hook) . projectile-mode)
   :bind
   (:projectile-mode-map
    ("<leader>pp" . #'projectile-command-map)
@@ -644,13 +636,6 @@ be prompted."
    ("<leader>pg" . #'projectile-ripgrep)
    ("<leader>pc" . #'projectile-compile-project)
    ("<leader>pr" . #'projectile-replace)))
-;; (require '20-google-translate)
-;; (require '30-bison)
-;; (require '30-cmake)
-(leaf posframe
-  :ensure t
-  :config
-  )
 (leaf tempel
   :ensure t
   :init
@@ -677,10 +662,29 @@ be prompted."
   :ensure t
   :custom
   (org-startup-indented . t)
+  (org-startup-truncated . nil)
   :config
+  (leaf org-capture
+    :ensure nil
+    :bind
+    ("C-c c" . org-capture)
+    :custom
+    (org-capture-templates . '(("t" "Todo" entry (file+headline "~/org/inbox.org" "Tasks")
+                                "* TODO %?\n  %i\n  %a")
+                               ("n" "Note" entry (file+headline "~/org/inbox.org" "Notes")
+                                "* %?\n  %i\n  %a"))))
+  (leaf org-agenda
+    :ensure nil
+    :bind
+    ("C-c a" . org-agenda)
+    :custom
+    (org-agenda-files . '("~/org/")))
   (leaf org-modern
     :ensure t
-    :hook (org-mode-hook . org-modern-mode))
+    :hook
+    (org-mode-hook . org-modern-mode)
+    (org-mode-hook . (lambda () (setq-local line-spacing 0.2)))
+    (org-agenda-finalize-hook . org-modern-agenda))
   (leaf org-modern-indent
     :ensure t
     :vc (org-modern-indent
@@ -688,12 +692,24 @@ be prompted."
     :config
     (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
   (leaf org-roam
-    :ensure t
+    :ensure t emacsql-sqlite-builtin
+    :global-minor-mode org-roam-db-autosync-mode
     :custom
-    ((org-roam-directory . "~/org/roam/")
-     (org-roam-db-location . "~/.emacs.d/org-roam.db"))
-    :config
-    (org-roam-db-autosync-mode)))
+    (org-roam-directory . "~/org/roam/")
+    (org-roam-db-location . "~/.emacs.d/org-roam.db")
+    (org-roam-database-connector . 'sqlite-builtin)
+    :bind
+    ("C-c r t" . org-roam-buffer-toggle)
+    ("C-c r f" . org-roam-node-find)
+    ("C-c r i" . org-roam-node-insert)
+    ("C-c r c" . org-roam-capture)
+    ("C-c r d j" . org-roam-dailies-capture-today)
+    ("C-c r d t" . org-roam-dailies-goto-today)
+    ("C-c r d y" . org-roam-dailies-goto-yesterday)
+    ("C-c r d n" . org-roam-dailies-goto-tomorrow)
+    ("C-c r d w" . org-roam-dailies-find-week)
+    ("C-c r d m" . org-roam-dailies-find-month)
+    ("C-c r d y" . org-roam-dailies-find-year)))
 (leaf pdf-tools
   :ensure t
   :hook (pdf-view-mode-hook . (lambda () (display-line-numbers-mode -1))))
@@ -705,21 +721,53 @@ be prompted."
     :ensure t)
   (leaf dockerfile-mode
     :ensure t))
-;; (require '30-yaml)
-;; (require '30-emacslisp)
-;; (require '30-common-lisp)
-;; (require '30-scheme)
-;; (require '30-agda)
-;; (require '30-ocaml)
-;; (require '30-sml)
-;; (require '30-fsharp)
-;; (require '30-markdown)
-;; (require '30-purescript)
-;; (require '30-coq)
-;; (require '30-maude)
-;; (require '30-lean)
-;; (require '30-pdf)
-;; (require '31-lsp)
+(leaf lsp-mode
+  :ensure t
+  :defvar lsp--sync-full lsp--sync-incremental
+  :custom
+  (lsp-auto-guess-root . t)
+  (lsp-enable-file-watchers . nil)
+  (lsp-enable-folding . nil)
+  (lsp-enable-on-type-formatting . nil)
+  (lsp-document-sync-method . nil)
+  (lsp-response-timeout . 5)
+  (lsp-use-plist . t)
+  (lsp-log-io . nil)
+  (lsp-semantic-tokens-enable . t)
+  (lsp-enable-snippet . nil)
+  (lsp-diagnostics-provider . :auto)
+  (lsp-enable-completion . t)
+  (lsp-completion-provider . :none)
+  (lsp-modeline-diagnostics-scope . :workspace)
+  (lsp-keymap-prefix . "C-c l")
+  :hook (lsp-mode-hook . lsp-enable-which-key-integration)
+  :config
+  (leaf lsp-ui
+    :ensure t
+    :custom
+    (lsp-ui-doc-enable . t)
+    (lsp-ui-doc-header . t)
+    (lsp-ui-doc-include-signature . t)
+    (lsp-ui-doc-use-childframe . t)
+    (lsp-ui-doc-use-webkit . t)
+    (lsp-ui-doc-position . 'at-point)
+    (lsp-ui-doc-show-with-cursor . t)
+    (lsp-ui-doc-show-with-mouse . nil)
+    (lsp-ui-doc-alignment . 'window)
+    (lsp-ui-flycheck-enable . t)
+    (lsp-ui-imenu-enable . nil)
+    (lsp-ui-peek-enable . t)
+    (lsp-ui-peek-fontify . 'on-demand)
+    :hook (lsp-mode-hook . lsp-ui-mode)
+    :bind (:lsp-ui-mode-map
+           ([remap xref-find-definitions]
+            . lsp-ui-peek-find-definitions)
+           ([remap xref-find-references]
+            . lsp-ui-peek-find-references)))
+  (leaf lsp-treemacs
+    :ensure t
+    :after treemacs
+    :hook (lsp-mode-hook . lsp-treemacs-sync-mode)))
 (leaf *languages
   :config
   (leaf nix-mode
@@ -744,10 +792,14 @@ be prompted."
     :config
     (leaf rust-mode
       :ensure t
-      :require t
-      ;; :hook 'eglot-ensure
+      :hook (rust-mode-hook . lsp)
       :custom
-      ((rust-indent-offset . 4)))
+      (rust-indent-offset . 4))
+    (leaf rust-ts-mode
+      :ensure nil
+      :hook (rust-ts-mode-hook . lsp)
+      :custom
+      (rust-ts-flymake-command . nil))
     (leaf cargo
       :ensure t))
   (leaf *fsharp
@@ -956,12 +1008,13 @@ be prompted."
      '("i e" . consult-flymake)
      '("i i" . consult-imenu)
      '("i p" . consult-yank-from-kill-ring)
-     '("a a" . avy-goto-char)
-     '("a l" . avy-goto-line))))
+     '("j j" . avy-goto-char)
+     '("j l" . avy-goto-line))))
 
 (load custom-file)
 (setq file-name-handler-alist my/saved-file-name-handler-alist)
 (setq gc-cons-threshold 16777216)
+(setq gc-cons-percentage 0.2)
 (garbage-collect)
 (provide 'init)
 ;;; init.el ends here
