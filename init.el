@@ -202,7 +202,7 @@ be prompted."
     (ef-themes-variable-pitch-ui . t)
     :config
     (mapc #'disable-theme custom-enabled-themes)
-    (load-theme 'ef-winter :no-confirm))
+    (ef-themes-select 'ef-rosa))
   (leaf nerd-icons
     :ensure t
     :config
@@ -262,7 +262,11 @@ be prompted."
   (leaf perfect-margin
     :ensure t
     :custom (perfect-margin-visible-width . 100)
-    :global-minor-mode perfect-margin-mode))
+    :global-minor-mode perfect-margin-mode)
+  (leaf dashboard
+    :ensure t
+    :config
+    (dashboard-setup-startup-hook)))
 (leaf *graphics
   :when (display-graphic-p)
   :config
@@ -275,19 +279,20 @@ be prompted."
     (fontaine-latest-state-file . `,(locate-user-emacs-file "fontaine-latest-state.eld"))
     (fontaine-presets . '((source-han
                            :default-family "Source Han Code JP"
-                           :fixed-pitch-family "Source Han Mono"
-                           :variable-pitch-family "Source Han Sans"
-                           :italic-family "Source Han Sans")
+                           :fixed-pitch-family "Source Han Code JP"
+                           :variable-pitch-family "Source Han Sans")
+                          (udev
+                           :default-family "UDEVGothic"
+                           :fixed-pitch-family "UDEVGothic"
+                           :variable-pitch-family "Inter")
                           (ibmplex
                            :default-family "PlemolJP"
                            :fixed-pitch-family "PlemolJP"
-                           :variable-pitch-family "IBM Plex Sans JP"
-                           :italic-family "PlemolJP")
+                           :variable-pitch-family "IBM Plex Sans JP")
                           (sarasa
                            :default-family "Sarasa Mono J"
                            :fixed-pitch-family "Sarasa Mono J"
-                           :variable-pitch-family "Sarasa Gothic J"
-                           :italic-family "Sarasa Mono J")))
+                           :variable-pitch-family "Sarasa Gothic J")))
     :config
     ;; (let ((table (make-char-table nil)))
     ;;   (set-char-table-range table t `(["[-.,:;A-Z_a-z><=!&|+?/\\]+" 0 font-shape-gstring]))
@@ -295,9 +300,11 @@ be prompted."
     ;;   (setq composition-function-table table))
     (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular)))
   (leaf ligature
+    :disabled t
     :ensure t
     :global-minor-mode global-ligature-mode)
   (leaf spacious-padding
+    :disabled t
     :ensure t
     :global-minor-mode spacious-padding-mode
     :custom
@@ -444,8 +451,7 @@ be prompted."
     :config
     (leaf realgud-lldb
       :ensure t
-      :require t))
-  )
+      :require t)))
 (leaf perspective
   :ensure t
   :defvar persp-consult-source
@@ -540,22 +546,25 @@ be prompted."
    (skk-cdb-large-jisyo . "~/.emacs.d/SKK-JISYO.XL.cdb"))
   :bind (("C-x j" . skk-mode)
          ("C-x J" . skk-auto-fill-mode))
-  :config
-  (leaf ddskk-posframe
-    :ensure t
-    :after posframe
-    :global-minor-mode t)
-  (leaf *skk-isearch
-    :hook
-    (isearch-mode-hook . #'(lambda ()
-                             (when (and (boundp 'skk-mode)
-                                        skk-mode
-                                        skk-isearch-mode-enable)
-                               (skk-isearch-mode-setup))))
-    (isearch-mode-end-hook . #'(lambda ()
-                                 (when (and (featurep 'skk-isearch)
-                                            skk-isearch-mode-enable)
-                                   (skk-isearch-mode-cleanup))))))
+  :init
+  (leaf skk
+    :ensure nil
+    :defer-config
+    (leaf ddskk-posframe
+      :ensure t
+      :after posframe
+      :hook (skk-mode-hook . ddskk-posframe-mode))
+    (leaf *skk-isearch
+      :hook
+      (isearch-mode-hook . #'(lambda ()
+                               (when (and (boundp 'skk-mode)
+                                          skk-mode
+                                          skk-isearch-mode-enable)
+                                 (skk-isearch-mode-setup))))
+      (isearch-mode-end-hook . #'(lambda ()
+                                   (when (and (featurep 'skk-isearch)
+                                              skk-isearch-mode-enable)
+                                     (skk-isearch-mode-cleanup)))))))
 ;; (require '20-migemo)
 ;; (require '20-fcitx)
 ;; (require '20-uim)
@@ -669,16 +678,16 @@ be prompted."
     :bind
     ("C-c c" . org-capture)
     :custom
-    (org-capture-templates . '(("t" "Todo" entry (file+headline "~/org/inbox.org" "Tasks")
+    (org-capture-templates . '(("t" "Todo" entry (file+headline "~/Documents/org/inbox.org" "Tasks")
                                 "* TODO %?\n  %i\n  %a")
-                               ("n" "Note" entry (file+headline "~/org/inbox.org" "Notes")
+                               ("n" "Note" entry (file+headline "~/Documents/org/inbox.org" "Notes")
                                 "* %?\n  %i\n  %a"))))
   (leaf org-agenda
     :ensure nil
     :bind
     ("C-c a" . org-agenda)
     :custom
-    (org-agenda-files . '("~/org/")))
+    (org-agenda-files . '("~/Documents/org/")))
   (leaf org-modern
     :ensure t
     :hook
@@ -695,7 +704,7 @@ be prompted."
     :ensure t emacsql-sqlite-builtin
     :global-minor-mode org-roam-db-autosync-mode
     :custom
-    (org-roam-directory . "~/org/roam/")
+    (org-roam-directory . "~/Documents/org/roam/")
     (org-roam-db-location . "~/.emacs.d/org-roam.db")
     (org-roam-database-connector . 'sqlite-builtin)
     :bind
@@ -749,7 +758,7 @@ be prompted."
     (lsp-ui-doc-header . t)
     (lsp-ui-doc-include-signature . t)
     (lsp-ui-doc-use-childframe . t)
-    (lsp-ui-doc-use-webkit . t)
+    (lsp-ui-doc-use-webkit . nil)
     (lsp-ui-doc-position . 'at-point)
     (lsp-ui-doc-show-with-cursor . t)
     (lsp-ui-doc-show-with-mouse . nil)
@@ -893,8 +902,8 @@ be prompted."
   :custom
   (copilot-indent-offset-warning-disable . t)
   :hook
-  (prog-mode-hook . copilot-mode)
-  (conf-mode-hook . copilot-mode)
+  ;; (prog-mode-hook . copilot-mode)
+  ;; (conf-mode-hook . copilot-mode)
   :bind (:copilot-completion-map
          ("<tab>" . 'copilot-accept-completion)))
 (leaf meow
