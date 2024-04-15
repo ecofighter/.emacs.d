@@ -137,6 +137,7 @@ be prompted."
 ;;(add-to-list 'load-path "~/.emacs.d/inits")
 (leaf emacs
   :custom ((make-backup-files . nil)
+           (create-lockfiles . nil)
            (fast-but-imprecise-scrolling . t)
            (process-adaptive-read-buffering . t)
            (indent-tabs-mode . nil)
@@ -150,9 +151,9 @@ be prompted."
            (tab-width . 4)
            (truncate-lines . nil)
            (truncate-partial-width-windows . nil)
-           (inhibit-startup-screen . t)
+           (inhibit-startup-screen . nil)
            (inhibit-x-resources . t)
-           (inhibit-compacting-font-caches . t)
+           (inhibit-compacting-font-caches . nil)
            (inhibit-startup-buffer-menu . t)
            (blink-matching-paren . nil)
            (auto-mode-case-fold . nil)
@@ -173,9 +174,9 @@ be prompted."
       :custom ((treesit-auto-install . 'prompt))
       :global-minor-mode global-treesit-auto-mode)))
 (leaf *theme
-  :config
+  :init
   (leaf *bars
-    :config
+    :init
     (tool-bar-mode -1)
     (menu-bar-mode -1)
     (scroll-bar-mode -1))
@@ -216,27 +217,27 @@ be prompted."
     :ensure t
     :global-minor-mode doom-modeline-mode
     :custom
-    ((doom-modeline-height . 25)
-     (doom-modeline-bar-width . 4)
-     (doom-modeline-buffer-file-name-style . 'truncate-with-project)
-     (doom-modeline-icon . t)
-     (doom-modeline-buffer-modification-icon . t)
-     (doom-modeline-buffer-state-icon . t)
-     (doom-modeline-buffer-encoding . t)
-     (doom-modeline-buffer-major-mode . t)
-     (doom-modeline-major-mode-icon . t)
-     (doom-modeline-major-mode-color-icon . nil)
-     (doom-modeline-buffer-minor-modes . nil)
-     (doom-modeline-indent-info . nil)
-     (doom-modeline-lsp . t)
-     (doom-modeline-github . nil)
-     (doom-modeline-gnus . nil)
-     (doom-modeline-irc . nil)
-     (doom-modeline-mu4e . nil)
-     (doom-modeline-persp-name . t)
-     (doom-modeline-persp-icon . t)
-     (doom-modeline-project-detection . 'auto)
-     (doom-modeline-unicode-fallback . nil)))
+    (doom-modeline-height . 25)
+    (doom-modeline-bar-width . 4)
+    (doom-modeline-buffer-file-name-style . 'truncate-with-project)
+    (doom-modeline-icon . t)
+    (doom-modeline-buffer-modification-icon . t)
+    (doom-modeline-buffer-state-icon . t)
+    (doom-modeline-buffer-encoding . t)
+    (doom-modeline-buffer-major-mode . t)
+    (doom-modeline-major-mode-icon . t)
+    (doom-modeline-major-mode-color-icon . nil)
+    (doom-modeline-buffer-minor-modes . nil)
+    (doom-modeline-indent-info . nil)
+    (doom-modeline-lsp . t)
+    (doom-modeline-github . nil)
+    (doom-modeline-gnus . nil)
+    (doom-modeline-irc . nil)
+    (doom-modeline-mu4e . nil)
+    (doom-modeline-persp-name . t)
+    (doom-modeline-persp-icon . t)
+    (doom-modeline-project-detection . 'auto)
+    (doom-modeline-unicode-fallback . nil))
   (leaf hide-mode-line
     :ensure t
     :hook
@@ -265,40 +266,56 @@ be prompted."
     :global-minor-mode perfect-margin-mode)
   (leaf dashboard
     :ensure t
-    :config
+    :defun dashboard-insert-startupify-lists
+    :custom
+    (dashboard-force-refresh . t)
+    (dashboard-center-content . t)
+    (dashboard-vertically-center-content .t)
+    (dashboard-display-icons . t)
+    (dashboard-icon-type . 'nerd-icons)
+    (dashboard-set-heading-icons . t)
+    (dashboard-set-file-icons . t)
+    :init
+    (when (daemonp)
+      (setq initial-buffer-choice #'(lambda ()(get-buffer-create "*dashboard*"))))
     (dashboard-setup-startup-hook)))
+(leaf fontaine
+  :ensure t
+  :require t
+  :global-minor-mode fontaine-mode
+  :hook (enable-theme-functions . fontaine-apply-current-preset)
+  :custom
+  (fontaine-latest-state-file . `,(locate-user-emacs-file "fontaine-latest-state.eld"))
+  (fontaine-presets . '((source-han
+                         :default-family "Source Han Code JP"
+                         :fixed-pitch-family "Source Han Code JP"
+                         :variable-pitch-family "Source Han Sans")
+                        (udev
+                         :default-family "UDEVGothic"
+                         :fixed-pitch-family "UDEVGothic"
+                         :variable-pitch-family "Inter")
+                        (ibmplex
+                         :default-family "PlemolJP"
+                         :fixed-pitch-family "PlemolJP"
+                         :variable-pitch-family "IBM Plex Sans JP")
+                        (sarasa
+                         :default-family "Sarasa Mono J"
+                         :fixed-pitch-family "Sarasa Mono J"
+                         :variable-pitch-family "Sarasa Gothic J")))
+  :hook
+  (before-make-frame-hook . fontaine-apply-current-preset)
+  :init
+  ;; (let ((table (make-char-table nil)))
+  ;;   (set-char-table-range table t `(["[-.,:;A-Z_a-z><=!&|+?/\\]+" 0 font-shape-gstring]))
+  ;;   (set-char-table-parent table composition-function-table)
+  ;;   (setq composition-function-table table))
+  (fontaine-set-preset (fontaine-restore-latest-preset)))
+(leaf posframe
+  :ensure t
+  :defun posframe-poshandler-frame-bottom-center)
 (leaf *graphics
   :when (display-graphic-p)
   :config
-  (leaf fontaine
-    :ensure t
-    :require t
-    :global-minor-mode fontaine-mode
-    :hook (enable-theme-functions . fontaine-apply-current-preset)
-    :custom
-    (fontaine-latest-state-file . `,(locate-user-emacs-file "fontaine-latest-state.eld"))
-    (fontaine-presets . '((source-han
-                           :default-family "Source Han Code JP"
-                           :fixed-pitch-family "Source Han Code JP"
-                           :variable-pitch-family "Source Han Sans")
-                          (udev
-                           :default-family "UDEVGothic"
-                           :fixed-pitch-family "UDEVGothic"
-                           :variable-pitch-family "Inter")
-                          (ibmplex
-                           :default-family "PlemolJP"
-                           :fixed-pitch-family "PlemolJP"
-                           :variable-pitch-family "IBM Plex Sans JP")
-                          (sarasa
-                           :default-family "Sarasa Mono J"
-                           :fixed-pitch-family "Sarasa Mono J"
-                           :variable-pitch-family "Sarasa Gothic J")))
-    :config
-    ;; (let ((table (make-char-table nil)))
-    ;;   (set-char-table-range table t `(["[-.,:;A-Z_a-z><=!&|+?/\\]+" 0 font-shape-gstring]))
-    ;;   (set-char-table-parent table composition-function-table)
-    ;;   (setq composition-function-table table))
-    (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular)))
   (leaf ligature
     :disabled t
     :ensure t
@@ -316,11 +333,7 @@ be prompted."
                                                         :scroll-bar-width 8
                                                         :fringe-width 8))
     (spacious-padding-subtle-mode-line . '(:mode-line-active 'default
-                                                             :mode-line-inactive vertical-border)))
-  (leaf posframe
-    :ensure t
-    :defun posframe-poshandler-frame-bottom-center
-    :require t))
+                                                             :mode-line-inactive vertical-border))))
 (leaf *platform-spec
   :config
   (leaf *wayland-clipboard
@@ -368,10 +381,9 @@ be prompted."
                        ("C-m" . 'vertico-exit)
                        ("C-j" . 'vertico-exit-input)))
   :global-minor-mode vertico-mode
-  :config
+  :init
   (leaf vertico-posframe
     :ensure t
-    :after posframe
     :hook (vertico-mode-hook . vertico-posframe-mode)))
 (leaf embark
   :ensure t
@@ -513,10 +525,9 @@ be prompted."
 (leaf which-key
   :ensure t
   :global-minor-mode which-key-mode
-  :config
+  :init
   (leaf which-key-posframe
     :ensure t
-    :after posframe
     :custom
     (which-key-posframe-poshandler . #'posframe-poshandler-frame-bottom-center)
     (which-key-posframe-border-width . 5)
@@ -536,35 +547,39 @@ be prompted."
   :ensure t
   :defvar skk-isearch-mode-enable
   :custom
-  ((skk-kutouten-type . '("．" . "，"))
-   (skk-use-azik . t)
-   (skk-isearch-start-mode . 'latin)
-   (skk-isearch-mode-enable . t)
-   (default-input-method . "japanese-skk")
-   (skk-large-jisyo . "~/.emacs.d/skk-get-jisyo/SKK-JISYO.L")
-   (skk-itaiji-jisyo . "~/.emacs.d/skk-get-jisyo/SKK-JISYO.itaiji")
-   (skk-cdb-large-jisyo . "~/.emacs.d/SKK-JISYO.XL.cdb"))
+  (skk-kutouten-type . '("．" . "，"))
+  (skk-use-azik . t)
+  (skk-isearch-start-mode . 'latin)
+  (skk-isearch-mode-enable . t)
+  (default-input-method . "japanese-skk")
+  (skk-large-jisyo . "~/.emacs.d/skk-get-jisyo/SKK-JISYO.L")
+  (skk-itaiji-jisyo . "~/.emacs.d/skk-get-jisyo/SKK-JISYO.itaiji")
+  (skk-cdb-large-jisyo . "~/.emacs.d/SKK-JISYO.XL.cdb")
   :bind (("C-x j" . skk-mode)
          ("C-x J" . skk-auto-fill-mode))
   :init
   (leaf skk
     :ensure nil
-    :defer-config
+    :config
     (leaf ddskk-posframe
       :ensure t
-      :after posframe
-      :hook (skk-mode-hook . ddskk-posframe-mode))
-    (leaf *skk-isearch
-      :hook
-      (isearch-mode-hook . #'(lambda ()
-                               (when (and (boundp 'skk-mode)
-                                          skk-mode
-                                          skk-isearch-mode-enable)
-                                 (skk-isearch-mode-setup))))
-      (isearch-mode-end-hook . #'(lambda ()
-                                   (when (and (featurep 'skk-isearch)
-                                              skk-isearch-mode-enable)
-                                     (skk-isearch-mode-cleanup)))))))
+      :after skk
+      :hook (skk-mode-hook . ddskk-posframe-mode)))
+  (leaf skk-isearch
+    :ensure nil
+    :defun
+    skk-isearch-mode-setup
+    skk-isearch-mode-cleanup
+    :init
+    (add-hook 'isearch-mode-hook #'(lambda ()
+                                     (when (and (boundp 'skk-mode)
+                                                skk-mode
+                                                skk-isearch-mode-enable)
+                                       (skk-isearch-mode-setup))))
+    (add-hook 'isearch-mode-end-hook #'(lambda ()
+                                         (when (and (featurep 'skk-isearch)
+                                                    skk-isearch-mode-enable)
+                                           (skk-isearch-mode-cleanup))))))
 ;; (require '20-migemo)
 ;; (require '20-fcitx)
 ;; (require '20-uim)
@@ -588,10 +603,9 @@ be prompted."
 (leaf flycheck
   :ensure t
   :global-minor-mode global-flycheck-mode
-  :config
+  :init
   (leaf flycheck-posframe
     :ensure t
-    :after posframe
     :hook (flycheck-mode-hook . flycheck-posframe-mode)))
 (leaf paren
   :ensure nil
@@ -1017,7 +1031,7 @@ be prompted."
      '("i e" . consult-flymake)
      '("i i" . consult-imenu)
      '("i p" . consult-yank-from-kill-ring)
-     '("j j" . avy-goto-char)
+     '("j j" . avy-goto-word-or-subword-1)
      '("j l" . avy-goto-line))))
 
 (load custom-file)
