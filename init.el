@@ -8,6 +8,8 @@
 (setq file-name-handler-alist nil)
 
 (setq custom-file (locate-user-emacs-file "custom.el"))
+(when (file-exists-p custom-file)
+  (load custom-file))
 (require 'package)
 (setq package-enable-at-startup nil)
 (setq package-install-upgrade-built-in t)
@@ -43,20 +45,6 @@
   :global-minor-mode (auto-compile-on-load-mode auto-compile-on-save-mode)
   :config
   (setq load-prefer-newer t))
-(leaf *mymacros
-  :init
-  (defvar *my/package-refreshed* nil)
-  (defmacro install-when-compile (package)
-    "Install PACKAGE when compile."
-    `(list
-      (add-to-list 'package-selected-packages ,package)
-      (eval-when-compile
-        (progn
-          (unless (package-installed-p ,package)
-            (unless *my/package-refreshed*
-              (package-refresh-contents)
-              (setq *my/package-refreshed* t))
-            (package-install ,package)))))))
 (leaf server
   :ensure nil
   :require t
@@ -137,6 +125,7 @@ be prompted."
 ;;(add-to-list 'load-path "~/.emacs.d/inits")
 (leaf emacs
   :custom ((make-backup-files . nil)
+           (backup-inhibited . nil)
            (create-lockfiles . nil)
            (fast-but-imprecise-scrolling . t)
            (process-adaptive-read-buffering . t)
@@ -145,9 +134,9 @@ be prompted."
            (x-select-enable-clipboard-manager . t)
            (use-file-dialog . nil)
            (use-short-answers . t)
-           (split-width-threshold . 80)
+           (split-width-threshold . 160)
            (vc-handled-backends . '(Git))
-           (fill-column . 100)
+           (fill-column . 80)
            (tab-width . 4)
            (truncate-lines . nil)
            (truncate-partial-width-windows . nil)
@@ -167,12 +156,16 @@ be prompted."
   (set-language-environment "Japanese")
   (prefer-coding-system 'utf-8)
   (leaf treesit
+    :ensure nil
     :custom (treesit-font-lock-level . 4)
     :config
     (leaf treesit-auto
       :ensure t
-      :custom ((treesit-auto-install . 'prompt))
-      :global-minor-mode global-treesit-auto-mode)))
+      :defun treesit-auto-add-to-auto-mode-alist
+      :custom (treesit-auto-install . 'prompt)
+      :global-minor-mode global-treesit-auto-mode
+      :config
+      (treesit-auto-add-to-auto-mode-alist 'all))))
 (leaf *theme
   :init
   (leaf *bars
@@ -203,7 +196,7 @@ be prompted."
     (ef-themes-variable-pitch-ui . t)
     :config
     (mapc #'disable-theme custom-enabled-themes)
-    (ef-themes-select 'ef-rosa))
+    (ef-themes-select 'ef-dream))
   (leaf nerd-icons
     :ensure t
     :config
@@ -275,15 +268,20 @@ be prompted."
     (dashboard-icon-type . 'nerd-icons)
     (dashboard-set-heading-icons . t)
     (dashboard-set-file-icons . t)
+    (dashboard-startup-banner . 2)
+    (dashboard-items . '((recents . 10)
+                         (bookmarks . 5)
+                         (projects . 5)
+                         (agenda . 5)))
     :init
     (when (daemonp)
       (setq initial-buffer-choice #'(lambda ()(get-buffer-create "*dashboard*"))))
     (dashboard-setup-startup-hook)))
 (leaf fontaine
   :ensure t
-  :require t
+  :defvar fontaine-current-preset
+  :defun (my/check-font-preset . init.el)
   :global-minor-mode fontaine-mode
-  :hook (enable-theme-functions . fontaine-apply-current-preset)
   :custom
   (fontaine-latest-state-file . `,(locate-user-emacs-file "fontaine-latest-state.eld"))
   (fontaine-presets . '((source-han
@@ -302,38 +300,11 @@ be prompted."
                          :default-family "Sarasa Mono J"
                          :fixed-pitch-family "Sarasa Mono J"
                          :variable-pitch-family "Sarasa Gothic J")))
-  :hook
-  (before-make-frame-hook . fontaine-apply-current-preset)
   :init
-  ;; (let ((table (make-char-table nil)))
-  ;;   (set-char-table-range table t `(["[-.,:;A-Z_a-z><=!&|+?/\\]+" 0 font-shape-gstring]))
-  ;;   (set-char-table-parent table composition-function-table)
-  ;;   (setq composition-function-table table))
-  (fontaine-set-preset (fontaine-restore-latest-preset)))
-(leaf posframe
-  :ensure t
-  :defun posframe-poshandler-frame-bottom-center)
-(leaf *graphics
-  :when (display-graphic-p)
-  :config
-  (leaf ligature
-    :disabled t
-    :ensure t
-    :global-minor-mode global-ligature-mode)
-  (leaf spacious-padding
-    :disabled t
-    :ensure t
-    :global-minor-mode spacious-padding-mode
-    :custom
-    (spacious-padding-widths . '(:internal-border-width 15
-                                                        :header-line-width 4
-                                                        :mode-line-width 6
-                                                        :tab-width 4
-                                                        :right-divider-width 30
-                                                        :scroll-bar-width 8
-                                                        :fringe-width 8))
-    (spacious-padding-subtle-mode-line . '(:mode-line-active 'default
-                                                             :mode-line-inactive vertical-border))))
+  (defun my/check-font-preset ()
+    (unless fontaine-current-preset
+      (fontaine-set-preset (or (fontaine-restore-latest-preset) 'udev))))
+  (add-hook 'before-make-frame-hook #'my/check-font-preset))
 (leaf *platform-spec
   :config
   (leaf *wayland-clipboard
@@ -375,6 +346,21 @@ be prompted."
   (exec-path-from-shell-arguments . nil)
   (exec-path-from-shell-check-startup-files . nil)
   (exec-path-from-shell-variables . '("PATH" "MANPATH" "LD_LIBRARY_PATH")))
+(leaf recentf
+  :ensure nil
+  :custom
+  (recentf-exclude . '("~/\.emacs\.d/bookmarks"
+                       "~/Documents/org/inbox.org"
+                       "/tmp.*"
+                       "~/\.emacs\.d/elpa.*")))
+(leaf eldoc
+  :ensure nil
+  :global-minor-mode global-eldoc-mode
+  :config
+  (leaf eldoc-box
+    :ensure t
+    :when (display-graphic-p)
+    :hook (eldoc-mode-hook . eldoc-box-hover-mode)))
 (leaf vertico
   :ensure t
   :bind (:vertico-map (("C-h" . 'vertico-directory-up)
@@ -446,24 +432,15 @@ be prompted."
       :hook (corfu-mode-hook . corfu-terminal-mode)))
   (leaf cape
     :ensure t
+    :custom
+    (cape-dabbrev-check-other-buffers . nil)
     :config
-    (defvar my/merged-capf)
-    (let* ((noncachedfuns '(#'cape-dabbrev))
-           (cachedfuns '(#'cape-file #'cape-rfc1345 #'cape-tex))
-           (mergedfuns (eval `(cape-capf-super (cape-capf-buster (cape-capf-super ,@noncachedfuns)) (cape-capf-super ,@cachedfuns)))))
-      (setq my/merged-capf mergedfuns)
-      (add-to-list 'completion-at-point-functions my/merged-capf)))
-  (leaf eglot
-    :disabled nil
-    :ensure t
-    :custom ((eglot-autoshutdown . t)))
-  (leaf realgud
-    :disabled t
-    :ensure t
-    :config
-    (leaf realgud-lldb
-      :ensure t
-      :require t)))
+    (mapc (lambda (item)
+            (add-to-list 'completion-at-point-functions item t))
+          '(dabbrev-capf
+            cape-keyword
+            cape-file
+            cape-tex))))
 (leaf perspective
   :ensure t
   :defvar persp-consult-source
@@ -508,26 +485,35 @@ be prompted."
                      ("*Help*" :align right :ratio 0.5 :select t)
                      ("*Completions*" :align below :ratio 0.3)
                      ("*latex-math-preview-expression*" :align below :ratio 0.3 :noselect t))))
+(leaf avy
+  :ensure t
+  :bind
+  ("C-c j j" . avy-goto-word-or-subword-1)
+  ("C-c j l" . avy-goto-line))
 (leaf ace-window
-  :ensure t)
+  :ensure t
+  :custom-face
+  (aw-leading-char-face . '((t :height 4.0)))
+  :config
+  (leaf ace-window-posframe
+    :ensure nil
+    :when (display-graphic-p)
+    :after posframe
+    :global-minor-mode ace-window-posframe-mode))
 (leaf winner
   :ensure nil
   :global-minor-mode winner-mode
   :bind
-  (("<leader>ws" . delete-other-windows)
-   ("<leader>wu" . winner-undo)
-   ("<leader>wr" . winner-redo)
-   ("<leader>w>" . enlarge-window-horizontally)
-   ("<leader>w<" . shrink-window-horizontally)
-   ("<leader>w." . enlarge-window)
-   ("<leader>w," . shrink-window)
-   ("<leader>w=" . balance-windows)))
+  (:winner-mode-map
+   ("C-c <left>" . winner-undo)
+   ("C-c <right>" . winner-redo)))
 (leaf which-key
   :ensure t
   :global-minor-mode which-key-mode
   :init
   (leaf which-key-posframe
     :ensure t
+    :defun (posframe-poshandler-frame-bottom-center . posframe)
     :custom
     (which-key-posframe-poshandler . #'posframe-poshandler-frame-bottom-center)
     (which-key-posframe-border-width . 5)
@@ -580,12 +566,7 @@ be prompted."
                                          (when (and (featurep 'skk-isearch)
                                                     skk-isearch-mode-enable)
                                            (skk-isearch-mode-cleanup))))))
-;; (require '20-migemo)
-;; (require '20-fcitx)
-;; (require '20-uim)
-;; (require '20-company)
 (leaf flymake
-  :disabled t
   :ensure t
   :hook (prog-mode-hook . flymake-mode)
   :config
@@ -595,12 +576,10 @@ be prompted."
     :after flymake)
   (leaf flymake-popon
     :ensure t
-    :hook (flymake-mode-hook . flymake-popon-mode))
-  (leaf flymake-diagnostic-at-point
-    :disabled t
-    :ensure t
-    :hook (flymake-mode-hook . flymake-diagnostic-at-point-mode)))
+    :when (display-graphic-p)
+    :hook (flymake-mode-hook . flymake-popon-mode)))
 (leaf flycheck
+  :disabled t
   :ensure t
   :global-minor-mode global-flycheck-mode
   :init
@@ -622,9 +601,13 @@ be prompted."
   :hook
   ((prog-mode-hook conf-mode-hook) . highlight-indent-guides-mode)
   :custom
+  (highlight-indent-guides-auto-odd-face-perc . 10)
+  (highlight-indent-guides-auto-even-face-perc . 15)
+  (highlight-indent-guides-auto-top-odd-face-perc . 40)
+  (highlight-indent-guides-auto-top-even-face-perc . 45)
   (highlight-indent-guides-auto-enabled . t)
-  (highlight-indent-guides-responsive . t)
-  (highlight-indent-guides-method . 'fill))
+  (highlight-indent-guides-responsive . 'top)
+  (highlight-indent-guides-method . 'column))
 (leaf transient
   :ensure t)
 (leaf git-commit
@@ -659,8 +642,96 @@ be prompted."
    ("<leader>pg" . #'projectile-ripgrep)
    ("<leader>pc" . #'projectile-compile-project)
    ("<leader>pr" . #'projectile-replace)))
+(leaf org
+  :ensure t
+  :require t
+  :custom
+  (org-startup-indented . t)
+  (org-startup-truncated . nil)
+  :config
+  (leaf org-web-tools
+    :ensure t
+    :bind
+    (:org-mode-map
+     ("C-c i l" . org-web-tools-insert-link-for-url)))
+  (leaf org-capture
+    :ensure nil
+    :bind
+    ("C-c c" . org-capture)
+    :custom
+    (org-capture-templates . '(("t" "Todo" entry (file+headline "~/Documents/org/inbox.org" "Tasks")
+                                "* TODO %?\n  %i\n  %a")
+                               ("n" "Note" entry (file+headline "~/Documents/org/inbox.org" "Notes")
+                                "* %?\n  %i\n  %a"))))
+  (leaf org-journal
+    :ensure t)
+  (leaf org-agenda
+    :ensure nil
+    :bind
+    ("C-c a" . org-agenda)
+    :custom
+    (org-agenda-files . '("~/Documents/org/")))
+  (leaf org-modern
+    :ensure t
+    :require t
+    :global-minor-mode global-org-modern-mode
+    :hook
+    (org-mode-hook . (lambda () (setq-local line-spacing 0.2))))
+  (leaf org-tidy
+    :ensure t
+    :hook
+    (org-mode-hook . org-tidy-mode))
+  (leaf org-modern-indent
+    :ensure t
+    :vc (org-modern-indent
+         :url "https://github.com/jdtsmith/org-modern-indent")
+    :config
+    (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
+  (leaf org-roam
+    :ensure t
+    :defvar org-roam-node-display-template
+    :global-minor-mode org-roam-db-autosync-mode
+    :custom
+    (org-roam-directory . "~/Documents/org/roam/")
+    (org-roam-db-location . "~/.emacs.d/org-roam.db")
+    (org-roam-database-connector . 'sqlite-builtin)
+    (org-roam-capture-templates . '(("p" "Permanent Note" plain "%?"
+                                     :target (file+head
+                                              "permanent/%<%Y%m%d%H%M%S>-${slug}.org"
+                                              "#+title: ${title}\n#+filetags: :Permanent:"))
+                                    ("f" "Fleet Note" plain "%?"
+                                     :target (file+head
+                                              "fleet/%<%Y%m%d%H%M%S>-${slug}.org"
+                                              "#+title: ${title}\n#+filetags: :Fleet:"))
+                                    ("l" "Literature Note" plain "%?"
+                                     :target (file+head
+                                              "literature/%<%Y%m%d%H%M%S>-${slug}.org"
+                                              "#+title: ${title}\n#+filetags: :Literature:"))))
+    :bind
+    ("C-c r t" . org-roam-buffer-toggle)
+    ("C-c r f" . org-roam-node-find)
+    ("C-c r i" . org-roam-node-insert)
+    ("C-c r c" . org-roam-capture)
+    :init
+    (leaf emacsql-sqlite-builtin
+      :ensure t)
+    (leaf consult-org-roam
+      :ensure t)
+    :config
+    (setq org-roam-node-display-template (concat "${title:*} "
+                                                 (propertize "${tags:10}" 'face 'org-tag)))))
+(leaf pdf-tools
+  :ensure t
+  :hook (pdf-view-mode-hook . (lambda () (display-line-numbers-mode -1))))
+(leaf *docker
+  :config
+  (leaf docker
+    :ensure t)
+  (leaf dockerfile-mode
+    :ensure t))
 (leaf tempel
   :ensure t
+  :defun tempel-expand
   :init
   (defun tempel-setup-capf ()
     ;; Add the Tempel Capf to `completion-at-point-functions'.
@@ -673,78 +744,29 @@ be prompted."
     (setq-local completion-at-point-functions
                 (cons #'tempel-expand
                       completion-at-point-functions)))
-
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
   (leaf tempel-collection
     :ensure t
     :require t
     :after tempel))
-(leaf org
+(leaf eglot
   :ensure t
+  :defun eglot-completion-at-point
   :custom
-  (org-startup-indented . t)
-  (org-startup-truncated . nil)
+  (eglot-autoshutdown . t)
+  :hook (eglot-managed-mode-hook . my/eglot-capf)
   :config
-  (leaf org-capture
-    :ensure nil
-    :bind
-    ("C-c c" . org-capture)
-    :custom
-    (org-capture-templates . '(("t" "Todo" entry (file+headline "~/Documents/org/inbox.org" "Tasks")
-                                "* TODO %?\n  %i\n  %a")
-                               ("n" "Note" entry (file+headline "~/Documents/org/inbox.org" "Notes")
-                                "* %?\n  %i\n  %a"))))
-  (leaf org-agenda
-    :ensure nil
-    :bind
-    ("C-c a" . org-agenda)
-    :custom
-    (org-agenda-files . '("~/Documents/org/")))
-  (leaf org-modern
+  (leaf eglot-tempel
     :ensure t
     :hook
-    (org-mode-hook . org-modern-mode)
-    (org-mode-hook . (lambda () (setq-local line-spacing 0.2)))
-    (org-agenda-finalize-hook . org-modern-agenda))
-  (leaf org-modern-indent
-    :ensure t
-    :vc (org-modern-indent
-         :url "https://github.com/jdtsmith/org-modern-indent")
-    :config
-    (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
-  (leaf org-roam
-    :ensure t emacsql-sqlite-builtin
-    :global-minor-mode org-roam-db-autosync-mode
-    :custom
-    (org-roam-directory . "~/Documents/org/roam/")
-    (org-roam-db-location . "~/.emacs.d/org-roam.db")
-    (org-roam-database-connector . 'sqlite-builtin)
-    :bind
-    ("C-c r t" . org-roam-buffer-toggle)
-    ("C-c r f" . org-roam-node-find)
-    ("C-c r i" . org-roam-node-insert)
-    ("C-c r c" . org-roam-capture)
-    ("C-c r d j" . org-roam-dailies-capture-today)
-    ("C-c r d t" . org-roam-dailies-goto-today)
-    ("C-c r d y" . org-roam-dailies-goto-yesterday)
-    ("C-c r d n" . org-roam-dailies-goto-tomorrow)
-    ("C-c r d w" . org-roam-dailies-find-week)
-    ("C-c r d m" . org-roam-dailies-find-month)
-    ("C-c r d y" . org-roam-dailies-find-year)))
-(leaf pdf-tools
-  :ensure t
-  :hook (pdf-view-mode-hook . (lambda () (display-line-numbers-mode -1))))
-(leaf *docker
-  :config
-  (leaf docker
-    :ensure t)
-  (leaf lsp-docker
-    :ensure t)
-  (leaf dockerfile-mode
-    :ensure t))
+    (eglot-managed-mode-hook . eglot-tempel-mode))
+  (defun my/eglot-capf ()
+    (setq-local completion-at-point-functions
+                (list (cape-capf-super
+                       #'eglot-completion-at-point
+                       #'tempel-expand
+                       #'cape-file)))))
 (leaf lsp-mode
+  :disabled t
   :ensure t
   :defvar lsp--sync-full lsp--sync-incremental
   :custom
@@ -764,6 +786,8 @@ be prompted."
   (lsp-modeline-diagnostics-scope . :workspace)
   (lsp-keymap-prefix . "C-c l")
   :hook (lsp-mode-hook . lsp-enable-which-key-integration)
+  :init
+  (setenv "LSP_USE_PLISTS" "true")
   :config
   (leaf lsp-ui
     :ensure t
@@ -794,12 +818,14 @@ be prompted."
 (leaf *languages
   :config
   (leaf nix-mode
+    :disabled t
     :ensure t)
   (leaf *c/cpp
-    :ensure nil
-    :config
+    :init
     (leaf cmake-mode
       :ensure t))
+  (leaf markdown-mode
+    :ensure t)
   (leaf web-mode
     :ensure t
     :mode ("\\.csp\\'" "\\html\\'"))
@@ -815,17 +841,21 @@ be prompted."
     :config
     (leaf rust-mode
       :ensure t
-      :hook (rust-mode-hook . lsp)
+      :defvar rust-mode-hook
       :custom
-      (rust-indent-offset . 4))
+      (rust-indent-offset . 4)
+      :config
+      (add-to-list 'rust-mode-hook #'eglot-ensure))
     (leaf rust-ts-mode
-      :ensure nil
-      :hook (rust-ts-mode-hook . lsp)
+      :ensure t
       :custom
-      (rust-ts-flymake-command . nil))
+      (rust-ts-flymake-command . nil)
+      :config
+      (setq-default rust-ts-mode-hook rust-mode-hook))
     (leaf cargo
       :ensure t))
   (leaf *fsharp
+    :disabled t
     :config
     (leaf fsharp-mode
       :ensure t
@@ -899,7 +929,8 @@ be prompted."
       (add-hook 'LaTeX-mode-hook #'lsp-bridge-mode)
       (add-hook 'plain-TeX-mode-hook #'lsp-bridge-mode))))
 (leaf editorconfig
-  :ensure t)
+  :ensure t
+  :global-minor-mode editorconfig-mode)
 (leaf gptel
   :ensure t
   :defun gptel-api-key-from-auth-source
@@ -1034,10 +1065,13 @@ be prompted."
      '("j j" . avy-goto-word-or-subword-1)
      '("j l" . avy-goto-line))))
 
-(load custom-file)
-(setq file-name-handler-alist my/saved-file-name-handler-alist)
-(setq gc-cons-threshold 16777216)
-(setq gc-cons-percentage 0.2)
-(garbage-collect)
+(leaf *afterinit
+  :init
+  (add-hook 'emacs-startup-hook
+            (lambda ()
+              (setq file-name-handler-alist my/saved-file-name-handler-alist)
+              (setq gc-cons-threshold 16777216)
+              (setq gc-cons-percentage 0.2)
+              (garbage-collect))))
 (provide 'init)
 ;;; init.el ends here
