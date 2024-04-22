@@ -332,7 +332,7 @@ be prompted."
            (getenv "WSL_DISTRO_NAME")
            (eq system-type 'windows-nt))
     :after browse-url
-    :defun my/browse-url-via-powershell
+    :defun (my/browse-url-via-powershell . init)
     :config
     (defun my/browse-url-via-powershell (url &rest _args)
       (shell-command (concat "powershell.exe start \"" url "\"")))
@@ -428,8 +428,15 @@ be prompted."
       :unless (display-graphic-p)
       :vc (corfu-terminal
            :url "https://codeberg.org/akib/emacs-corfu-terminal.git")
-      :after corfu
-      :hook (corfu-mode-hook . corfu-terminal-mode)))
+      :init
+      (if (daemonp)
+          (add-hook 'server-after-make-frame-hook
+                    #'(lambda ()
+                        "disable corfu-terminal-mode in graphical frames"
+                        (if (display-graphic-p)
+                            (corfu-terminal-mode -1)
+                          (corfu-terminal-mode +1))))
+        (corfu-terminal-mode +1))))
   (leaf cape
     :ensure t
     :custom
@@ -437,7 +444,7 @@ be prompted."
     :config
     (mapc (lambda (item)
             (add-to-list 'completion-at-point-functions item t))
-          '(dabbrev-capf
+          '(cape-dabbrev
             cape-keyword
             cape-file
             cape-tex))))
