@@ -4,18 +4,9 @@
 ;; using leaf.el
 
 ;;; Code:
-(defconst my/saved-file-name-handler-alist file-name-handler-alist)
-(setq file-name-handler-alist nil)
-
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (when (file-exists-p custom-file)
   (load custom-file))
-(require 'package)
-(setq package-enable-at-startup nil)
-(setq package-install-upgrade-built-in t)
-(when (fboundp 'native-comp-available-p)
-  (when (native-comp-available-p)
-    (setq package-native-compile t)))
 
 (eval-and-compile
   (customize-set-variable
@@ -34,31 +25,26 @@
 
 (leaf leaf
   :ensure t
-  :require t
-  :config
-  (leaf leaf-tree
-    :ensure t
-    :require t))
+  :require t)
 (leaf auto-compile
   :ensure t
   :custom (auto-compile-native-compile . t)
-  :global-minor-mode (auto-compile-on-load-mode auto-compile-on-save-mode)
-  :config
-  (setq load-prefer-newer t))
+  :hook (emacs-lisp-mode-hook . auto-compile-on-save-mode))
 (leaf server
   :ensure nil
-  :require t
   :defun server-edit server-delete-client
   :defvar server-clients)
 (leaf *myutils
-  :defun modified-buffers-exist my/exit
+  :defun
+  my/modified-buffers
+  my/exit
   :config
   (defun my/reopen-with-sudo ()
     "Reopen buffer with sudo."
     (interactive)
     (find-file (concat "/sudo::"
                        (expand-file-name (buffer-file-name)))))
-  (defun modified-buffers-exist ()
+  (defun my/modified-buffers ()
     "Check to see if there are any buffers that have been modified.
 It will return true if there are and nil otherwise.
 Buffers that have `buffer-offer-save' set to nil are ignored."
@@ -90,7 +76,7 @@ be prompted."
 
     (let (new-frame modified-buffers active-clients-or-frames)
                                         ; Check if there are modified buffers or active clients or frames.
-      (setq modified-buffers (modified-buffers-exist))
+      (setq modified-buffers (my/modified-buffers))
       (setq active-clients-or-frames ( or (> (length server-clients) 1)
                                        (> (length (frame-list)) 1)))
                                         ; Create a new frame if prompts are needed.
@@ -157,15 +143,14 @@ be prompted."
   (prefer-coding-system 'utf-8)
   (leaf treesit
     :ensure nil
-    :custom (treesit-font-lock-level . 4)
+    :custom (treesit-font-lock-level . 4))
+  (leaf treesit-auto
+    :ensure t
+    :defun treesit-auto-add-to-auto-mode-alist
+    :custom (treesit-auto-install . 'prompt)
+    :global-minor-mode global-treesit-auto-mode
     :config
-    (leaf treesit-auto
-      :ensure t
-      :defun treesit-auto-add-to-auto-mode-alist
-      :custom (treesit-auto-install . 'prompt)
-      :global-minor-mode global-treesit-auto-mode
-      :config
-      (treesit-auto-add-to-auto-mode-alist 'all))))
+    (treesit-auto-add-to-auto-mode-alist 'all)))
 (leaf *theme
   :init
   (leaf *bars
@@ -174,12 +159,27 @@ be prompted."
     (menu-bar-mode -1)
     (scroll-bar-mode -1))
   (leaf modus-themes
-    :disabled t
     :ensure t
     :require t
+    :custom
+    (modus-themes-italic-constructs . t)
+    (modus-themes-bold-constructs . t)
+    (modus-themes-mixed-fonts . t)
+    (modus-themes-variable-pitch-ui . t)
+    (modus-themes-custom-auto-reload . t)
+    (modus-themes-disable-other-themes . t)
+    (modus-themes-prompts . '(italic bold))
+    (modus-themes-completions . '((matches . (extrabold))
+                                  (selection . (semibold text-also))))
+    (modus-themes-headings . '((1 . (variable-pitch 1.5))
+                               (2 . (1.3))
+                               (agenda-date . (1.3))
+                               (agenda-structure . (variable-pitch light 1.8))
+                               (t . (1.1))))
     :config
-    (load-theme 'modus-vivendi-tinted :no-confirm))
+    (load-theme 'modus-vivendi :no-confirm))
   (leaf ef-themes
+    :disabled t
     :ensure t
     :require t
     :custom
@@ -275,7 +275,7 @@ be prompted."
                          (agenda . 5)))
     :init
     (when (daemonp)
-      (setq initial-buffer-choice #'(lambda ()(get-buffer-create "*dashboard*"))))
+      (setq initial-buffer-choice #'(lambda () (get-buffer-create "*dashboard*"))))
     (dashboard-setup-startup-hook)))
 (leaf fontaine
   :ensure t
@@ -304,7 +304,7 @@ be prompted."
   (defun my/check-font-preset ()
     (unless fontaine-current-preset
       (fontaine-set-preset (or (fontaine-restore-latest-preset) 'udev))))
-  (add-hook 'before-make-frame-hook #'my/check-font-preset))
+  (add-hook 'window-setup-hook #'my/check-font-preset))
 (leaf *platform-spec
   :config
   (leaf *wayland-clipboard
@@ -341,7 +341,7 @@ be prompted."
   :ensure t
   :unless (eq system-type 'windows-nt)
   :defun exec-path-from-shell-initialize
-  :hook (after-init-hook . exec-path-from-shell-initialize)
+  :hook (emacs-startup-hook . exec-path-from-shell-initialize)
   :custom
   (exec-path-from-shell-arguments . nil)
   (exec-path-from-shell-check-startup-files . nil)
@@ -359,18 +359,17 @@ be prompted."
   :config
   (leaf eldoc-box
     :ensure t
-    :when (display-graphic-p)
-    :hook (eldoc-mode-hook . eldoc-box-hover-mode)))
+    :init
+    (defun my/enable-eldoc-box-hover-mode-when-graphical ()
+      (when (display-graphic-p)
+        (eldoc-box-hover-mode 1)))
+    :hook (eldoc-mode-hook . my/enable-eldoc-box-hover-mode-when-graphical)))
 (leaf vertico
   :ensure t
   :bind (:vertico-map (("C-h" . 'vertico-directory-up)
                        ("C-m" . 'vertico-exit)
                        ("C-j" . 'vertico-exit-input)))
-  :global-minor-mode vertico-mode
-  :init
-  (leaf vertico-posframe
-    :ensure t
-    :hook (vertico-mode-hook . vertico-posframe-mode)))
+  :global-minor-mode vertico-mode)
 (leaf embark
   :ensure t
   :bind
@@ -382,6 +381,12 @@ be prompted."
   consult-customize
   consult--customize-put
   :defvar consult--source-buffer consult-buffer-sources
+  :bind
+  ("C-c i e" . consult-flymake)
+  ("C-c i i" . consult-imenu)
+  ("C-c i l" . consult-line)
+  ("C-c i p" . consult-yank-from-kill-ring)
+  ("C-c i b" . consult-buffer)
   :config
   (leaf embark-consult
     :ensure t
@@ -402,10 +407,11 @@ be prompted."
     :defvar corfu-map corfu-margin-formatters
     :global-minor-mode global-corfu-mode
     :hook (corfu-mode-hook . corfu-popupinfo-mode)
-    :custom ((corfu-auto . t)
-             (corfu-auto-delay . 0.3)
-             (corfu-auto-prefix . 3)
-             (corfu-cycle . t))
+    :custom
+    (corfu-auto . t)
+    (corfu-auto-delay . 0.3)
+    (corfu-auto-prefix . 3)
+    (corfu-cycle . t)
     :config
     (leaf *corfu-meow-espace
       :after meow
@@ -426,17 +432,19 @@ be prompted."
     (leaf corfu-terminal
       :ensure t
       :unless (display-graphic-p)
+      :defun
+      corfu-terminal-mode
+      (my/toggle-corfu-terminal . init.el)
       :vc (corfu-terminal
            :url "https://codeberg.org/akib/emacs-corfu-terminal.git")
       :init
-      (if (daemonp)
-          (add-hook 'server-after-make-frame-hook
-                    #'(lambda ()
-                        "disable corfu-terminal-mode in graphical frames"
-                        (if (display-graphic-p)
-                            (corfu-terminal-mode -1)
-                          (corfu-terminal-mode +1))))
-        (corfu-terminal-mode +1))))
+      (when (daemonp)
+        (defun my/toggle-corfu-terminal ()
+          "disable corfu-terminal-mode in graphical frames"
+          (if (display-graphic-p)
+              (corfu-terminal-mode -1)
+            (corfu-terminal-mode +1)))
+        (add-hook 'server-after-make-frame-hook #'my/toggle-corfu-terminal))))
   (leaf cape
     :ensure t
     :custom
@@ -464,6 +472,7 @@ be prompted."
     (consult-customize consult--source-buffer :hidden t :default nil)
     (add-to-list 'consult-buffer-sources persp-consult-source)))
 (leaf treemacs
+  :disabled t
   :ensure t
   :hook (treemacs-mode-hook . (lambda () (display-line-numbers-mode -1)))
   :bind
@@ -503,10 +512,9 @@ be prompted."
   (aw-leading-char-face . '((t :height 4.0)))
   :config
   (leaf ace-window-posframe
-    :ensure nil
+    :ensure posframe
     :when (display-graphic-p)
-    :after posframe
-    :global-minor-mode ace-window-posframe-mode))
+    :hook (window-setup-hook . ace-window-posframe-mode)))
 (leaf winner
   :ensure nil
   :global-minor-mode winner-mode
@@ -575,6 +583,7 @@ be prompted."
                                            (skk-isearch-mode-cleanup))))))
 (leaf flymake
   :ensure t
+  :defun flymake-eldoc-function
   :hook (prog-mode-hook . flymake-mode)
   :config
   (leaf flymake-collection
@@ -583,7 +592,6 @@ be prompted."
     :after flymake)
   (leaf flymake-popon
     :ensure t
-    :when (display-graphic-p)
     :hook (flymake-mode-hook . flymake-popon-mode)))
 (leaf flycheck
   :disabled t
@@ -641,14 +649,16 @@ be prompted."
   ((prog-mode-hook conf-mode-hook text-mode-hook) . projectile-mode)
   :bind
   (:projectile-mode-map
-   ("<leader>pp" . #'projectile-command-map)
-   ("<leader>pf" . #'projectile-find-file)
-   ("<leader>ps" . #'projectile-switch-project)
-   ("<leader>pb" . #'projectile-switch-to-buffer)
-   ("<leader>pd" . #'projectile-dired)
-   ("<leader>pg" . #'projectile-ripgrep)
-   ("<leader>pc" . #'projectile-compile-project)
-   ("<leader>pr" . #'projectile-replace)))
+   ("C-c p p" . #'projectile-command-map)
+   ("C-c p f" . #'projectile-find-file)
+   ("C-c p s" . #'projectile-switch-project)
+   ("C-c p b" . #'projectile-switch-to-buffer)
+   ("C-c p d" . #'projectile-dired)
+   ("C-c p g" . #'projectile-ripgrep)
+   ("C-c p c" . #'projectile-compile-project)
+   ("C-c p r" . #'projectile-replace)))
+(leaf literate-calc-mode
+  :ensure t)
 (leaf org
   :ensure t
   :require t
@@ -725,8 +735,9 @@ be prompted."
     (leaf consult-org-roam
       :ensure t)
     :config
-    (setq org-roam-node-display-template (concat "${title:*} "
-                                                 (propertize "${tags:10}" 'face 'org-tag)))))
+    (setq org-roam-node-display-template
+          (concat "${title:*} "
+                  (propertize "${tags:10}" 'face 'org-tag)))))
 (leaf pdf-tools
   :ensure t
   :hook (pdf-view-mode-hook . (lambda () (display-line-numbers-mode -1))))
@@ -757,11 +768,17 @@ be prompted."
     :after tempel))
 (leaf eglot
   :ensure t
-  :defun eglot-completion-at-point
+  :defun
+  eglot-completion-at-point
+  eglot-hover-eldoc-function
   :custom
   (eglot-autoshutdown . t)
   :hook (eglot-managed-mode-hook . my/eglot-capf)
   :config
+  (leaf eglot-signature-eldoc-talkative
+    :ensure t
+    :advice
+    (:override eglot-signature-eldoc-function eglot-signature-eldoc-talkative))
   (leaf eglot-tempel
     :ensure t
     :hook
@@ -841,8 +858,6 @@ be prompted."
   (leaf *haskell
     :config
     (leaf haskell-mode
-      :ensure t)
-    (leaf haskell-snippets
       :ensure t))
   (leaf *rust
     :config
@@ -933,16 +948,14 @@ be prompted."
     (leaf *latex-lsp
       :disabled t
       :config
-      (add-hook 'LaTeX-mode-hook #'lsp-bridge-mode)
-      (add-hook 'plain-TeX-mode-hook #'lsp-bridge-mode))))
+      (add-hook 'LaTeX-mode-hook #'eglot-ensure)
+      (add-hook 'plain-TeX-mode-hook #'eglot-ensure))))
 (leaf editorconfig
   :ensure t
   :global-minor-mode editorconfig-mode)
 (leaf gptel
   :ensure t
   :defun gptel-api-key-from-auth-source
-  :bind
-  (("<leader>gg" . gptel-menu))
   :config
   (gptel-make-anthropic "Claude"
     :stream t
@@ -1065,20 +1078,7 @@ be prompted."
      '("w" . ace-window)
      '("e" . embark-act)
      '("u" . vundo)
-     '("I" . imenu-list)
-     '("i e" . consult-flymake)
-     '("i i" . consult-imenu)
-     '("i p" . consult-yank-from-kill-ring)
-     '("j j" . avy-goto-word-or-subword-1)
-     '("j l" . avy-goto-line))))
+     '("I" . imenu-list))))
 
-(leaf *afterinit
-  :init
-  (add-hook 'emacs-startup-hook
-            (lambda ()
-              (setq file-name-handler-alist my/saved-file-name-handler-alist)
-              (setq gc-cons-threshold 16777216)
-              (setq gc-cons-percentage 0.2)
-              (garbage-collect))))
 (provide 'init)
 ;;; init.el ends here

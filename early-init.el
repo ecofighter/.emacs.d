@@ -1,25 +1,40 @@
 ;;; early-init.el --- my early-init-file -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
+(defconst my/saved-file-name-handler-alist file-name-handler-alist)
+(setq file-name-handler-alist nil)
 (setq gc-cons-threshold most-positive-fixnum)
-(setq read-process-output-max (* 1024 1024))
 (setq garbage-collection-messages t)
+(setq inhibit-redisplay t)
+(setq inhibit-message t)
 
+(defun my/restore-variables-after-init ()
+  "Restore variables changed in `early-init.el'."
+  (setq file-name-handler-alist my/saved-file-name-handler-alist)
+  (setq gc-cons-threshold 16777216)
+  (setq gc-cons-percentage 0.2)
+  (setq inhibit-redisplay nil)
+  (setq inhibit-message nil)
+  (redisplay)
+  (garbage-collect))
+(add-hook 'after-init-hook #'my/restore-variables-after-init)
+
+(setq load-prefer-newer t)
+(setq read-process-output-max (* 1024 1024))
 (setq-default native-comp-async-report-warnings-errors 'silent)
 (setq-default native-comp-async-jobs-number 4)
-(setq-default native-comp-speed 2)
+(setq-default native-comp-speed 3)
 
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
 
-(setq inhibit-redisplay t)
-(setq inhibit-message t)
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (setq inhibit-redisplay nil)
-			(setq inhibit-message nil)
-			(redisplay)))
+(require 'package)
+(setq package-enable-at-startup nil)
+(setq package-install-upgrade-built-in t)
+(when (fboundp 'native-comp-available-p)
+  (when (native-comp-available-p)
+    (setq package-native-compile t)))
 
 (provide 'early-init)
 ;;; early-init.el ends here
