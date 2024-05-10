@@ -310,12 +310,14 @@ be prompted."
   (leaf alert
     :when (eq system-type 'linux)
     :ensure t
+    :require t
     :custom
     (alert-default-style . 'libnotify))
   (leaf alert-toast
     :when (or (getenv "WSL_DISTRO_NAME")
               (eq system-type 'windows-nt))
     :ensure t
+    :require t
     :custom
     (alert-default-style . 'toast))
   (leaf *wayland-clipboard
@@ -713,7 +715,21 @@ be prompted."
     (find-file (expand-file-name "inbox.org" org-directory)))
   (leaf org-pomodoro
     :ensure t
-    :require t)
+    :require org-clock alert
+    :custom
+    (org-pomodoro-audio-player . "play.sh")
+    (org-pomodoro-start-sound-p . t)
+    :init
+    (eval-when-compile (require 'org-clock))
+    :hook
+    (org-pomodoro-started-hook . (lambda ()
+                                   (alert (concat "Pomodoro Start: " org-clock-current-task))))
+    (org-pomodoro-finished-hook . (lambda ()
+                                    (alert "Pomodoro Finish")))
+    (org-pomodoro-break-finished-hook . (lambda ()
+                                          (alert "Pomodoro Break Finish")))
+    (org-pomodoro-overtime-hook . (lambda ()
+                                    (alert (concat "Pomodoro overtime: " org-clock-current-task)))))
   (leaf org-agenda
     :ensure nil
     :require t
