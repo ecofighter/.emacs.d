@@ -663,13 +663,11 @@ be prompted."
    ("C-c p g" . #'projectile-ripgrep)
    ("C-c p c" . #'projectile-compile-project)
    ("C-c p r" . #'projectile-replace)))
-(leaf literate-calc-mode
-  :ensure t)
 (leaf org
   :ensure t
   :require t
   :custom
-  (org-startup-indented . t)
+  (org-startup-indented . nil)
   (org-startup-truncated . nil)
   :config
   (leaf org-web-tools
@@ -705,6 +703,7 @@ be prompted."
     :hook
     (org-mode-hook . org-tidy-mode))
   (leaf org-modern-indent
+    :disabled t
     :ensure t
     :vc (org-modern-indent
          :url "https://github.com/jdtsmith/org-modern-indent")
@@ -744,6 +743,18 @@ be prompted."
     (setq org-roam-node-display-template
           (concat "${title:*} "
                   (propertize "${tags:10}" 'face 'org-tag)))))
+(leaf literate-calc-mode
+  :ensure t
+  :init
+  (with-eval-after-load 'org
+    (eval-when-compile (require 'org))
+    (setf (alist-get 'literate-calc org-babel-load-languages) t)))
+(leaf graphviz-dot-mode
+  :ensure t
+  :init
+  (with-eval-after-load 'org-src
+    (eval-when-compile (require 'org-src))
+    (setf (alist-get "dot" org-src-lang-modes nil nil #'string=) 'graphviz-dot-mode)))
 (leaf pdf-tools
   :ensure t
   :hook (pdf-view-mode-hook . (lambda () (display-line-numbers-mode -1))))
@@ -780,7 +791,8 @@ be prompted."
                 (list (cape-capf-super
                        #'eglot-completion-at-point
                        #'yasnippet-capf
-                       #'cape-file)))))
+                       #'cape-file
+                       #'cape-tex)))))
 (leaf lsp-mode
   :disabled t
   :ensure t
