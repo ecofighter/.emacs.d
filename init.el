@@ -667,8 +667,7 @@ be prompted."
   (org-directory . "~/Documents/org")
   (org-startup-indented . nil)
   (org-startup-truncated . nil)
-  (org-todo-keywords . '((sequence "TODO" "PROG" "|" "DONE")
-                         (sequence "TODAY" "|" "DONE")))
+  (org-todo-keywords . '((sequence "TODO" "PROG" "|" "DONE")))
   :bind
   ("C-c o" . my/org-prefix)
   :init
@@ -728,30 +727,36 @@ be prompted."
                                       ("q" "4 Weeks agenda"
                                        ((agenda "" ((org-agenda-span 28)))))
                                       ("c" "Super"
-                                       ((agenda "" ((org-agenda-span 'day)
-                                                    (org-auper-agenda-groups
-                                                     '((:name "Today"
-                                                              :time-grid t
-                                                              :day today
-                                                              :scheduled today
-                                                              :todo "TODAY"
-                                                              :order 1)))))
-                                        (alltodo "" ((org-agenda-overriding-header "")
-                                                     (org-super-agenda-groups
-                                                      '((:name "Past but not finished"
-                                                               :scheduled past)
-                                                        (:name "Due Today"
-                                                               :deadline today)
-                                                        (:name "Today"
-                                                               :scheduled today
-                                                               :todo ("TODAY"))
-                                                        (:name "Work in progress"
-                                                               :todo ("PROG"))
-                                                        (:name "Future"
-                                                               :scheduled future
-                                                               :deadline future)
-                                                        (:name "Not scheduled"
-                                                               :and (:todo ("TODO") :scheduled nil))))))))))))
+                                       ((agenda ""
+                                                ((org-agenda-span 'day)
+                                                 (org-agenda-prefix-format
+                                                  "%i %-12:c%?-12t% s")
+                                                 (org-auper-agenda-groups
+                                                  '((:name "Today"
+                                                           :time-grid t
+                                                           :day today
+                                                           :scheduled today
+                                                           :todo "TODAY"
+                                                           :order 1)))))
+                                        (alltodo ""
+                                                 ((org-agenda-overriding-header "")
+                                                  (org-agenda-prefix-format
+                                                   "%i %-12:c%?-12t% s")
+                                                  (org-super-agenda-groups
+                                                   '((:name "Past but not finished"
+                                                            :scheduled past
+                                                            :deadline past)
+                                                     (:name "Due Today"
+                                                            :deadline today)
+                                                     (:name "Today"
+                                                            :scheduled today)
+                                                     (:name "Work in progress"
+                                                            :todo ("PROG"))
+                                                     (:name "Future"
+                                                            :scheduled future
+                                                            :deadline future)
+                                                     (:name "Not scheduled"
+                                                            :and (:todo ("TODO") :scheduled nil))))))))))))
   (leaf org-modern
     :ensure t
     :global-minor-mode global-org-modern-mode)
