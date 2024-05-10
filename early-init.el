@@ -23,7 +23,7 @@
 (setq read-process-output-max (* 1024 1024))
 (setq-default native-comp-async-report-warnings-errors 'silent)
 (setq-default native-comp-async-jobs-number 4)
-(setq-default native-comp-speed 3)
+(setq-default native-comp-speed 2)
 
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)

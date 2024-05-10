@@ -469,7 +469,8 @@ be prompted."
   :config
   (with-eval-after-load 'consult
     (eval-when-compile
-      (require 'consult))
+      (require 'consult)
+      (declare-function consult--customize-put "ext:consult.el"))
     (consult-customize consult--source-buffer :hidden t :default nil)
     (add-to-list 'consult-buffer-sources persp-consult-source)))
 (leaf treemacs
@@ -629,14 +630,10 @@ be prompted."
   (highlight-indent-guides-auto-enabled . t)
   (highlight-indent-guides-responsive . 'top)
   (highlight-indent-guides-method . 'column))
-(leaf transient
-  :ensure t)
-(leaf git-commit
-  :ensure t)
 (leaf magit
   :ensure t
   :bind
-  (("C-x g" . #'magit-status))
+  ("C-x g" . #'magit-status)
   :init
   (leaf difftastic
     :ensure t
@@ -665,57 +662,116 @@ be prompted."
    ("C-c p r" . #'projectile-replace)))
 (leaf org
   :ensure t
-  :require t
+  :defvar org-directory my/org-prefix
   :custom
+  (org-directory . "~/Documents/org")
   (org-startup-indented . nil)
   (org-startup-truncated . nil)
-  :config
-  (leaf org-web-tools
-    :ensure t
-    :bind
-    (:org-mode-map
-     ("C-c i l" . org-web-tools-insert-link-for-url)))
+  (org-todo-keywords . '((sequence "TODO" "PROG" "|" "DONE")
+                         (sequence "TODAY" "|" "DONE")))
+  :bind
+  ("C-c o" . my/org-prefix)
+  :init
+  (define-prefix-command 'my/org-prefix)
+  (leaf *my/org-utils
+    :init
+    (defun my/open-org-dir ()
+      "Open `org-directory'."
+      (interactive)
+      (find-file org-directory))
+    (defun my/open-org-inbox ()
+      "Open the inbox file."
+      (interactive)
+      (find-file (expand-file-name "inbox.org" org-directory)))
+    (leaf-keys
+     (my/org-prefix ("o" . my/open-org-dir)
+                    ("O" . my/open-org-inbox))))
   (leaf org-capture
     :ensure nil
     :bind
-    ("C-c c" . org-capture)
+    (:my/org-prefix
+     ("c" . org-capture))
     :custom
-    (org-capture-templates . '(("t" "Todo" entry (file+headline "~/Documents/org/inbox.org" "Tasks")
+    (org-capture-templates . `(("t" "Todo" entry
+                                (file+headline ,(expand-file-name "inbox.org" org-directory)
+                                               "Tasks")
                                 "* TODO %?\n  %i\n  %a")
-                               ("n" "Note" entry (file+headline "~/Documents/org/inbox.org" "Notes")
+                               ("n" "Note" entry
+                                (file+headline ,(expand-file-name "inbox.org" org-directory)
+                                               "Notes")
                                 "* %?\n  %i\n  %a"))))
-  (leaf org-journal
-    :ensure t)
   (leaf org-agenda
     :ensure nil
+    :require t
     :bind
     ("C-c a" . org-agenda)
     :custom
-    (org-agenda-files . '("~/Documents/org/")))
+    (org-agenda-files . `(,(expand-file-name "inbox.org" org-directory)
+                          ,(file-name-as-directory (expand-file-name "tasks/" org-directory))))
+    (org-agenda-skip-scheduled-if-done . t)
+    (org-agenda-include-deadlines . t)
+    (org-agenda-include-diary . t)
+    (org-agenda-block-separator . nil)
+    (org-agenda-compact-blocks . t)
+    :init
+    (leaf org-super-agenda
+      :ensure t
+      :global-minor-mode org-super-agenda-mode
+      :custom
+      (org-agenda-custom-commands . '(("n" "Agenda and all TODOs"
+                                       ((agenda #1="")
+                                        (alltodo #1#)))
+                                      ("d" "Day agenda"
+                                       ((agenda "" ((org-agenda-span 'day)))))
+                                      ("w" "Week agenda"
+                                       ((agenda "" ((org-agenda-span 'week)))))
+                                      ("q" "4 Weeks agenda"
+                                       ((agenda "" ((org-agenda-span 28)))))
+                                      ("c" "Super"
+                                       ((agenda "" ((org-agenda-span 'day)
+                                                    (org-auper-agenda-groups
+                                                     '((:name "Today"
+                                                              :time-grid t
+                                                              :day today
+                                                              :scheduled today
+                                                              :todo "TODAY"
+                                                              :order 1)))))
+                                        (alltodo "" ((org-agenda-overriding-header "")
+                                                     (org-super-agenda-groups
+                                                      '((:name "Past but not finished"
+                                                               :scheduled past)
+                                                        (:name "Due Today"
+                                                               :deadline today)
+                                                        (:name "Today"
+                                                               :scheduled today
+                                                               :todo ("TODAY"))
+                                                        (:name "Work in progress"
+                                                               :todo ("PROG"))
+                                                        (:name "Future"
+                                                               :scheduled future
+                                                               :deadline future)
+                                                        (:name "Not scheduled"
+                                                               :and (:todo ("TODO") :scheduled nil))))))))))))
   (leaf org-modern
     :ensure t
-    :require t
-    :global-minor-mode global-org-modern-mode
-    :hook
-    (org-mode-hook . (lambda () (setq-local line-spacing 0.2))))
+    :global-minor-mode global-org-modern-mode)
   (leaf org-tidy
     :ensure t
     :hook
     (org-mode-hook . org-tidy-mode))
-  (leaf org-modern-indent
-    :disabled t
+  (leaf org-web-tools
     :ensure t
-    :vc (org-modern-indent
-         :url "https://github.com/jdtsmith/org-modern-indent")
-    :config
-    (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
+    :after org
+    :bind
+    (:my/org-prefix
+     ("l" . 'org-web-tools-insert-link-for-url)))
   (leaf org-roam
     :ensure t
     :defvar org-roam-node-display-template
     :global-minor-mode org-roam-db-autosync-mode
     :custom
-    (org-roam-directory . "~/Documents/org/roam/")
-    (org-roam-db-location . "~/.emacs.d/org-roam.db")
+    (org-roam-directory . `,(expand-file-name "roam" org-directory))
+    (org-roam-db-location . `,(locate-user-emacs-file "org-roam.db"))
     (org-roam-database-connector . 'sqlite-builtin)
     (org-roam-capture-templates . '(("p" "Permanent Note" plain "%?"
                                      :target (file+head
@@ -729,29 +785,31 @@ be prompted."
                                      :target (file+head
                                               "literature/%<%Y%m%d%H%M%S>-${slug}.org"
                                               "#+title: ${title}\n#+filetags: :Literature:"))))
+    (org-roam-node-display-template . `,(concat "${title:*} "
+                                                (propertize "${tags:10}" 'face 'org-tag)))
     :bind
-    ("C-c r t" . org-roam-buffer-toggle)
-    ("C-c r f" . org-roam-node-find)
-    ("C-c r i" . org-roam-node-insert)
-    ("C-c r c" . org-roam-capture)
-    :init
+    (:my/org-prefix
+     ("r t" . org-roam-buffer-toggle)
+     ("r f" . org-roam-node-find)
+     ("r i" . org-roam-node-insert)
+     ("r c" . org-roam-capture))
+    :config
     (leaf emacsql-sqlite-builtin
       :ensure t)
     (leaf consult-org-roam
-      :ensure t)
-    :config
-    (setq org-roam-node-display-template
-          (concat "${title:*} "
-                  (propertize "${tags:10}" 'face 'org-tag)))))
+      :ensure t)))
 (leaf literate-calc-mode
   :ensure t
   :init
   (with-eval-after-load 'org
     (eval-when-compile (require 'org))
-    (setf (alist-get 'literate-calc org-babel-load-languages) t)))
+    (require 'literate-calc-mode)))
 (leaf graphviz-dot-mode
   :ensure t
   :init
+  (with-eval-after-load 'org
+    (eval-when-compile (require 'org))
+    (setf (alist-get 'dot org-babel-load-languages) t))
   (with-eval-after-load 'org-src
     (eval-when-compile (require 'org-src))
     (setf (alist-get "dot" org-src-lang-modes nil nil #'string=) 'graphviz-dot-mode)))
