@@ -307,6 +307,17 @@ be prompted."
   (add-hook 'window-setup-hook #'my/check-font-preset))
 (leaf *platform-spec
   :config
+  (leaf alert
+    :when (eq system-type 'linux)
+    :ensure t
+    :custom
+    (alert-default-style . 'libnotify))
+  (leaf alert-toast
+    :when (or (getenv "WSL_DISTRO_NAME")
+              (eq system-type 'windows-nt))
+    :ensure t
+    :custom
+    (alert-default-style . 'toast))
   (leaf *wayland-clipboard
     :when (getenv "WAYLAND_DISPLAY")
     :defvar wl-copy-process
@@ -328,9 +339,8 @@ be prompted."
     (setq interprogram-cut-function 'wl-copy)
     (setq interprogram-paste-function 'wl-paste))
   (leaf *pwsh-url-handler
-    :when (or
-           (getenv "WSL_DISTRO_NAME")
-           (eq system-type 'windows-nt))
+    :when (or (getenv "WSL_DISTRO_NAME")
+              (eq system-type 'windows-nt))
     :after browse-url
     :defun (my/browse-url-via-powershell . init)
     :config
@@ -668,43 +678,47 @@ be prompted."
   (org-startup-indented . nil)
   (org-startup-truncated . nil)
   (org-todo-keywords . '((sequence "TODO" "PROG" "|" "DONE")))
+  (org-clock-out-remove-zero-time-clocks . t)
+  (org-clock-clocked-in-display . 'frame-title)
+  (org-capture-templates . `(("t" "Todo" entry
+                              (file+headline ,(expand-file-name "inbox.org" org-directory)
+                                             "Tasks")
+                              "* TODO %?\n  %i\n  %a")
+                             ("n" "Note" entry
+                              (file+headline ,(expand-file-name "inbox.org" org-directory)
+                                             "Notes")
+                              "* %?\n  %i\n  %a")))
   :bind
+  ("C-c a" . org-agenda)
   ("C-c o" . my/org-prefix)
+  (:my/org-prefix
+   ("o" . my/open-org-inbox)
+   ("O" . my/open-org-dir)
+   ("p" . org-pomodoro)
+   ("l" . org-web-tools-insert-link-for-url)
+   ("c" . org-capture)
+   ("r t" . org-roam-buffer-toggle)
+   ("r f" . org-roam-node-find)
+   ("r i" . org-roam-node-insert)
+   ("r c" . org-roam-capture))
   :init
   (define-prefix-command 'my/org-prefix)
-  (leaf *my/org-utils
-    :init
-    (defun my/open-org-dir ()
-      "Open `org-directory'."
-      (interactive)
-      (find-file org-directory))
-    (defun my/open-org-inbox ()
-      "Open the inbox file."
-      (interactive)
-      (find-file (expand-file-name "inbox.org" org-directory)))
-    (leaf-keys
-     (my/org-prefix ("o" . my/open-org-dir)
-                    ("O" . my/open-org-inbox))))
-  (leaf org-capture
-    :ensure nil
-    :bind
-    (:my/org-prefix
-     ("c" . org-capture))
-    :custom
-    (org-capture-templates . `(("t" "Todo" entry
-                                (file+headline ,(expand-file-name "inbox.org" org-directory)
-                                               "Tasks")
-                                "* TODO %?\n  %i\n  %a")
-                               ("n" "Note" entry
-                                (file+headline ,(expand-file-name "inbox.org" org-directory)
-                                               "Notes")
-                                "* %?\n  %i\n  %a"))))
+  (defun my/open-org-dir ()
+    "Open `org-directory'."
+    (interactive)
+    (find-file org-directory))
+  (defun my/open-org-inbox ()
+    "Open the inbox file."
+    (interactive)
+    (find-file (expand-file-name "inbox.org" org-directory)))
+  (leaf org-pomodoro
+    :ensure t
+    :require t)
   (leaf org-agenda
     :ensure nil
     :require t
-    :bind
-    ("C-c a" . org-agenda)
     :custom
+    (org-agenda-span . 'day)
     (org-agenda-files . `(,(expand-file-name "inbox.org" org-directory)
                           ,(file-name-as-directory (expand-file-name "tasks/" org-directory))))
     (org-agenda-skip-scheduled-if-done . t)
@@ -717,6 +731,18 @@ be prompted."
       :ensure t
       :global-minor-mode org-super-agenda-mode
       :custom
+      (org-super-agenda-groups . '((:name "Past but not finished"
+                                          :scheduled past
+                                          :deadline past)
+                                   (:name "Due Today"
+                                          :and (:deadline today :scheduled nil))
+                                   (:name "Today"
+                                          :scheduled today
+                                          :time-grid t)
+                                   (:name "Future"
+                                          :scheduled future)
+                                   (:name "Not Scheduled"
+                                          :scheduled nil)))
       (org-agenda-custom-commands . '(("n" "Agenda and all TODOs"
                                        ((agenda #1="")
                                         (alltodo #1#)))
@@ -725,50 +751,52 @@ be prompted."
                                       ("w" "Week agenda"
                                        ((agenda "" ((org-agenda-span 'week)))))
                                       ("q" "4 Weeks agenda"
-                                       ((agenda "" ((org-agenda-span 28)))))
+                                       ((agenda "" ((org-agenda-span 28)
+                                                    (org-deadline-warning-days 56)))))
                                       ("c" "Super"
                                        ((agenda ""
                                                 ((org-agenda-span 'day)
                                                  (org-agenda-prefix-format
                                                   "%i %-12:c%?-12t% s")
-                                                 (org-auper-agenda-groups
-                                                  '((:name "Today"
+                                                 (org-deadline-warning-days 28)
+                                                 (org-super-agenda-groups
+                                                  '((:name "Past but not finished"
+                                                           :scheduled past
+                                                           :deadline past)
+                                                    (:name "Today"
                                                            :time-grid t
-                                                           :day today
-                                                           :scheduled today
-                                                           :todo "TODAY"
-                                                           :order 1)))))
+                                                           :deadline today
+                                                           :scheduled today)
+                                                    (:name "Soon"
+                                                           :anything t)))))
                                         (alltodo ""
                                                  ((org-agenda-overriding-header "")
                                                   (org-agenda-prefix-format
                                                    "%i %-12:c%?-12t% s")
+                                                  (org-deadline-warning-days 28)
                                                   (org-super-agenda-groups
                                                    '((:name "Past but not finished"
                                                             :scheduled past
                                                             :deadline past)
                                                      (:name "Due Today"
                                                             :deadline today)
-                                                     (:name "Today"
-                                                            :scheduled today)
-                                                     (:name "Work in progress"
-                                                            :todo ("PROG"))
-                                                     (:name "Future"
-                                                            :scheduled future
-                                                            :deadline future)
                                                      (:name "Not scheduled"
-                                                            :and (:todo ("TODO") :scheduled nil))))))))))))
+                                                            :and (:scheduled nil :deadline t))
+                                                     (:name "No Deadline"
+                                                            :and (:scheduled nil :deadline nil))
+                                                     (:name "Future"
+                                                            :scheduled future)))))))))))
   (leaf org-modern
     :ensure t
-    :global-minor-mode global-org-modern-mode)
+    :custom
+    (org-modern-star . 'fold)
+    :hook
+    (org-mode-hook . org-modern-mode)
+    (org-agenda-finalize-hook . org-modern-agenda))
   (leaf org-tidy
     :ensure t)
   (leaf org-web-tools
-    :ensure t
-    :after org
-    :require t
-    :bind
-    (:my/org-prefix
-     ("l" . 'org-web-tools-insert-link-for-url)))
+    :ensure t)
   (leaf org-roam
     :ensure t
     :defvar org-roam-node-display-template
@@ -791,13 +819,7 @@ be prompted."
                                               "#+title: ${title}\n#+filetags: :Literature:"))))
     (org-roam-node-display-template . `,(concat "${title:*} "
                                                 (propertize "${tags:10}" 'face 'org-tag)))
-    :bind
-    (:my/org-prefix
-     ("r t" . org-roam-buffer-toggle)
-     ("r f" . org-roam-node-find)
-     ("r i" . org-roam-node-insert)
-     ("r c" . org-roam-capture))
-    :config
+    :init
     (leaf emacsql-sqlite-builtin
       :ensure t)
     (leaf consult-org-roam
