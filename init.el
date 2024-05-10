@@ -377,9 +377,6 @@ be prompted."
   ("C-," . 'embark-dwim))
 (leaf consult
   :ensure t
-  :defun
-  consult-customize
-  consult--customize-put
   :defvar consult--source-buffer consult-buffer-sources
   :bind
   ("C-c i e" . consult-flymake)
@@ -470,9 +467,7 @@ be prompted."
   (persp-sort . 'created)
   :global-minor-mode persp-mode
   :config
-  (leaf *perspective-consult
-    :after consult perspective
-    :config
+  (with-eval-after-load 'consult
     (eval-when-compile
       (require 'consult))
     (consult-customize consult--source-buffer :hidden t :default nil)
@@ -559,9 +554,6 @@ be prompted."
   (skk-isearch-start-mode . 'latin)
   (skk-isearch-mode-enable . t)
   (default-input-method . "japanese-skk")
-  (skk-large-jisyo . "~/.emacs.d/skk-get-jisyo/SKK-JISYO.L")
-  (skk-itaiji-jisyo . "~/.emacs.d/skk-get-jisyo/SKK-JISYO.itaiji")
-  (skk-cdb-large-jisyo . "~/.emacs.d/SKK-JISYO.XL.cdb")
   :bind (("C-x j" . skk-mode)
          ("C-x J" . skk-auto-fill-mode))
   :init
@@ -572,6 +564,14 @@ be prompted."
       :ensure t
       :after skk
       :hook (skk-mode-hook . ddskk-posframe-mode)))
+  (leaf skk-vars
+    :ensure nil
+    :config
+    (eval-when-compile (require 'skk-vars))
+    (setq skk-get-jisyo-directory (locate-user-emacs-file "skk-get-jisyo/"))
+    (setq skk-large-jisyo (concat skk-get-jisyo-directory "SKK-JISYO.L"))
+    (setq skk-itaiji-jisyo (concat skk-get-jisyo-directory "SKK-JISYO.itaiji"))
+    (setq skk-cdb-large-jisyo (concat skk-get-jisyo-directory "SKK-JISYO.L.cdb")))
   (leaf skk-isearch
     :ensure nil
     :defun
