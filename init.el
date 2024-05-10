@@ -291,7 +291,7 @@ be prompted."
                         (udev
                          :default-family "UDEVGothic"
                          :fixed-pitch-family "UDEVGothic"
-                         :variable-pitch-family "Inter")
+                         :variable-pitch-family "Sarasa Gothic J")
                         (ibmplex
                          :default-family "PlemolJP"
                          :fixed-pitch-family "PlemolJP"
@@ -449,7 +449,7 @@ be prompted."
     :ensure t
     :custom
     (cape-dabbrev-check-other-buffers . nil)
-    :config
+    :init
     (mapc (lambda (item)
             (add-to-list 'completion-at-point-functions item t))
           '(cape-dabbrev
@@ -742,30 +742,20 @@ be prompted."
   :ensure t
   :hook (pdf-view-mode-hook . (lambda () (display-line-numbers-mode -1))))
 (leaf *docker
+  :disabled t
   :config
   (leaf docker
     :ensure t)
   (leaf dockerfile-mode
     :ensure t))
-(leaf tempel
+(leaf yasnippet
   :ensure t
-  :defun tempel-expand
-  :init
-  (defun tempel-setup-capf ()
-    ;; Add the Tempel Capf to `completion-at-point-functions'.
-    ;; `tempel-expand' only triggers on exact matches. Alternatively use
-    ;; `tempel-complete' if you want to see all matches, but then you
-    ;; should also configure `tempel-trigger-prefix', such that Tempel
-    ;; does not trigger too often when you don't expect it. NOTE: We add
-    ;; `tempel-expand' *before* the main programming mode Capf, such
-    ;; that it will be tried first.
-    (setq-local completion-at-point-functions
-                (cons #'tempel-expand
-                      completion-at-point-functions)))
-  (leaf tempel-collection
+  :global-minor-mode yas-global-mode
+  :config
+  (leaf yasnippet-capf
     :ensure t
-    :require t
-    :after tempel))
+    :config
+    (add-to-list 'completion-at-point-functions #'yasnippet-capf)))
 (leaf eglot
   :ensure t
   :defun
@@ -779,15 +769,11 @@ be prompted."
     :ensure t
     :advice
     (:override eglot-signature-eldoc-function eglot-signature-eldoc-talkative))
-  (leaf eglot-tempel
-    :ensure t
-    :hook
-    (eglot-managed-mode-hook . eglot-tempel-mode))
   (defun my/eglot-capf ()
     (setq-local completion-at-point-functions
                 (list (cape-capf-super
                        #'eglot-completion-at-point
-                       #'tempel-expand
+                       #'yasnippet-capf
                        #'cape-file)))))
 (leaf lsp-mode
   :disabled t
@@ -892,6 +878,7 @@ be prompted."
       :after fsharp-mode
       :require t))
   (leaf *sagemath
+    :disabled t
     :config
     (leaf sage-shell-mode
       :ensure t
