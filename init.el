@@ -412,6 +412,12 @@ be prompted."
     (corfu-auto-delay . 0.3)
     (corfu-auto-prefix . 3)
     (corfu-cycle . t)
+    :bind
+    (:corfu-map
+     ("TAB" . corfu-insert)
+     ("<tab>" . corfu-insert)
+     ("RET" . nil)
+     ("<return>" . nil))
     :config
     (leaf *corfu-meow-espace
       :after meow
