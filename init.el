@@ -761,12 +761,11 @@ be prompted."
     :ensure t
     :global-minor-mode global-org-modern-mode)
   (leaf org-tidy
-    :ensure t
-    :hook
-    (org-mode-hook . org-tidy-mode))
+    :ensure t)
   (leaf org-web-tools
     :ensure t
     :after org
+    :require t
     :bind
     (:my/org-prefix
      ("l" . 'org-web-tools-insert-link-for-url)))
