@@ -120,7 +120,10 @@ be prompted."
            (x-select-enable-clipboard-manager . t)
            (use-file-dialog . nil)
            (use-short-answers . t)
-           (split-width-threshold . 160)
+           (window-min-height . 10)
+           (window-min-width . 70)
+           (split-width-threshold . 140)
+           (split-height-threshold . 20)
            (vc-handled-backends . '(Git))
            (fill-column . 80)
            (tab-width . 4)
@@ -141,6 +144,33 @@ be prompted."
   (defvaralias 'cperl-indent-level 'tab-width)
   (set-language-environment "Japanese")
   (prefer-coding-system 'utf-8)
+  (defun my/split-window-sensibly-prefer-horizontally (&optional window)
+    "Alternative `split-window-sensibly'."
+    (let ((window (or window (selected-window))))
+      (or (and (window-splittable-p window t)
+	           (with-selected-window window
+	             (split-window-right)))
+          (and (window-splittable-p window)
+	           (with-selected-window window
+	             (split-window-below)))
+	      (and
+           (let ((frame (window-frame window)))
+             (or
+              (eq window (frame-root-window frame))
+              (catch 'done
+                (walk-window-tree (lambda (w)
+                                    (unless (or (eq w window)
+                                                (window-dedicated-p w))
+                                      (throw 'done nil)))
+                                  frame nil 'nomini)
+                t)))
+	       (not (window-minibuffer-p window))
+	       (let ((split-height-threshold 0))
+	         (when (window-splittable-p window t)
+	           (with-selected-window window
+	             (split-window-right))))))))
+  (declare-function my/split-window-sensibly-prefer-horizontally "init")
+  (advice-add #'split-window-sensibly :override #'my/split-window-sensibly-prefer-horizontally)
   (leaf treesit
     :ensure nil
     :custom (treesit-font-lock-level . 4))
@@ -293,7 +323,7 @@ be prompted."
     :global-minor-mode global-hl-todo-mode)
   (leaf perfect-margin
     :ensure t
-    :custom (perfect-margin-visible-width . 100)
+    :custom (perfect-margin-visible-width . 140)
     :global-minor-mode perfect-margin-mode)
   (leaf spacious-padding
     :ensure t
