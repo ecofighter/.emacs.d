@@ -159,6 +159,7 @@ be prompted."
     (menu-bar-mode -1)
     (scroll-bar-mode -1))
   (leaf modus-themes
+    :disabled t
     :ensure t
     :require t
     :custom
@@ -206,31 +207,59 @@ be prompted."
     (leaf nerd-icons-dired
       :ensure t
       :hook (dired-mode-hook . nerd-icons-dired-mode)))
-  (leaf doom-modeline
-    :ensure t
-    :global-minor-mode doom-modeline-mode
-    :custom
-    (doom-modeline-height . 25)
-    (doom-modeline-bar-width . 4)
-    (doom-modeline-buffer-file-name-style . 'truncate-with-project)
-    (doom-modeline-icon . t)
-    (doom-modeline-buffer-modification-icon . t)
-    (doom-modeline-buffer-state-icon . t)
-    (doom-modeline-buffer-encoding . t)
-    (doom-modeline-buffer-major-mode . t)
-    (doom-modeline-major-mode-icon . t)
-    (doom-modeline-major-mode-color-icon . nil)
-    (doom-modeline-buffer-minor-modes . nil)
-    (doom-modeline-indent-info . nil)
-    (doom-modeline-lsp . t)
-    (doom-modeline-github . nil)
-    (doom-modeline-gnus . nil)
-    (doom-modeline-irc . nil)
-    (doom-modeline-mu4e . nil)
-    (doom-modeline-persp-name . t)
-    (doom-modeline-persp-icon . t)
-    (doom-modeline-project-detection . 'auto)
-    (doom-modeline-unicode-fallback . nil))
+  (leaf *nano
+    :disabled t
+    :config
+    (leaf nano-theme
+      :ensure t
+      :config
+      (load-theme 'nano-dark t nil))
+    (leaf nano-modeline
+      :ensure t
+      :defun nano-modeline-footer
+      :require t
+      :custom
+      (nano-modeline-position . #'nano-modeline-footer)
+      :hook
+      (prog-mode-hook . nano-modeline-prog-mode)
+      (text-mode-hook . nano-modeline-text-mode)
+      (org-mode-hook . nano-modeline-org-mode)
+      (pdf-view-mode-hook . nano-modeline-pdf-mode)
+      (term-mode-hook . nano-modeline-term-mode)
+      (xwidget-webkit-mode-hook . nano-modeline-xwidget-mode)
+      (messages-buffer-mode-hook . nano-modeline-message-mode)
+      (org-capture-mode-hook . nano-modeline-org-capture-mode)
+      (org-agenda-mode-hook . nano-modeline-org-agenda-mode)))
+  (leaf *doom
+    :config
+    (leaf doom-themes
+      :ensure t
+      :config
+      (load-theme 'doom-spacegrey t nil))
+    (leaf doom-modeline
+      :ensure t
+      :global-minor-mode doom-modeline-mode
+      :custom
+      (doom-modeline-window-width-limit . 60)
+      (doom-modeline-buffer-file-name-style . 'truncate-with-project)
+      (doom-modeline-icon . t)
+      (doom-modeline-buffer-modification-icon . t)
+      (doom-modeline-buffer-state-icon . t)
+      (doom-modeline-buffer-encoding . t)
+      (doom-modeline-buffer-major-mode . t)
+      (doom-modeline-major-mode-icon . t)
+      (doom-modeline-major-mode-color-icon . nil)
+      (doom-modeline-buffer-minor-modes . nil)
+      (doom-modeline-indent-info . nil)
+      (doom-modeline-lsp . t)
+      (doom-modeline-github . nil)
+      (doom-modeline-gnus . nil)
+      (doom-modeline-irc . nil)
+      (doom-modeline-mu4e . nil)
+      (doom-modeline-persp-name . t)
+      (doom-modeline-persp-icon . t)
+      (doom-modeline-project-detection . 'auto)
+      (doom-modeline-unicode-fallback . nil)))
   (leaf hide-mode-line
     :ensure t
     :hook
@@ -379,10 +408,9 @@ be prompted."
 (leaf recentf
   :ensure nil
   :custom
-  (recentf-exclude . '("~/\.emacs\.d/bookmarks"
-                       "~/Documents/org/inbox.org"
-                       "/tmp.*"
-                       "~/\.emacs\.d/elpa.*")))
+  (recentf-exclude . `(,(locate-user-emacs-file "bookmarks")
+                       ,(locate-user-emacs-file "elpa")
+                       "/tmp.*")))
 (leaf eldoc
   :ensure nil
   :global-minor-mode global-eldoc-mode
@@ -559,6 +587,7 @@ be prompted."
   :global-minor-mode which-key-mode
   :init
   (leaf which-key-posframe
+    :disabled t
     :ensure t
     :defun (posframe-poshandler-frame-bottom-center . posframe)
     :custom
@@ -676,20 +705,6 @@ be prompted."
   (transient-append-suffix 'magit-diff '(-1 -1)
     [("D" "Difftastic diff (dwim)" difftastic-magit-diff)
      ("S" "Difftastic show" difftastic-magit-show)]))
-(leaf projectile
-  :ensure t
-  :hook
-  ((prog-mode-hook conf-mode-hook text-mode-hook) . projectile-mode)
-  :bind
-  (:projectile-mode-map
-   ("C-c p p" . #'projectile-command-map)
-   ("C-c p f" . #'projectile-find-file)
-   ("C-c p s" . #'projectile-switch-project)
-   ("C-c p b" . #'projectile-switch-to-buffer)
-   ("C-c p d" . #'projectile-dired)
-   ("C-c p g" . #'projectile-ripgrep)
-   ("C-c p c" . #'projectile-compile-project)
-   ("C-c p r" . #'projectile-replace)))
 (leaf org
   :ensure t
   :defvar org-directory my/org-prefix
@@ -986,13 +1001,13 @@ be prompted."
       :defvar rust-mode-hook
       :custom
       (rust-indent-offset . 4)
-      :config
-      (add-to-list 'rust-mode-hook #'eglot-ensure))
+      :hook
+      (rust-mode-hook . eglot-ensure))
     (leaf rust-ts-mode
       :ensure t
       :custom
       (rust-ts-flymake-command . nil)
-      :config
+      :defer-config
       (setq-default rust-ts-mode-hook rust-mode-hook))
     (leaf cargo
       :ensure t))
