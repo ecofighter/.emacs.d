@@ -225,7 +225,9 @@ be prompted."
       (mode-line-format . nil)
       :hook
       (prog-mode-hook . nano-modeline-prog-mode)
+      (conf-mode-hook . nano-modeline-prog-mode)
       (text-mode-hook . nano-modeline-text-mode)
+      (special-mode-hook . nano-modeline-text-mode)
       (org-mode-hook . nano-modeline-org-mode)
       (pdf-view-mode-hook . nano-modeline-pdf-mode)
       (term-mode-hook . nano-modeline-term-mode)
