@@ -611,12 +611,7 @@ be prompted."
 (leaf ace-window
   :ensure t
   :custom-face
-  (aw-leading-char-face . '((t :height 4.0)))
-  :config
-  (leaf ace-window-posframe
-    :ensure posframe
-    :when (display-graphic-p)
-    :hook (window-setup-hook . ace-window-posframe-mode)))
+  (aw-leading-char-face . '((t :height 4.0))))
 (leaf winner
   :ensure nil
   :global-minor-mode winner-mode
@@ -665,6 +660,8 @@ be prompted."
   (skk-show-mode-show . t)
   (skk-show-mode-style . 'inline)
   (skk-inline-show-face . nil)
+  :custom-face
+  (skk-show-mode-inline-face . '((t (:inherit default :background "white smoke" :foreground "SlateGray4"))))
   :config
   (with-eval-after-load 'skk-vars
     (eval-when-compile (require 'skk-vars))
@@ -672,7 +669,6 @@ be prompted."
     (setq skk-large-jisyo (expand-file-name "SKK-JISYO.L" skk-get-jisyo-directory))
     (setq skk-itaiji-jisyo (expand-file-name "SKK-JISYO.itaiji" skk-get-jisyo-directory))
     (setq skk-cdb-large-jisyo (expand-file-name "SKK-JISYO.L.cdb" skk-get-jisyo-directory)))
-  (custom-set-faces '(skk-show-mode-inline-face ((t (:inherit default :background "white smoke" :foreground "SlateGray4")))))
   (leaf ddskk-posframe
     :ensure t
     :after skk
