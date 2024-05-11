@@ -753,6 +753,11 @@ be prompted."
   (eval-and-compile
     (define-prefix-command 'my/org-prefix))
   :config
+  (eval-after-load 'org
+    (let ((inbox-file-name (expand-file-name "inbox.org" org-directory)))
+      (unless (file-exists-p inbox-file-name)
+        (with-temp-file inbox-file-name
+          (insert "#+TITLE: inbox\n")))))
   (defun my/open-org-dir ()
     "Open `org-directory'."
     (interactive)
