@@ -159,7 +159,6 @@ be prompted."
     (menu-bar-mode -1)
     (scroll-bar-mode -1))
   (leaf modus-themes
-    :disabled t
     :ensure t
     :require t
     :custom
@@ -178,7 +177,7 @@ be prompted."
                                (agenda-structure . (variable-pitch light 1.8))
                                (t . (1.1))))
     :config
-    (load-theme 'modus-vivendi :no-confirm))
+    (load-theme 'modus-vivendi-tinted :no-confirm))
   (leaf ef-themes
     :disabled t
     :ensure t
@@ -197,7 +196,7 @@ be prompted."
     (ef-themes-variable-pitch-ui . t)
     :config
     (mapc #'disable-theme custom-enabled-themes)
-    (ef-themes-select 'ef-dream))
+    (ef-themes-select 'ef-elea-dark))
   (leaf nord-theme
     :ensure t)
   (leaf nerd-icons
@@ -210,18 +209,19 @@ be prompted."
       :ensure t
       :hook (dired-mode-hook . nerd-icons-dired-mode)))
   (leaf *nano
-    :disabled t
     :config
     (leaf nano-theme
+      :disabled t
       :ensure t
       :config
       (load-theme 'nano-dark t nil))
     (leaf nano-modeline
       :ensure t
-      :defun nano-modeline-footer
+      ;; :defun nano-modeline-footer
       :require t
       :custom
-      (nano-modeline-position . #'nano-modeline-footer)
+      ;; (nano-modeline-position . #'nano-modeline-footer)
+      (mode-line-format . nil)
       :hook
       (prog-mode-hook . nano-modeline-prog-mode)
       (text-mode-hook . nano-modeline-text-mode)
@@ -233,11 +233,12 @@ be prompted."
       (org-capture-mode-hook . nano-modeline-org-capture-mode)
       (org-agenda-mode-hook . nano-modeline-org-agenda-mode)))
   (leaf *doom
+    :disabled t
     :config
     (leaf doom-themes
       :ensure t
       :config
-      (load-theme 'doom-nord t nil))
+      (load-theme 'doom-spacegrey t nil))
     (leaf doom-modeline
       :ensure t
       :global-minor-mode doom-modeline-mode
@@ -267,6 +268,7 @@ be prompted."
     :hook
     (imenu-list-major-mode-hook . hide-mode-line-mode))
   (leaf minions
+    :disabled t
     :ensure t
     :global-minor-mode minions-mode)
   (leaf rainbow-delimiters
@@ -616,6 +618,8 @@ be prompted."
   (skk-isearch-start-mode . 'latin)
   (skk-isearch-mode-enable . t)
   (default-input-method . "japanese-skk")
+  (skk-status-indicator . nil)
+  (skk-show-mode-show . t)
   :bind (("C-x j" . skk-mode)
          ("C-x J" . skk-auto-fill-mode))
   :init
