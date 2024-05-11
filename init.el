@@ -198,6 +198,8 @@ be prompted."
     :config
     (mapc #'disable-theme custom-enabled-themes)
     (ef-themes-select 'ef-dream))
+  (leaf nord-theme
+    :ensure t)
   (leaf nerd-icons
     :ensure t
     :config
@@ -235,7 +237,7 @@ be prompted."
     (leaf doom-themes
       :ensure t
       :config
-      (load-theme 'doom-spacegrey t nil))
+      (load-theme 'doom-nord t nil))
     (leaf doom-modeline
       :ensure t
       :global-minor-mode doom-modeline-mode
