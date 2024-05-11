@@ -750,7 +750,9 @@ be prompted."
    ("r i" . org-roam-node-insert)
    ("r c" . org-roam-capture))
   :init
-  (define-prefix-command 'my/org-prefix)
+  (eval-and-compile
+    (define-prefix-command 'my/org-prefix))
+  :config
   (defun my/open-org-dir ()
     "Open `org-directory'."
     (interactive)
