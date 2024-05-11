@@ -682,6 +682,11 @@ be prompted."
   (leaf flycheck-posframe
     :ensure t
     :hook (flycheck-mode-hook . flycheck-posframe-mode)))
+(leaf ispell
+  :custom
+  (ispell-program-name . "hunspell")
+  (ispell-really-hunspell . t)
+  (ispell-dictionary . "en_US"))
 (leaf paren
   :ensure nil
   :global-minor-mode show-paren-mode)
@@ -705,21 +710,16 @@ be prompted."
   (highlight-indent-guides-responsive . 'top)
   (highlight-indent-guides-method . 'column))
 (leaf magit
-  :ensure t
+  :ensure t difftastic
   :bind
   ("C-x g" . #'magit-status)
+  (:magit-blame-read-only-mode-map
+   ("D" . 'difftastic-magit-show)
+   ("S" . 'difftastic-magit-show))
   :config
-  (leaf difftastic
-    :ensure t transient
-    :bind
-    (:magit-blame-read-only-mode-map
-     ("D" . 'difftastic-magit-show)
-     ("S" . 'difftastic-magit-show))
-    :config
-    (transient-append-suffix 'magit-diff '(-1 -1)
-      [("D" "Difftastic diff (dwim)" difftastic-magit-diff)
-       ("S" "Difftastic show" difftastic-magit-show)]))
-  )
+  (transient-append-suffix 'magit-diff '(-1 -1)
+    [("D" "Difftastic diff (dwim)" difftastic-magit-diff)
+     ("S" "Difftastic show" difftastic-magit-show)]))
 (leaf *org
   :config
   (defconst my/org-inbox-file "inbox.org"
@@ -993,6 +993,9 @@ be prompted."
     :hook (lsp-mode-hook . lsp-treemacs-sync-mode)))
 (leaf *languages
   :config
+  (leaf text-mode
+    :custom
+    (text-mode-ispell-word-completion . nil))
   (leaf nix-mode
     :disabled t
     :ensure t)
@@ -1055,23 +1058,22 @@ be prompted."
     :config
     (leaf auctex
       :custom
-      ((TeX-engine . 'luatex)
-       ;;(TeX-engine-alist . '((luatex "LuaTeX" "luatex.exe" "lualatex.exe --jobname=%(s-filename-only)" "luatex.exe")))
-       (LaTeX-using-Biber . t)
-       (TeX-PDF-mode . t)
-       (TeX-source-correlate-mode . t)
-       (TeX-source-correlate-method . 'synctex)
-       (TeX-source-correlate-start-server . t)
-       (TeX-parse-self . t)
-       (TeX-auto-save . t)
-       (reftex-plug-into-AUCTeX . t))
+      (TeX-engine . 'luatex)
+      (LaTeX-using-Biber . t)
+      (TeX-PDF-mode . t)
+      (TeX-source-correlate-mode . t)
+      (TeX-source-correlate-method . 'synctex)
+      (TeX-source-correlate-start-server . t)
+      (TeX-parse-self . t)
+      (TeX-auto-save . t)
+      (reftex-plug-into-AUCTeX . t)
       :ensure t
       :defvar TeX-view-program-list TeX-error-list TeX-command-buffer
       :defun TeX-revert-document-buffer TeX-active-master TeX-output-extension
       :hook (LaTeX-mode-hook . turn-on-reftex)
       :config
       (leaf *preview-with-pdf-tools
-        :when (featurep 'pdf-tools)
+        :after pdf-tools
         :hook (TeX-after-compilation-finished-functions . TeX-revert-document-buffer)
         :custom
         (TeX-view-program-selection . '((output-pdf "PDF Tools")))
