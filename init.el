@@ -1,4 +1,4 @@
-;;; init.el -- my config -*- lexical-binding: t -*-
+;;; Init.el -- my config -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;; using leaf.el
@@ -720,179 +720,182 @@ be prompted."
   (transient-append-suffix 'magit-diff '(-1 -1)
     [("D" "Difftastic diff (dwim)" difftastic-magit-diff)
      ("S" "Difftastic show" difftastic-magit-show)]))
-(leaf org
-  :ensure t
-  :defvar org-directory my/org-prefix
-  :custom
-  (org-directory . "~/Documents/org")
-  (org-startup-indented . nil)
-  (org-startup-truncated . nil)
-  (org-todo-keywords . '((sequence "TODO" "PROG" "|" "DONE")))
-  (org-clock-out-remove-zero-time-clocks . t)
-  (org-clock-clocked-in-display . 'frame-title)
-  (org-capture-templates . `(("t" "Todo" entry
-                              (file+headline ,(expand-file-name "inbox.org" org-directory)
-                                             "Tasks")
-                              "* TODO %?\n  %i\n  %a")
-                             ("n" "Note" entry
-                              (file+headline ,(expand-file-name "inbox.org" org-directory)
-                                             "Notes")
-                              "* %?\n  %i\n  %a")))
-  :bind
-  ("C-c a" . org-agenda)
-  ("C-c o" . my/org-prefix)
-  (:my/org-prefix
-   ("o" . my/open-org-inbox)
-   ("O" . my/open-org-dir)
-   ("p" . org-pomodoro)
-   ("l" . org-web-tools-insert-link-for-url)
-   ("c" . org-capture)
-   ("r t" . org-roam-buffer-toggle)
-   ("r f" . org-roam-node-find)
-   ("r i" . org-roam-node-insert)
-   ("r c" . org-roam-capture))
-  :init
-  (eval-and-compile
-    (define-prefix-command 'my/org-prefix))
+(leaf *org
   :config
-  (eval-after-load 'org
-    (let ((inbox-file-name (expand-file-name "inbox.org" org-directory)))
+  (defconst my/org-inbox-file "inbox.org"
+    "Org file to use with org-capture.")
+  (defvar my/org-prefix nil
+    "Prefix map for org commands.")
+  (define-prefix-command 'my/org-prefix)
+  (leaf org
+    :ensure t
+    :defvar org-directory
+    :custom
+    (org-directory . "~/Documents/org")
+    (org-startup-indented . nil)
+    (org-startup-truncated . nil)
+    (org-todo-keywords . '((sequence "TODO" "PROG" "|" "DONE")))
+    (org-clock-out-remove-zero-time-clocks . t)
+    (org-clock-clocked-in-display . 'frame-title)
+    (org-capture-templates . `(("t" "Todo" entry
+                                (file+headline ,(expand-file-name my/org-inbox-file org-directory)
+                                               "Tasks")
+                                "* TODO %?\n  %i\n  %a")
+                               ("n" "Note" entry
+                                (file+headline ,(expand-file-name my/org-inbox-file org-directory)
+                                               "Notes")
+                                "* %?\n  %i\n  %a")))
+    :bind
+    ("C-c a" . org-agenda)
+    ("C-c o" . my/org-prefix)
+    (:my/org-prefix
+     ("o" . my/open-org-inbox)
+     ("O" . my/open-org-dir)
+     ("p" . org-pomodoro)
+     ("l" . org-web-tools-insert-link-for-url)
+     ("c" . org-capture)
+     ("r t" . org-roam-buffer-toggle)
+     ("r f" . org-roam-node-find)
+     ("r i" . org-roam-node-insert)
+     ("r c" . org-roam-capture))
+    :config
+    (let ((inbox-file-name (expand-file-name my/org-inbox-file org-directory)))
       (unless (file-exists-p inbox-file-name)
         (with-temp-file inbox-file-name
-          (insert "#+TITLE: inbox\n")))))
-  (defun my/open-org-dir ()
-    "Open `org-directory'."
-    (interactive)
-    (find-file org-directory))
-  (defun my/open-org-inbox ()
-    "Open the inbox file."
-    (interactive)
-    (find-file (expand-file-name "inbox.org" org-directory)))
-  (leaf org-pomodoro
-    :ensure t
-    :require org-clock alert
-    :custom
-    (org-pomodoro-audio-player . "play.sh")
-    (org-pomodoro-start-sound-p . t)
-    :init
-    (eval-when-compile (require 'org-clock)))
-  (leaf org-agenda
-    :ensure nil
-    :require t
-    :custom
-    (org-agenda-span . 'day)
-    (org-agenda-files . `(,(expand-file-name "inbox.org" org-directory)
-                          ,(file-name-as-directory (expand-file-name "tasks/" org-directory))))
-    (org-agenda-skip-scheduled-if-done . t)
-    (org-agenda-include-deadlines . t)
-    (org-agenda-include-diary . t)
-    (org-agenda-block-separator . nil)
-    (org-agenda-compact-blocks . t)
-    :init
-    (leaf org-super-agenda
+          (insert "#+TITLE: inbox\n"))))
+    (defun my/open-org-dir ()
+      "Open `org-directory'."
+      (interactive)
+      (find-file org-directory))
+    (defun my/open-org-inbox ()
+      "Open the inbox file."
+      (interactive)
+      (find-file (expand-file-name my/org-inbox-file org-directory)))
+    (leaf org-pomodoro
       :ensure t
-      :global-minor-mode org-super-agenda-mode
+      :require org-clock alert
       :custom
-      (org-super-agenda-groups . '((:name "Past but not finished"
-                                          :scheduled past
-                                          :deadline past)
-                                   (:name "Due Today"
-                                          :and (:deadline today :scheduled nil))
-                                   (:name "Today"
-                                          :scheduled today
-                                          :time-grid t)
-                                   (:name "Future"
-                                          :scheduled future)
-                                   (:name "Not Scheduled"
-                                          :scheduled nil)))
-      (org-agenda-custom-commands . '(("n" "Agenda and all TODOs"
-                                       ((agenda #1="")
-                                        (alltodo #1#)))
-                                      ("d" "Day agenda"
-                                       ((agenda "" ((org-agenda-span 'day)))))
-                                      ("w" "Week agenda"
-                                       ((agenda "" ((org-agenda-span 'week)))))
-                                      ("q" "4 Weeks agenda"
-                                       ((agenda "" ((org-agenda-span 28)
-                                                    (org-deadline-warning-days 56)))))
-                                      ("c" "Super"
-                                       ((agenda ""
-                                                ((org-agenda-span 'day)
-                                                 (org-agenda-prefix-format
-                                                  "%i %-12:c%?-12t% s")
-                                                 (org-deadline-warning-days 28)
-                                                 (org-super-agenda-groups
-                                                  '((:name "Past but not finished"
-                                                           :scheduled past
-                                                           :deadline past)
-                                                    (:name "Today"
-                                                           :time-grid t
-                                                           :deadline today
-                                                           :scheduled today)
-                                                    (:name "Soon"
-                                                           :anything t)))))
-                                        (alltodo ""
-                                                 ((org-agenda-overriding-header "")
-                                                  (org-agenda-prefix-format
-                                                   "%i %-12:c%?-12t% s")
-                                                  (org-deadline-warning-days 28)
-                                                  (org-super-agenda-groups
-                                                   '((:name "Past but not finished"
-                                                            :scheduled past
-                                                            :deadline past)
-                                                     (:name "Due Today"
-                                                            :deadline today)
-                                                     (:name "Not scheduled"
-                                                            :and (:scheduled nil :deadline t))
-                                                     (:name "No Deadline"
-                                                            :and (:scheduled nil :deadline nil))
-                                                     (:name "Future"
-                                                            :scheduled future)))))))))))
-  (leaf org-modern
-    :ensure t
-    :custom
-    (org-modern-star . 'fold)
-    (org-modern-table . nil)
-    :hook
-    (org-mode-hook . org-modern-mode)
-    (org-agenda-finalize-hook . org-modern-agenda))
-  (leaf valign
-    :ensure t
-    :custom
-    (valign-fancy-bar . t)
-    :hook
-    (org-mode-hook . valign-mode))
-  (leaf org-tidy
-    :ensure t)
-  (leaf org-web-tools
-    :ensure t)
-  (leaf org-roam
-    :ensure t
-    :defvar org-roam-node-display-template
-    :global-minor-mode org-roam-db-autosync-mode
-    :custom
-    (org-roam-directory . `,(expand-file-name "roam" org-directory))
-    (org-roam-db-location . `,(locate-user-emacs-file "org-roam.db"))
-    (org-roam-database-connector . 'sqlite-builtin)
-    (org-roam-capture-templates . '(("p" "Permanent Note" plain "%?"
-                                     :target (file+head
-                                              "permanent/%<%Y%m%d%H%M%S>-${slug}.org"
-                                              "#+title: ${title}\n#+filetags: :Permanent:"))
-                                    ("f" "Fleet Note" plain "%?"
-                                     :target (file+head
-                                              "fleet/%<%Y%m%d%H%M%S>-${slug}.org"
-                                              "#+title: ${title}\n#+filetags: :Fleet:"))
-                                    ("l" "Literature Note" plain "%?"
-                                     :target (file+head
-                                              "literature/%<%Y%m%d%H%M%S>-${slug}.org"
-                                              "#+title: ${title}\n#+filetags: :Literature:"))))
-    (org-roam-node-display-template . `,(concat "${title:*} "
-                                                (propertize "${tags:10}" 'face 'org-tag)))
-    :init
-    (leaf emacsql-sqlite-builtin
+      (org-pomodoro-audio-player . "play.sh")
+      (org-pomodoro-start-sound-p . t)
+      :init
+      (eval-when-compile (require 'org-clock)))
+    (leaf org-agenda
+      :ensure nil
+      :require t
+      :custom
+      (org-agenda-span . 'day)
+      (org-agenda-files . `(,(expand-file-name my/org-inbox-file org-directory)
+                            ,(file-name-as-directory (expand-file-name "tasks/" org-directory))))
+      (org-agenda-skip-scheduled-if-done . t)
+      (org-agenda-include-deadlines . t)
+      (org-agenda-include-diary . t)
+      (org-agenda-block-separator . nil)
+      (org-agenda-compact-blocks . t)
+      :init
+      (leaf org-super-agenda
+        :ensure t
+        :global-minor-mode org-super-agenda-mode
+        :custom
+        (org-super-agenda-groups . '((:name "Past but not finished"
+                                            :scheduled past
+                                            :deadline past)
+                                     (:name "Due Today"
+                                            :and (:deadline today :scheduled nil))
+                                     (:name "Today"
+                                            :scheduled today
+                                            :time-grid t)
+                                     (:name "Future"
+                                            :scheduled future)
+                                     (:name "Not Scheduled"
+                                            :scheduled nil)))
+        (org-agenda-custom-commands . '(("n" "Agenda and all TODOs"
+                                         ((agenda #1="")
+                                          (alltodo #1#)))
+                                        ("d" "Day agenda"
+                                         ((agenda "" ((org-agenda-span 'day)))))
+                                        ("w" "Week agenda"
+                                         ((agenda "" ((org-agenda-span 'week)))))
+                                        ("q" "4 Weeks agenda"
+                                         ((agenda "" ((org-agenda-span 28)
+                                                      (org-deadline-warning-days 56)))))
+                                        ("c" "Super"
+                                         ((agenda ""
+                                                  ((org-agenda-span 'day)
+                                                   (org-agenda-prefix-format
+                                                    "%i %-12:c%?-12t% s")
+                                                   (org-deadline-warning-days 28)
+                                                   (org-super-agenda-groups
+                                                    '((:name "Past but not finished"
+                                                             :scheduled past
+                                                             :deadline past)
+                                                      (:name "Today"
+                                                             :time-grid t
+                                                             :deadline today
+                                                             :scheduled today)
+                                                      (:name "Soon"
+                                                             :anything t)))))
+                                          (alltodo ""
+                                                   ((org-agenda-overriding-header "")
+                                                    (org-agenda-prefix-format
+                                                     "%i %-12:c%?-12t% s")
+                                                    (org-deadline-warning-days 28)
+                                                    (org-super-agenda-groups
+                                                     '((:name "Past but not finished"
+                                                              :scheduled past
+                                                              :deadline past)
+                                                       (:name "Due Today"
+                                                              :deadline today)
+                                                       (:name "Not scheduled"
+                                                              :and (:scheduled nil :deadline t))
+                                                       (:name "No Deadline"
+                                                              :and (:scheduled nil :deadline nil))
+                                                       (:name "Future"
+                                                              :scheduled future)))))))))))
+    (leaf org-modern
+      :ensure t
+      :custom
+      (org-modern-star . 'fold)
+      (org-modern-table . nil)
+      :hook
+      (org-mode-hook . org-modern-mode)
+      (org-agenda-finalize-hook . org-modern-agenda))
+    (leaf valign
+      :ensure t
+      :custom
+      (valign-fancy-bar . t)
+      :hook
+      (org-mode-hook . valign-mode))
+    (leaf org-tidy
       :ensure t)
-    (leaf consult-org-roam
-      :ensure t)))
+    (leaf org-web-tools
+      :ensure t)
+    (leaf org-roam
+      :ensure t
+      :defvar org-roam-node-display-template
+      :global-minor-mode org-roam-db-autosync-mode
+      :custom
+      (org-roam-directory . `,(expand-file-name "roam" org-directory))
+      (org-roam-db-location . `,(locate-user-emacs-file "org-roam.db"))
+      (org-roam-database-connector . 'sqlite-builtin)
+      (org-roam-capture-templates . '(("p" "Permanent Note" plain "%?"
+                                       :target (file+head
+                                                "permanent/%<%Y%m%d%H%M%S>-${slug}.org"
+                                                "#+title: ${title}\n#+filetags: :Permanent:"))
+                                      ("f" "Fleet Note" plain "%?"
+                                       :target (file+head
+                                                "fleet/%<%Y%m%d%H%M%S>-${slug}.org"
+                                                "#+title: ${title}\n#+filetags: :Fleet:"))
+                                      ("l" "Literature Note" plain "%?"
+                                       :target (file+head
+                                                "literature/%<%Y%m%d%H%M%S>-${slug}.org"
+                                                "#+title: ${title}\n#+filetags: :Literature:"))))
+      (org-roam-node-display-template . `,(concat "${title:*} "
+                                                  (propertize "${tags:10}" 'face 'org-tag)))
+      :init
+      (leaf emacsql-sqlite-builtin
+        :ensure t)
+      (leaf consult-org-roam
+        :ensure t))))
 (leaf literate-calc-mode
   :ensure t
   :init
