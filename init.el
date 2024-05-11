@@ -781,7 +781,6 @@ be prompted."
       (eval-when-compile (require 'org-clock)))
     (leaf org-agenda
       :ensure nil
-      :require t
       :custom
       (org-agenda-span . 'day)
       (org-agenda-files . `(,(expand-file-name my/org-inbox-file org-directory)
