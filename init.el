@@ -269,10 +269,10 @@ be prompted."
     (dashboard-set-heading-icons . t)
     (dashboard-set-file-icons . t)
     (dashboard-startup-banner . 2)
-    (dashboard-items . '((recents . 10)
-                         (bookmarks . 5)
-                         (projects . 5)
-                         (agenda . 5)))
+    (dashboard-items . '((agenda . 10)
+                         (projects . 10)
+                         (bookmarks . 10)
+                         (recents . 10)))
     :init
     (when (daemonp)
       (setq initial-buffer-choice #'(lambda () (get-buffer-create "*dashboard*"))))
@@ -291,15 +291,33 @@ be prompted."
                         (udev
                          :default-family "UDEVGothic"
                          :fixed-pitch-family "UDEVGothic"
-                         :variable-pitch-family "Sarasa Gothic J")
+                         :variable-pitch-family "Sarasa Gothic J"
+                         :line-spacing 0.2)
+                        (udev35
+                         :default-family "UDEVGothic35"
+                         :fixed-pitch-family "UDEVGothic35"
+                         :variable-pitch-family "Sarasa Gothic J"
+                         :line-spacing 0.2)
                         (ibmplex
                          :default-family "PlemolJP"
                          :fixed-pitch-family "PlemolJP"
-                         :variable-pitch-family "IBM Plex Sans JP")
+                         :variable-pitch-family "IBM Plex Sans JP"
+                         :line-spacing 0.2)
+                        (ibmplex35
+                         :default-family "PlemolJP35"
+                         :fixed-pitch-family "PlemolJP35"
+                         :variable-pitch-family "IBM Plex Sans JP"
+                         :line-spacing 0.2)
                         (sarasa
                          :default-family "Sarasa Mono J"
                          :fixed-pitch-family "Sarasa Mono J"
-                         :variable-pitch-family "Sarasa Gothic J")))
+                         :variable-pitch-family "Sarasa Gothic J"
+                         :line-spacing 0.2)
+                        (sarasaterm
+                         :default-family "Sarasa Term J"
+                         :fixed-pitch-family "Sarasa Term J"
+                         :variable-pitch-family "Sarasa Gothic J"
+                         :line-spacing 0.2)))
   :init
   (defun my/check-font-preset ()
     (unless fontaine-current-preset
@@ -720,16 +738,7 @@ be prompted."
     (org-pomodoro-audio-player . "play.sh")
     (org-pomodoro-start-sound-p . t)
     :init
-    (eval-when-compile (require 'org-clock))
-    :hook
-    (org-pomodoro-started-hook . (lambda ()
-                                   (alert (concat "Pomodoro Start: " org-clock-current-task))))
-    (org-pomodoro-finished-hook . (lambda ()
-                                    (alert "Pomodoro Finish")))
-    (org-pomodoro-break-finished-hook . (lambda ()
-                                          (alert "Pomodoro Break Finish")))
-    (org-pomodoro-overtime-hook . (lambda ()
-                                    (alert (concat "Pomodoro overtime: " org-clock-current-task)))))
+    (eval-when-compile (require 'org-clock)))
   (leaf org-agenda
     :ensure nil
     :require t
@@ -806,9 +815,16 @@ be prompted."
     :ensure t
     :custom
     (org-modern-star . 'fold)
+    (org-modern-table . nil)
     :hook
     (org-mode-hook . org-modern-mode)
     (org-agenda-finalize-hook . org-modern-agenda))
+  (leaf valign
+    :ensure t
+    :custom
+    (valign-fancy-bar . t)
+    :hook
+    (org-mode-hook . valign-mode))
   (leaf org-tidy
     :ensure t)
   (leaf org-web-tools
