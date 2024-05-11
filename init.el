@@ -136,7 +136,7 @@ be prompted."
            (enable-recusive-minibuffers . t)
            (completion-cycle-threshold . 3)
            (tab-always-indent . 'complete))
-  :init
+  :config
   (defvaralias 'c-basic-offset 'tab-width)
   (defvaralias 'cperl-indent-level 'tab-width)
   (set-language-environment "Japanese")
@@ -152,9 +152,9 @@ be prompted."
     :config
     (treesit-auto-add-to-auto-mode-alist 'all)))
 (leaf *theme
-  :init
+  :config
   (leaf *bars
-    :init
+    :config
     (tool-bar-mode -1)
     (menu-bar-mode -1)
     (scroll-bar-mode -1))
@@ -314,7 +314,7 @@ be prompted."
                          (projects . 10)
                          (bookmarks . 10)
                          (recents . 10)))
-    :init
+    :config
     (when (daemonp)
       (setq initial-buffer-choice #'(lambda () (get-buffer-create "*dashboard*"))))
     (dashboard-setup-startup-hook)))
@@ -359,7 +359,7 @@ be prompted."
                          :fixed-pitch-family "Sarasa Term J"
                          :variable-pitch-family "Sarasa Gothic J"
                          :line-spacing 0.2)))
-  :init
+  :config
   (defun my/check-font-preset ()
     (unless fontaine-current-preset
       (fontaine-set-preset (or (fontaine-restore-latest-preset) 'udev))))
@@ -429,7 +429,7 @@ be prompted."
   :config
   (leaf eldoc-box
     :ensure t
-    :init
+    :config
     (defun my/enable-eldoc-box-hover-mode-when-graphical ()
       (when (display-graphic-p)
         (eldoc-box-hover-mode 1)))
@@ -510,7 +510,7 @@ be prompted."
       (my/toggle-corfu-terminal . init.el)
       :vc (corfu-terminal
            :url "https://codeberg.org/akib/emacs-corfu-terminal.git")
-      :init
+      :config
       (when (daemonp)
         (defun my/toggle-corfu-terminal ()
           "disable corfu-terminal-mode in graphical frames"
@@ -522,7 +522,7 @@ be prompted."
     :ensure t
     :custom
     (cape-dabbrev-check-other-buffers . nil)
-    :init
+    :config
     (mapc (lambda (item)
             (add-to-list 'completion-at-point-functions item t))
           '(cape-dabbrev
@@ -597,7 +597,7 @@ be prompted."
 (leaf which-key
   :ensure t
   :global-minor-mode which-key-mode
-  :init
+  :config
   (leaf which-key-posframe
     :disabled t
     :ensure t
@@ -635,7 +635,7 @@ be prompted."
   (skk-show-mode-show . t)
   (skk-show-mode-style . 'inline)
   (skk-inline-show-face . nil)
-  :init
+  :config
   (with-eval-after-load 'skk-vars
     (eval-when-compile (require 'skk-vars))
     (setq skk-get-jisyo-directory (locate-user-emacs-file "skk-get-jisyo/"))
@@ -652,7 +652,7 @@ be prompted."
   :defun
   skk-isearch-mode-setup
   skk-isearch-mode-cleanup
-  :init
+  :config
   (add-hook 'isearch-mode-hook #'(lambda ()
                                    (when (and (boundp 'skk-mode)
                                               skk-mode
@@ -678,7 +678,7 @@ be prompted."
   :disabled t
   :ensure t
   :global-minor-mode global-flycheck-mode
-  :init
+  :config
   (leaf flycheck-posframe
     :ensure t
     :hook (flycheck-mode-hook . flycheck-posframe-mode)))
@@ -708,18 +708,18 @@ be prompted."
   :ensure t
   :bind
   ("C-x g" . #'magit-status)
-  :init
+  :config
   (leaf difftastic
-    :ensure t
-    :after magit
+    :ensure t transient
     :bind
     (:magit-blame-read-only-mode-map
      ("D" . 'difftastic-magit-show)
-     ("S" . 'difftastic-magit-show)))
-  :config
-  (transient-append-suffix 'magit-diff '(-1 -1)
-    [("D" "Difftastic diff (dwim)" difftastic-magit-diff)
-     ("S" "Difftastic show" difftastic-magit-show)]))
+     ("S" . 'difftastic-magit-show))
+    :config
+    (transient-append-suffix 'magit-diff '(-1 -1)
+      [("D" "Difftastic diff (dwim)" difftastic-magit-diff)
+       ("S" "Difftastic show" difftastic-magit-show)]))
+  )
 (leaf *org
   :config
   (defconst my/org-inbox-file "inbox.org"
@@ -773,12 +773,9 @@ be prompted."
       (find-file (expand-file-name my/org-inbox-file org-directory)))
     (leaf org-pomodoro
       :ensure t
-      :require org-clock alert
       :custom
       (org-pomodoro-audio-player . "play.sh")
-      (org-pomodoro-start-sound-p . t)
-      :init
-      (eval-when-compile (require 'org-clock)))
+      (org-pomodoro-start-sound-p . t))
     (leaf org-agenda
       :ensure nil
       :custom
@@ -790,7 +787,7 @@ be prompted."
       (org-agenda-include-diary . t)
       (org-agenda-block-separator . nil)
       (org-agenda-compact-blocks . t)
-      :init
+      :config
       (leaf org-super-agenda
         :ensure t
         :global-minor-mode org-super-agenda-mode
@@ -869,7 +866,7 @@ be prompted."
     (leaf org-web-tools
       :ensure t)
     (leaf org-roam
-      :ensure t
+      :ensure t emacsql-sqlite-builtin consult-org-roam
       :defvar org-roam-node-display-template
       :global-minor-mode org-roam-db-autosync-mode
       :custom
@@ -889,21 +886,16 @@ be prompted."
                                                 "literature/%<%Y%m%d%H%M%S>-${slug}.org"
                                                 "#+title: ${title}\n#+filetags: :Literature:"))))
       (org-roam-node-display-template . `,(concat "${title:*} "
-                                                  (propertize "${tags:10}" 'face 'org-tag)))
-      :init
-      (leaf emacsql-sqlite-builtin
-        :ensure t)
-      (leaf consult-org-roam
-        :ensure t))))
+                                                  (propertize "${tags:10}" 'face 'org-tag))))))
 (leaf literate-calc-mode
   :ensure t
-  :init
+  :config
   (with-eval-after-load 'org
     (eval-when-compile (require 'org))
     (require 'literate-calc-mode)))
 (leaf graphviz-dot-mode
   :ensure t
-  :init
+  :config
   (with-eval-after-load 'org
     (eval-when-compile (require 'org))
     (setf (alist-get 'dot org-babel-load-languages) t))
@@ -912,7 +904,8 @@ be prompted."
     (setf (alist-get "dot" org-src-lang-modes nil nil #'string=) 'graphviz-dot-mode)))
 (leaf pdf-tools
   :ensure t
-  :hook (pdf-view-mode-hook . (lambda () (display-line-numbers-mode -1))))
+  :config
+  (pdf-tools-install))
 (leaf *docker
   :disabled t
   :config
@@ -1004,7 +997,7 @@ be prompted."
     :disabled t
     :ensure t)
   (leaf *c/cpp
-    :init
+    :config
     (leaf cmake-mode
       :ensure t))
   (leaf markdown-mode
@@ -1077,14 +1070,12 @@ be prompted."
       :defun TeX-revert-document-buffer TeX-active-master TeX-output-extension
       :hook (LaTeX-mode-hook . turn-on-reftex)
       :config
-      (leaf pdf-tools
-        :ensure t
+      (leaf *preview-with-pdf-tools
+        :when (featurep 'pdf-tools)
         :hook (TeX-after-compilation-finished-functions . TeX-revert-document-buffer)
         :custom
-        ((TeX-view-program-selection . '((output-pdf "PDF Tools")))
-         (TeX-view-program-list . '(("PDF Tools" TeX-pdf-tools-sync-view))))
-        :config
-        (pdf-tools-install))
+        (TeX-view-program-selection . '((output-pdf "PDF Tools")))
+        (TeX-view-program-list . '(("PDF Tools" TeX-pdf-tools-sync-view))))
       (leaf auctex-cluttex
         :ensure t
         ;; :custom
