@@ -218,7 +218,7 @@ be prompted."
       (load-theme 'nano-dark t nil))
     (leaf nano-modeline
       :ensure t
-      ;; :defun nano-modeline-footer
+      :defun nano-modeline-text-mode
       :require t
       :custom
       ;; (nano-modeline-position . #'nano-modeline-footer)
@@ -226,15 +226,15 @@ be prompted."
       :hook
       (prog-mode-hook . nano-modeline-prog-mode)
       (conf-mode-hook . nano-modeline-prog-mode)
-      (text-mode-hook . nano-modeline-text-mode)
-      (special-mode-hook . nano-modeline-text-mode)
       (org-mode-hook . nano-modeline-org-mode)
       (pdf-view-mode-hook . nano-modeline-pdf-mode)
       (term-mode-hook . nano-modeline-term-mode)
       (xwidget-webkit-mode-hook . nano-modeline-xwidget-mode)
       (messages-buffer-mode-hook . nano-modeline-message-mode)
       (org-capture-mode-hook . nano-modeline-org-capture-mode)
-      (org-agenda-mode-hook . nano-modeline-org-agenda-mode)))
+      (org-agenda-mode-hook . nano-modeline-org-agenda-mode)
+      :config
+      (nano-modeline-text-mode t)))
   (leaf *doom
     :disabled t
     :config
