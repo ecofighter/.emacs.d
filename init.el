@@ -159,6 +159,7 @@ be prompted."
     (menu-bar-mode -1)
     (scroll-bar-mode -1))
   (leaf modus-themes
+    :disabled t
     :ensure t
     :require t
     :custom
@@ -177,9 +178,8 @@ be prompted."
                                (agenda-structure . (variable-pitch light 1.8))
                                (t . (1.1))))
     :config
-    (load-theme 'modus-vivendi-tinted :no-confirm))
+    (load-theme 'modus-operandi-tinted :no-confirm))
   (leaf ef-themes
-    :disabled t
     :ensure t
     :require t
     :custom
@@ -194,9 +194,10 @@ be prompted."
                            (t variable-pitch 1.1)))
     (ef-themes-mixed-fonts . t)
     (ef-themes-variable-pitch-ui . t)
+    (ef-themes-to-toggle . '(ef-elea-light ef-elea-dark))
     :config
     (mapc #'disable-theme custom-enabled-themes)
-    (ef-themes-select 'ef-elea-dark))
+    (ef-themes-select 'ef-elea-light))
   (leaf nord-theme
     :ensure t)
   (leaf nerd-icons
@@ -280,7 +281,9 @@ be prompted."
     (show-trailing-whitespace . t)
     (whitespace-style . '(face trailing)))
   (leaf display-line-numbers
-    :global-minor-mode global-display-line-numbers-mode)
+    :hook
+    (prog-mode-hook . display-line-numbers-mode)
+    (conf-mode-hook . display-line-numbers-mode))
   (leaf hl-line
     :global-minor-mode global-hl-line-mode)
   (leaf hl-todo
@@ -290,6 +293,9 @@ be prompted."
     :ensure t
     :custom (perfect-margin-visible-width . 100)
     :global-minor-mode perfect-margin-mode)
+  (leaf spacious-padding
+    :ensure t
+    :global-minor-mode spacious-padding-mode)
   (leaf dashboard
     :ensure t
     :defun dashboard-insert-startupify-lists
