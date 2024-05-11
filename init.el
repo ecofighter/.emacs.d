@@ -618,6 +618,9 @@ be prompted."
 (leaf ddskk
   :ensure t
   :defvar skk-isearch-mode-enable
+  :bind
+  ("C-x j" . skk-mode)
+  ("C-x J" . skk-auto-fill-mode)
   :custom
   (skk-kutouten-type . '("．" . "，"))
   (skk-use-azik . t)
@@ -625,40 +628,38 @@ be prompted."
   (skk-isearch-mode-enable . t)
   (default-input-method . "japanese-skk")
   (skk-status-indicator . nil)
+  (skk-show-tooltip . t)
+  (skk-show-inline . nil)
   (skk-show-mode-show . t)
-  :bind (("C-x j" . skk-mode)
-         ("C-x J" . skk-auto-fill-mode))
+  (skk-show-mode-style . 'inline)
+  (skk-inline-show-face . nil)
   :init
-  (leaf skk
-    :ensure nil
-    :config
-    (leaf ddskk-posframe
-      :ensure t
-      :after skk
-      :hook (skk-mode-hook . ddskk-posframe-mode)))
-  (leaf skk-vars
-    :ensure nil
-    :config
+  (with-eval-after-load 'skk-vars
     (eval-when-compile (require 'skk-vars))
     (setq skk-get-jisyo-directory (locate-user-emacs-file "skk-get-jisyo/"))
-    (setq skk-large-jisyo (concat skk-get-jisyo-directory "SKK-JISYO.L"))
-    (setq skk-itaiji-jisyo (concat skk-get-jisyo-directory "SKK-JISYO.itaiji"))
-    (setq skk-cdb-large-jisyo (concat skk-get-jisyo-directory "SKK-JISYO.L.cdb")))
-  (leaf skk-isearch
-    :ensure nil
-    :defun
-    skk-isearch-mode-setup
-    skk-isearch-mode-cleanup
-    :init
-    (add-hook 'isearch-mode-hook #'(lambda ()
-                                     (when (and (boundp 'skk-mode)
-                                                skk-mode
-                                                skk-isearch-mode-enable)
-                                       (skk-isearch-mode-setup))))
-    (add-hook 'isearch-mode-end-hook #'(lambda ()
-                                         (when (and (featurep 'skk-isearch)
-                                                    skk-isearch-mode-enable)
-                                           (skk-isearch-mode-cleanup))))))
+    (setq skk-large-jisyo (expand-file-name "SKK-JISYO.L" skk-get-jisyo-directory))
+    (setq skk-itaiji-jisyo (expand-file-name "SKK-JISYO.itaiji" skk-get-jisyo-directory))
+    (setq skk-cdb-large-jisyo (expand-file-name "SKK-JISYO.L.cdb" skk-get-jisyo-directory)))
+  (custom-set-faces '(skk-show-mode-inline-face ((t (:inherit default :background "white smoke" :foreground "SlateGray4")))))
+  (leaf ddskk-posframe
+    :ensure t
+    :after skk
+    :hook (skk-mode-hook . ddskk-posframe-mode)))
+(leaf skk-isearch
+  :ensure nil
+  :defun
+  skk-isearch-mode-setup
+  skk-isearch-mode-cleanup
+  :init
+  (add-hook 'isearch-mode-hook #'(lambda ()
+                                   (when (and (boundp 'skk-mode)
+                                              skk-mode
+                                              skk-isearch-mode-enable)
+                                     (skk-isearch-mode-setup))))
+  (add-hook 'isearch-mode-end-hook #'(lambda ()
+                                       (when (and (featurep 'skk-isearch)
+                                                  skk-isearch-mode-enable)
+                                         (skk-isearch-mode-cleanup)))))
 (leaf flymake
   :ensure t
   :defun flymake-eldoc-function
