@@ -173,14 +173,7 @@ be prompted."
   (advice-add #'split-window-sensibly :override #'my/split-window-sensibly-prefer-horizontally)
   (leaf treesit
     :ensure nil
-    :custom (treesit-font-lock-level . 4))
-  (leaf treesit-auto
-    :ensure t
-    :defun treesit-auto-add-to-auto-mode-alist
-    :custom (treesit-auto-install . 'prompt)
-    :global-minor-mode global-treesit-auto-mode
-    :config
-    (treesit-auto-add-to-auto-mode-alist 'all)))
+    :custom (treesit-font-lock-level . 4)))
 (leaf *theme
   :config
   (leaf *bars
@@ -1072,19 +1065,15 @@ be prompted."
     :config
     (leaf rust-mode
       :ensure t
-      :defvar rust-mode-hook
       :custom
       (rust-indent-offset . 4)
+      (rust-mode-treesitter-derive . t)
       :hook
       (rust-mode-hook . eglot-ensure))
-    (leaf rust-ts-mode
+    (leaf cargo-mode
       :ensure t
-      :custom
-      (rust-ts-flymake-command . nil)
-      :defer-config
-      (setq-default rust-ts-mode-hook rust-mode-hook))
-    (leaf cargo
-      :ensure t))
+      :hook
+      (rust-mode-hook . cargo-minor-mode)))
   (leaf *fsharp
     :disabled t
     :config
