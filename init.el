@@ -793,9 +793,9 @@ be prompted."
                                                "Notes")
                                 "* %?\n  %i\n  %a")))
     :bind
-    ("C-c a" . org-agenda)
     ("C-c o" . my/org-prefix)
     (:my/org-prefix
+     ("a" . org-agenda)
      ("o" . my/open-org-inbox)
      ("O" . my/open-org-dir)
      ("p" . org-pomodoro)
