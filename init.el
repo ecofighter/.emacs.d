@@ -1095,25 +1095,23 @@ be prompted."
       (TeX-source-correlate-start-server . t)
       (TeX-parse-self . t)
       (TeX-auto-save . t)
-      (reftex-plug-into-AUCTeX . t)
-      :ensure t
+      (TeX-view-program-selection . '((output-pdf "PDF Tools")))
+      (TeX-view-program-list . '(("PDF Tools" TeX-pdf-tools-sync-view)))
       :defvar TeX-view-program-list TeX-error-list TeX-command-buffer
       :defun TeX-revert-document-buffer TeX-active-master TeX-output-extension
-      :hook (LaTeX-mode-hook . turn-on-reftex)
+      :hook
+      (TeX-after-compilation-finished-functions . TeX-revert-document-buffer)
+      (LaTeX-mode-hook . digestif)
       :config
-      (leaf *preview-with-pdf-tools
-        :after pdf-tools
-        :hook (TeX-after-compilation-finished-functions . TeX-revert-document-buffer)
+      (leaf reftex
+        :ensure t
+        :hook
+        (LaTeX-mode-hook . turn-on-reftex)
         :custom
-        (TeX-view-program-selection . '((output-pdf "PDF Tools")))
-        (TeX-view-program-list . '(("PDF Tools" TeX-pdf-tools-sync-view))))
+        (reftex-plug-into-AUCTeX . t)
+        (reftex-ref-style-default-list . '("Cleveref" "Default")))
       (leaf auctex-cluttex
         :ensure t
-        ;; :custom
-        ;; ((auctex-cluttex-program . "cluttex.exe")
-        ;;  (auctex-cluttex-ClutTeX-command . '("ClutTeX" "cluttex.exe -e %(cluttexengine) %(cluttexbib) %(cluttexindex) %S %t" auctex-cluttex--TeX-run-ClutTeX nil
-        ;;                                      (plain-tex-mode latex-mode)
-        ;;                                      :help "Run ClutTeX")))
         :hook (LaTeX-mode-hook . auctex-cluttex-mode)
         :defun
         auctex-cluttex--TeX-ClutTeX-sentinel
