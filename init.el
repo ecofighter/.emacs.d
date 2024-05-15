@@ -5,8 +5,8 @@
 
 ;;; Code:
 (setq custom-file (locate-user-emacs-file "custom.el"))
-(when (file-exists-p custom-file)
-  (load custom-file))
+;; (when (file-exists-p custom-file)
+;;   (load custom-file))
 
 (eval-and-compile
   (customize-set-variable
@@ -131,7 +131,6 @@ be prompted."
            (truncate-partial-width-windows . nil)
            (inhibit-startup-screen . nil)
            (inhibit-x-resources . t)
-           (inhibit-compacting-font-caches . nil)
            (inhibit-startup-buffer-menu . t)
            (blink-matching-paren . nil)
            (auto-mode-case-fold . nil)
@@ -173,7 +172,11 @@ be prompted."
   (advice-add #'split-window-sensibly :override #'my/split-window-sensibly-prefer-horizontally)
   (leaf treesit
     :ensure nil
-    :custom (treesit-font-lock-level . 4)))
+    :custom
+    (treesit-font-lock-level . 4)
+    (treesit-language-source-alist . '(( rust .
+                                         ("https://github.com/tree-sitter/tree-sitter-rust"
+                                          nil nil nil nil))))))
 (leaf *theme
   :config
   (leaf *bars
@@ -240,6 +243,7 @@ be prompted."
       :config
       (load-theme 'nano-dark t nil))
     (leaf nano-modeline
+      :disabled t
       :ensure t
       :defun nano-modeline-text-mode
       :require t
@@ -259,9 +263,9 @@ be prompted."
       :config
       (nano-modeline-text-mode t)))
   (leaf *doom
-    :disabled t
     :config
     (leaf doom-themes
+      :disabled t
       :ensure t
       :config
       (load-theme 'doom-spacegrey t nil))
@@ -361,6 +365,7 @@ be prompted."
   :defun (my/check-font-preset . init.el)
   :global-minor-mode fontaine-mode
   :custom
+  (inhibit-compacting-font-caches . t)
   (fontaine-latest-state-file . `,(locate-user-emacs-file "fontaine-latest-state.eld"))
   (fontaine-presets . '((source-han
                          :default-family "Source Han Code JP"
@@ -1086,6 +1091,7 @@ be prompted."
   (leaf *latex
     :config
     (leaf auctex
+      :ensure t
       :custom
       (TeX-engine . 'luatex)
       (LaTeX-using-Biber . t)
@@ -1101,7 +1107,6 @@ be prompted."
       :defun TeX-revert-document-buffer TeX-active-master TeX-output-extension
       :hook
       (TeX-after-compilation-finished-functions . TeX-revert-document-buffer)
-      (LaTeX-mode-hook . digestif)
       :config
       (leaf reftex
         :ensure t
