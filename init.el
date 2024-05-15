@@ -316,28 +316,14 @@ be prompted."
     :global-minor-mode global-hl-todo-mode)
   (leaf perfect-margin
     :ensure t
-    :custom (perfect-margin-visible-width . 100)
+    :custom
+    (perfect-margin-visible-width . 100)
+    (perfect-margin-disable-in-splittable-check . t)
     :global-minor-mode perfect-margin-mode
     :config
-    (defvar perfect-margin-only-set-left-margin)
-    (defvar my/perfect-margin-check-splittable-with-original-width t)
-    (declare-function perfect-margin--auto-margin-ignore-p "ext:perfect-margin")
-    (defun my/perfect-margin--window-splittable-p-advice (func window &optional horizontal)
-      (if (or
-           (not horizontal)
-           (not my/perfect-margin-check-splittable-with-original-width)
-           (perfect-margin--auto-margin-ignore-p window))
-          (funcall func window horizontal)
-        (let* ((margins (window-margins window)))
-          (prog2
-              (set-window-margins window 0 (if perfect-margin-only-set-left-margin
-                                               (cdr margins)
-                                             0))
-              (funcall func window horizontal)
-            (set-window-margins window (car margins) (cdr margins))))))
-    (declare-function my/perfect-margin--window-splittable-p-advice "init")
-    (advice-add #'window-splittable-p
-                :around #'my/perfect-margin--window-splittable-p-advice))
+    (with-eval-after-load 'doom-modeline
+      (eval-when-compile (require 'doom-modeline nil t))
+      (setq mode-line-right-align-edge 'window)))
   (leaf spacious-padding
     :ensure t
     :custom
