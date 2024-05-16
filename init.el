@@ -15,9 +15,9 @@
                        ("gnu-devel"    . "https://elpa.gnu.org/devel/")
                        ("gnu"          . "https://elpa.gnu.org/packages/")))
   (customize-set-variable
-   'package-archive-priorities '(("gnu-devel" . 3)
-                                 ("melpa" . 2)
-                                 ("nongnu" . 1)))
+   'package-archive-priorities '(("gnu" . 1)
+                                 ("nongnu" . 2)
+                                 ("melpa" . 3)))
   (package-initialize)
   (unless (package-installed-p 'leaf)
     (package-refresh-contents)
@@ -329,6 +329,7 @@ be prompted."
       (eval-when-compile (require 'doom-modeline nil t))
       (setq mode-line-right-align-edge 'window)))
   (leaf spacious-padding
+    :disabled t
     :ensure t
     :custom
     (spacious-padding-widths . '( :internal-border-width 12
@@ -352,8 +353,8 @@ be prompted."
     (dashboard-set-file-icons . t)
     (dashboard-startup-banner . 2)
     (dashboard-items . '((agenda . 10)
-                         (projects . 10)
-                         (bookmarks . 10)
+                         (projects . 5)
+                         (bookmarks . 5)
                          (recents . 10)))
     :config
     (when (daemonp)
@@ -610,11 +611,10 @@ be prompted."
   :ensure t
   :global-minor-mode shackle-mode
   :custom
-  (shackle-rules . '((compilation-mode :align below :ratio 0.2)
-                     ("*Flycheck errors*" :align 'below :ratio 0.2)
-                     ("*Help*" :align right :ratio 0.5 :select t)
-                     ("*Completions*" :align below :ratio 0.3)
-                     ("*latex-math-preview-expression*" :align below :ratio 0.3 :noselect t))))
+  (shackle-rules . '((compilation-mode :align below)
+                     ("*Flycheck errors*" :align below)
+                     ("*Help*" :align right)
+                     ("*Completions*" :align below))))
 (leaf avy
   :ensure t
   :bind
@@ -629,6 +629,7 @@ be prompted."
   :global-minor-mode winner-mode
   :bind
   (:winner-mode-map
+   ("C-z" . winner-undo)
    ("C-c <left>" . winner-undo)
    ("C-c <right>" . winner-redo)))
 (leaf which-key
@@ -724,7 +725,8 @@ be prompted."
   :custom
   (ispell-program-name . "hunspell")
   (ispell-really-hunspell . t)
-  (ispell-dictionary . "en_US"))
+  (ispell-dictionary . "en_US")
+  (ispell-personal-dictionary . "~/Documents/ispell_persional.dict"))
 (leaf paren
   :ensure nil
   :global-minor-mode show-paren-mode)
@@ -966,7 +968,7 @@ be prompted."
   eglot-hover-eldoc-function
   :custom
   (eglot-autoshutdown . t)
-  :hook (eglot-managed-mode-hook . my/eglot-capf)
+  ;; :hook (eglot-managed-mode-hook . my/eglot-capf)
   :config
   (leaf eglot-signature-eldoc-talkative
     :ensure t
@@ -1090,8 +1092,16 @@ be prompted."
        (sage-shell:use-simple-prompt . t))))
   (leaf *latex
     :config
-    (leaf auctex
+    (leaf reftex
       :ensure t
+      :hook
+      (LaTeX-mode-hook . turn-on-reftex)
+      :custom
+      (reftex-plug-into-AUCTeX . t)
+      (reftex-ref-style-default-list . '("Cleveref" "Default")))
+    (leaf auctex
+      :ensure nil
+      :require nil
       :custom
       (TeX-engine . 'luatex)
       (LaTeX-using-Biber . t)
@@ -1107,16 +1117,12 @@ be prompted."
       :defun TeX-revert-document-buffer TeX-active-master TeX-output-extension
       :hook
       (TeX-after-compilation-finished-functions . TeX-revert-document-buffer)
+      (LaTeX-mode-hook . turn-on-flyspell)
       :config
-      (leaf reftex
-        :ensure t
-        :hook
-        (LaTeX-mode-hook . turn-on-reftex)
-        :custom
-        (reftex-plug-into-AUCTeX . t)
-        (reftex-ref-style-default-list . '("Cleveref" "Default")))
       (leaf auctex-cluttex
-        :ensure t
+        :disabled t
+        :ensure nil
+        :require nil
         :hook (LaTeX-mode-hook . auctex-cluttex-mode)
         :defun
         auctex-cluttex--TeX-ClutTeX-sentinel
@@ -1129,12 +1135,7 @@ be prompted."
             (run-hook-with-args 'TeX-after-compilation-finished-functions
                                 (with-current-buffer TeX-command-buffer
                                   (expand-file-name
-                                   (TeX-active-master (TeX-output-extension)))))))))
-    (leaf *latex-lsp
-      :disabled t
-      :config
-      (add-hook 'LaTeX-mode-hook #'eglot-ensure)
-      (add-hook 'plain-TeX-mode-hook #'eglot-ensure))))
+                                   (TeX-active-master (TeX-output-extension)))))))))))
 (leaf editorconfig
   :ensure t
   :global-minor-mode editorconfig-mode)
