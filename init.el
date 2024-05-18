@@ -362,9 +362,9 @@ be prompted."
     (dashboard-setup-startup-hook)))
 (leaf fontaine
   :ensure t
-  :defvar fontaine-current-preset
-  :defun (my/check-font-preset . init.el)
   :global-minor-mode fontaine-mode
+  :defvar fontaine-current-preset fontaine-recovered-preset
+  :defun fontaine-restore-latest-preset
   :custom
   (inhibit-compacting-font-caches . t)
   (fontaine-latest-state-file . `,(locate-user-emacs-file "fontaine-latest-state.eld"))
@@ -396,32 +396,26 @@ be prompted."
                          :default-family "Sarasa Mono J"
                          :fixed-pitch-family "Sarasa Mono J"
                          :variable-pitch-family "Sarasa Gothic J"
-                         :line-spacing 0.2)
-                        (sarasaterm
-                         :default-family "Sarasa Term J"
-                         :fixed-pitch-family "Sarasa Term J"
-                         :variable-pitch-family "Sarasa Gothic J"
                          :line-spacing 0.2)))
   :config
-  (defun my/check-font-preset ()
-    (unless fontaine-current-preset
-      (fontaine-set-preset (or (fontaine-restore-latest-preset) 'udev))))
-  (add-hook 'window-setup-hook #'my/check-font-preset))
+  (if (or (display-graphic-p)
+          (daemonp))
+      (fontaine-set-preset (or (fontaine-restore-latest-preset) 'ibmplex))))
 (leaf *platform-spec
   :config
   (leaf alert
-    :when (eq system-type 'linux)
     :ensure t
-    :require t
-    :custom
-    (alert-default-style . 'libnotify))
-  (leaf alert-toast
-    :when (or (getenv "WSL_DISTRO_NAME")
-              (eq system-type 'windows-nt))
-    :ensure t
-    :require t
-    :custom
-    (alert-default-style . 'toast))
+    :config
+    (leaf *linux
+      :when (eq system-type 'linux)
+      :custom (alert-default-style . 'libnotify))
+    (leaf alert-toast
+      :when (or (getenv "WSL_DISTRO_NAME")
+                (eq system-type 'windows-nt))
+      :ensure t
+      :require t
+      :custom
+      (alert-default-style . 'toast)))
   (leaf *wayland-clipboard
     :when (getenv "WAYLAND_DISPLAY")
     :defvar wl-copy-process
@@ -942,10 +936,7 @@ be prompted."
   (with-eval-after-load 'org-src
     (eval-when-compile (require 'org-src))
     (setf (alist-get "dot" org-src-lang-modes nil nil #'string=) 'graphviz-dot-mode)))
-(leaf pdf-tools
-  :ensure t
-  :config
-  (pdf-tools-install))
+
 (leaf *docker
   :disabled t
   :config
@@ -955,7 +946,8 @@ be prompted."
     :ensure t))
 (leaf yasnippet
   :ensure t
-  :global-minor-mode yas-global-mode
+  :hook
+  (prog-mode-hook . yas-minor-mode-on)
   :config
   (leaf yasnippet-capf
     :ensure t
@@ -968,19 +960,11 @@ be prompted."
   eglot-hover-eldoc-function
   :custom
   (eglot-autoshutdown . t)
-  ;; :hook (eglot-managed-mode-hook . my/eglot-capf)
   :config
   (leaf eglot-signature-eldoc-talkative
     :ensure t
     :advice
-    (:override eglot-signature-eldoc-function eglot-signature-eldoc-talkative))
-  (defun my/eglot-capf ()
-    (setq-local completion-at-point-functions
-                (list (cape-capf-super
-                       #'eglot-completion-at-point
-                       #'yasnippet-capf
-                       #'cape-file
-                       #'cape-tex)))))
+    (:override eglot-signature-eldoc-function eglot-signature-eldoc-talkative)))
 (leaf lsp-mode
   :disabled t
   :ensure t
@@ -1053,7 +1037,9 @@ be prompted."
   (leaf *haskell
     :config
     (leaf haskell-mode
-      :ensure t))
+      :ensure t
+      :hook
+      (haskell-mode-hook . eglot-ensure)))
   (leaf *rust
     :config
     (leaf rust-mode
@@ -1100,8 +1086,7 @@ be prompted."
       (reftex-plug-into-AUCTeX . t)
       (reftex-ref-style-default-list . '("Cleveref" "Default")))
     (leaf auctex
-      :ensure nil
-      :require nil
+      :ensure t
       :custom
       (TeX-engine . 'luatex)
       (LaTeX-using-Biber . t)
@@ -1118,24 +1103,39 @@ be prompted."
       :hook
       (TeX-after-compilation-finished-functions . TeX-revert-document-buffer)
       (LaTeX-mode-hook . turn-on-flyspell)
-      :config
+      :init
       (leaf auctex-cluttex
-        :disabled t
-        :ensure nil
-        :require nil
+        :after tex
+        :ensure buttercup
+        :vc (auctex-cluttex
+             :url "https://github.com/ecofighter/auctex-cluttex"
+             :branch "major-mode-name-changed")
+        :require t
         :hook (LaTeX-mode-hook . auctex-cluttex-mode)
         :defun
         auctex-cluttex--TeX-ClutTeX-sentinel
         :advice
         (:after auctex-cluttex--TeX-ClutTeX-sentinel my/run-after-compilation-finished-funcs)
         :config
+        (eval-when-compile (require 'auctex-cluttex nil t))
+        (setq auctex-cluttex-ClutTeX-command
+              '("ClutTeX"
+                "cluttex --shell-escape -e %(cluttexengine) %(cluttexbib) %(cluttexindex) %S %t"
+                auctex-cluttex--TeX-run-ClutTeX nil (plain-tex-mode latex-mode)
+                :help "Run ClutTeX"))
         (defun my/run-after-compilation-finished-funcs (&rest _args)
           "run AUCTeX's TeX-after-compilation-finished-functions hook. Ignore all ARGS"
           (unless TeX-error-list
             (run-hook-with-args 'TeX-after-compilation-finished-functions
                                 (with-current-buffer TeX-command-buffer
                                   (expand-file-name
-                                   (TeX-active-master (TeX-output-extension)))))))))))
+                                   (TeX-active-master (TeX-output-extension)))))))))
+    :config
+    (leaf pdf-tools
+      :after latex
+      :ensure t
+      :config
+      (pdf-tools-install))))
 (leaf editorconfig
   :ensure t
   :global-minor-mode editorconfig-mode)
