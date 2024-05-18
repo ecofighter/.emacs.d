@@ -184,6 +184,55 @@ be prompted."
     (tool-bar-mode -1)
     (menu-bar-mode -1)
     (scroll-bar-mode -1))
+  (leaf *modeline
+    :config
+    (leaf doom-modeline
+      :disabled t
+      :ensure t
+      :global-minor-mode doom-modeline-mode
+      :custom
+      (doom-modeline-window-width-limit . 60)
+      (doom-modeline-buffer-file-name-style . 'truncate-with-project)
+      (doom-modeline-icon . t)
+      (doom-modeline-buffer-modification-icon . t)
+      (doom-modeline-buffer-state-icon . t)
+      (doom-modeline-buffer-encoding . t)
+      (doom-modeline-buffer-major-mode . t)
+      (doom-modeline-major-mode-icon . t)
+      (doom-modeline-major-mode-color-icon . nil)
+      (doom-modeline-buffer-minor-modes . nil)
+      (doom-modeline-indent-info . nil)
+      (doom-modeline-lsp . t)
+      (doom-modeline-github . nil)
+      (doom-modeline-gnus . nil)
+      (doom-modeline-irc . nil)
+      (doom-modeline-mu4e . nil)
+      (doom-modeline-persp-name . t)
+      (doom-modeline-persp-icon . t)
+      (doom-modeline-project-detection . 'auto)
+      (doom-modeline-unicode-fallback . nil))
+    (leaf nano-modeline
+      :ensure t
+      :defun nano-modeline-text-mode
+      :require t
+      :custom
+      ;; (nano-modeline-position . #'nano-modeline-footer)
+      (mode-line-format . nil)
+      :hook
+      (prog-mode-hook . nano-modeline-prog-mode)
+      (conf-mode-hook . nano-modeline-prog-mode)
+      (org-mode-hook . nano-modeline-org-mode)
+      (pdf-view-mode-hook . nano-modeline-pdf-mode)
+      (term-mode-hook . nano-modeline-term-mode)
+      (xwidget-webkit-mode-hook . nano-modeline-xwidget-mode)
+      (messages-buffer-mode-hook . nano-modeline-message-mode)
+      (org-capture-mode-hook . nano-modeline-org-capture-mode)
+      (org-agenda-mode-hook . nano-modeline-org-agenda-mode)
+      :config
+      (nano-modeline-text-mode t))
+    (leaf hide-mode-line
+      :ensure t
+      :global-minor-mode global-hide-mode-line-mode))
   (leaf modus-themes
     :disabled t
     :ensure t
@@ -223,9 +272,13 @@ be prompted."
     (ef-themes-to-toggle . '(ef-elea-light ef-elea-dark))
     :config
     (mapc #'disable-theme custom-enabled-themes)
-    (ef-themes-select 'ef-elea-light))
+    (ef-themes-select 'ef-elea-dark))
   (leaf nord-theme
-    :ensure t)
+    :disabled t
+    :ensure t
+    :require t
+    :config
+    (load-theme 'nord t))
   (leaf nerd-icons
     :ensure t
     :config
@@ -235,68 +288,13 @@ be prompted."
     (leaf nerd-icons-dired
       :ensure t
       :hook (dired-mode-hook . nerd-icons-dired-mode)))
-  (leaf *nano
-    :config
-    (leaf nano-theme
-      :disabled t
-      :ensure t
-      :config
-      (load-theme 'nano-dark t nil))
-    (leaf nano-modeline
-      :disabled t
-      :ensure t
-      :defun nano-modeline-text-mode
-      :require t
-      :custom
-      ;; (nano-modeline-position . #'nano-modeline-footer)
-      (mode-line-format . nil)
-      :hook
-      (prog-mode-hook . nano-modeline-prog-mode)
-      (conf-mode-hook . nano-modeline-prog-mode)
-      (org-mode-hook . nano-modeline-org-mode)
-      (pdf-view-mode-hook . nano-modeline-pdf-mode)
-      (term-mode-hook . nano-modeline-term-mode)
-      (xwidget-webkit-mode-hook . nano-modeline-xwidget-mode)
-      (messages-buffer-mode-hook . nano-modeline-message-mode)
-      (org-capture-mode-hook . nano-modeline-org-capture-mode)
-      (org-agenda-mode-hook . nano-modeline-org-agenda-mode)
-      :config
-      (nano-modeline-text-mode t)))
-  (leaf *doom
-    :config
-    (leaf doom-themes
-      :disabled t
-      :ensure t
-      :config
-      (load-theme 'doom-spacegrey t nil))
-    (leaf doom-modeline
-      :ensure t
-      :global-minor-mode doom-modeline-mode
-      :custom
-      (doom-modeline-window-width-limit . 60)
-      (doom-modeline-buffer-file-name-style . 'truncate-with-project)
-      (doom-modeline-icon . t)
-      (doom-modeline-buffer-modification-icon . t)
-      (doom-modeline-buffer-state-icon . t)
-      (doom-modeline-buffer-encoding . t)
-      (doom-modeline-buffer-major-mode . t)
-      (doom-modeline-major-mode-icon . t)
-      (doom-modeline-major-mode-color-icon . nil)
-      (doom-modeline-buffer-minor-modes . nil)
-      (doom-modeline-indent-info . nil)
-      (doom-modeline-lsp . t)
-      (doom-modeline-github . nil)
-      (doom-modeline-gnus . nil)
-      (doom-modeline-irc . nil)
-      (doom-modeline-mu4e . nil)
-      (doom-modeline-persp-name . t)
-      (doom-modeline-persp-icon . t)
-      (doom-modeline-project-detection . 'auto)
-      (doom-modeline-unicode-fallback . nil)))
-  (leaf hide-mode-line
+  (leaf nano-theme
+    :ensure t)
+  (leaf doom-themes
+    :disabled t
     :ensure t
-    :hook
-    (imenu-list-major-mode-hook . hide-mode-line-mode))
+    :config
+    (load-theme 'doom-spacegrey t nil))
   (leaf minions
     :disabled t
     :ensure t
@@ -746,7 +744,7 @@ be prompted."
 (leaf magit
   :ensure t difftastic
   :bind
-  ("C-x g" . #'magit-status)
+  ("C-x g" . #'magit)
   (:magit-blame-read-only-mode-map
    ("D" . 'difftastic-magit-show)
    ("S" . 'difftastic-magit-show))
@@ -921,6 +919,10 @@ be prompted."
                                                 "#+title: ${title}\n#+filetags: :Literature:"))))
       (org-roam-node-display-template . `,(concat "${title:*} "
                                                   (propertize "${tags:10}" 'face 'org-tag))))))
+(leaf pdf-tools
+  :ensure t
+  :config
+  (pdf-loader-install))
 (leaf literate-calc-mode
   :ensure t
   :config
@@ -936,7 +938,6 @@ be prompted."
   (with-eval-after-load 'org-src
     (eval-when-compile (require 'org-src))
     (setf (alist-get "dot" org-src-lang-modes nil nil #'string=) 'graphviz-dot-mode)))
-
 (leaf *docker
   :disabled t
   :config
@@ -1117,25 +1118,13 @@ be prompted."
         :advice
         (:after auctex-cluttex--TeX-ClutTeX-sentinel my/run-after-compilation-finished-funcs)
         :config
-        (eval-when-compile (require 'auctex-cluttex nil t))
-        (setq auctex-cluttex-ClutTeX-command
-              '("ClutTeX"
-                "cluttex --shell-escape -e %(cluttexengine) %(cluttexbib) %(cluttexindex) %S %t"
-                auctex-cluttex--TeX-run-ClutTeX nil (plain-tex-mode latex-mode)
-                :help "Run ClutTeX"))
         (defun my/run-after-compilation-finished-funcs (&rest _args)
           "run AUCTeX's TeX-after-compilation-finished-functions hook. Ignore all ARGS"
           (unless TeX-error-list
             (run-hook-with-args 'TeX-after-compilation-finished-functions
                                 (with-current-buffer TeX-command-buffer
                                   (expand-file-name
-                                   (TeX-active-master (TeX-output-extension)))))))))
-    :config
-    (leaf pdf-tools
-      :after latex
-      :ensure t
-      :config
-      (pdf-tools-install))))
+                                   (TeX-active-master (TeX-output-extension)))))))))))
 (leaf editorconfig
   :ensure t
   :global-minor-mode editorconfig-mode)
