@@ -230,6 +230,8 @@ be prompted."
       (org-agenda-mode-hook . nano-modeline-org-agenda-mode)
       :config
       (nano-modeline-text-mode t))
+    (leaf nano-theme
+      :ensure t)
     (leaf hide-mode-line
       :ensure t
       :global-minor-mode global-hide-mode-line-mode))
@@ -269,10 +271,10 @@ be prompted."
                            (t variable-pitch 1.1)))
     (ef-themes-mixed-fonts . t)
     (ef-themes-variable-pitch-ui . t)
-    (ef-themes-to-toggle . '(ef-elea-light ef-elea-dark))
+    ;; (ef-themes-to-toggle . '(ef-elea-light ef-elea-dark))
     :config
     (mapc #'disable-theme custom-enabled-themes)
-    (ef-themes-select 'ef-elea-dark))
+    (ef-themes-select 'ef-dream))
   (leaf nord-theme
     :disabled t
     :ensure t
@@ -288,8 +290,6 @@ be prompted."
     (leaf nerd-icons-dired
       :ensure t
       :hook (dired-mode-hook . nerd-icons-dired-mode)))
-  (leaf nano-theme
-    :ensure t)
   (leaf doom-themes
     :disabled t
     :ensure t
