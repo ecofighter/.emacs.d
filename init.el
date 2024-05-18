@@ -184,6 +184,61 @@ be prompted."
     (tool-bar-mode -1)
     (menu-bar-mode -1)
     (scroll-bar-mode -1))
+  (leaf *face
+    :config
+    (leaf modus-themes
+      :disabled t
+      :ensure t
+      :require t
+      :custom
+      (modus-themes-italic-constructs . t)
+      (modus-themes-bold-constructs . t)
+      (modus-themes-mixed-fonts . t)
+      (modus-themes-variable-pitch-ui . t)
+      (modus-themes-custom-auto-reload . t)
+      (modus-themes-disable-other-themes . t)
+      (modus-themes-prompts . '(italic bold))
+      (modus-themes-completions . '((matches . (extrabold))
+                                    (selection . (semibold text-also))))
+      (modus-themes-headings . '((1 . (variable-pitch 1.5))
+                                 (2 . (1.3))
+                                 (agenda-date . (1.3))
+                                 (agenda-structure . (variable-pitch light 1.8))
+                                 (t . (1.1))))
+      :config
+      (load-theme 'modus-operandi-tinted :no-confirm))
+    (leaf ef-themes
+      :ensure t
+      :require t
+      :custom
+      (ef-themes-headings .'((0 variable-pitch light 1.9)
+                             (1 variable-pitch light 1.8)
+                             (2 variable-pitch regular 1.7)
+                             (3 variable-pitch regular 1.6)
+                             (4 variable-pitch regular 1.5)
+                             (5 variable-pitch 1.4) ; absence of weight means `bold'
+                             (6 variable-pitch 1.3)
+                             (7 variable-pitch 1.2)
+                             (t variable-pitch 1.1)))
+      (ef-themes-mixed-fonts . t)
+      (ef-themes-variable-pitch-ui . t)
+      ;; (ef-themes-to-toggle . '(ef-elea-light ef-elea-dark))
+      :config
+      (load-theme 'ef-dream :no-confirm))
+    (leaf nord-theme
+      :disabled t
+      :ensure t
+      :require t
+      :config
+      (load-theme 'nord t))
+    (leaf doom-themes
+      :disabled t
+      :ensure t
+      :config
+      (load-theme 'doom-spacegrey t nil))
+    (leaf nano-theme
+      :disabled t
+      :ensure t))
   (leaf *modeline
     :config
     (leaf doom-modeline
@@ -230,57 +285,9 @@ be prompted."
       (org-agenda-mode-hook . nano-modeline-org-agenda-mode)
       :config
       (nano-modeline-text-mode t))
-    (leaf nano-theme
-      :ensure t)
     (leaf hide-mode-line
       :ensure t
       :global-minor-mode global-hide-mode-line-mode))
-  (leaf modus-themes
-    :disabled t
-    :ensure t
-    :require t
-    :custom
-    (modus-themes-italic-constructs . t)
-    (modus-themes-bold-constructs . t)
-    (modus-themes-mixed-fonts . t)
-    (modus-themes-variable-pitch-ui . t)
-    (modus-themes-custom-auto-reload . t)
-    (modus-themes-disable-other-themes . t)
-    (modus-themes-prompts . '(italic bold))
-    (modus-themes-completions . '((matches . (extrabold))
-                                  (selection . (semibold text-also))))
-    (modus-themes-headings . '((1 . (variable-pitch 1.5))
-                               (2 . (1.3))
-                               (agenda-date . (1.3))
-                               (agenda-structure . (variable-pitch light 1.8))
-                               (t . (1.1))))
-    :config
-    (load-theme 'modus-operandi-tinted :no-confirm))
-  (leaf ef-themes
-    :ensure t
-    :require t
-    :custom
-    (ef-themes-headings .'((0 variable-pitch light 1.9)
-                           (1 variable-pitch light 1.8)
-                           (2 variable-pitch regular 1.7)
-                           (3 variable-pitch regular 1.6)
-                           (4 variable-pitch regular 1.5)
-                           (5 variable-pitch 1.4) ; absence of weight means `bold'
-                           (6 variable-pitch 1.3)
-                           (7 variable-pitch 1.2)
-                           (t variable-pitch 1.1)))
-    (ef-themes-mixed-fonts . t)
-    (ef-themes-variable-pitch-ui . t)
-    ;; (ef-themes-to-toggle . '(ef-elea-light ef-elea-dark))
-    :config
-    (mapc #'disable-theme custom-enabled-themes)
-    (ef-themes-select 'ef-dream))
-  (leaf nord-theme
-    :disabled t
-    :ensure t
-    :require t
-    :config
-    (load-theme 'nord t))
   (leaf nerd-icons
     :ensure t
     :config
@@ -290,11 +297,6 @@ be prompted."
     (leaf nerd-icons-dired
       :ensure t
       :hook (dired-mode-hook . nerd-icons-dired-mode)))
-  (leaf doom-themes
-    :disabled t
-    :ensure t
-    :config
-    (load-theme 'doom-spacegrey t nil))
   (leaf minions
     :disabled t
     :ensure t
