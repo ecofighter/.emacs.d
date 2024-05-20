@@ -222,9 +222,9 @@ be prompted."
                              (t variable-pitch 1.1)))
       (ef-themes-mixed-fonts . t)
       (ef-themes-variable-pitch-ui . t)
-      ;; (ef-themes-to-toggle . '(ef-elea-light ef-elea-dark))
+      (ef-themes-to-toggle . '(ef-elea-dark ef-elea-light))
       :config
-      (load-theme 'ef-dream :no-confirm))
+      (load-theme 'ef-elea-dark :no-confirm))
     (leaf nord-theme
       :disabled t
       :ensure t
@@ -1108,11 +1108,8 @@ be prompted."
       (LaTeX-mode-hook . turn-on-flyspell)
       :init
       (leaf auctex-cluttex
+        :ensure t
         :after tex
-        :ensure buttercup
-        :vc (auctex-cluttex
-             :url "https://github.com/ecofighter/auctex-cluttex"
-             :branch "major-mode-name-changed")
         :require t
         :hook (LaTeX-mode-hook . auctex-cluttex-mode)
         :defun
