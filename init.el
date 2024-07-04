@@ -184,61 +184,6 @@ be prompted."
     (tool-bar-mode -1)
     (menu-bar-mode -1)
     (scroll-bar-mode -1))
-  (leaf *face
-    :config
-    (leaf modus-themes
-      :disabled t
-      :ensure t
-      :require t
-      :custom
-      (modus-themes-italic-constructs . t)
-      (modus-themes-bold-constructs . t)
-      (modus-themes-mixed-fonts . t)
-      (modus-themes-variable-pitch-ui . t)
-      (modus-themes-custom-auto-reload . t)
-      (modus-themes-disable-other-themes . t)
-      (modus-themes-prompts . '(italic bold))
-      (modus-themes-completions . '((matches . (extrabold))
-                                    (selection . (semibold text-also))))
-      (modus-themes-headings . '((1 . (variable-pitch 1.5))
-                                 (2 . (1.3))
-                                 (agenda-date . (1.3))
-                                 (agenda-structure . (variable-pitch light 1.8))
-                                 (t . (1.1))))
-      :config
-      (load-theme 'modus-operandi-tinted :no-confirm))
-    (leaf ef-themes
-      :ensure t
-      :require t
-      :custom
-      (ef-themes-headings .'((0 variable-pitch light 1.9)
-                             (1 variable-pitch light 1.8)
-                             (2 variable-pitch regular 1.7)
-                             (3 variable-pitch regular 1.6)
-                             (4 variable-pitch regular 1.5)
-                             (5 variable-pitch 1.4) ; absence of weight means `bold'
-                             (6 variable-pitch 1.3)
-                             (7 variable-pitch 1.2)
-                             (t variable-pitch 1.1)))
-      (ef-themes-mixed-fonts . t)
-      (ef-themes-variable-pitch-ui . t)
-      (ef-themes-to-toggle . '(ef-elea-dark ef-elea-light))
-      :config
-      (load-theme 'ef-elea-dark :no-confirm))
-    (leaf nord-theme
-      :disabled t
-      :ensure t
-      :require t
-      :config
-      (load-theme 'nord t))
-    (leaf doom-themes
-      :disabled t
-      :ensure t
-      :config
-      (load-theme 'doom-spacegrey t nil))
-    (leaf nano-theme
-      :disabled t
-      :ensure t))
   (leaf *modeline
     :config
     (leaf doom-modeline
@@ -267,6 +212,7 @@ be prompted."
       (doom-modeline-project-detection . 'auto)
       (doom-modeline-unicode-fallback . nil))
     (leaf nano-modeline
+      :disabled t
       :ensure t
       :defun nano-modeline-text-mode
       :require t
@@ -285,9 +231,107 @@ be prompted."
       (org-agenda-mode-hook . nano-modeline-org-agenda-mode)
       :config
       (nano-modeline-text-mode t))
+    (leaf smart-mode-line
+      :disabled t
+      :ensure t
+      :custom
+      (sml/theme . 'respectful)
+      (sml/no-confirm-load-theme . t)
+      :config
+      (sml/setup))
+    (leaf moody
+      :disabled t
+      :ensure t
+      :defun (my/disable-modeline-box-face . init)
+      :custom
+      (x-underline-at-decent-line . t)
+      :config
+      (moody-replace-mode-line-front-space)
+      ;; (moody-replace-mode-line-buffer-identification)
+      (moody-replace-sml/mode-line-buffer-identification)
+      (moody-replace-eldoc-minibuffer-message-function)
+      (moody-replace-vc-mode))
+    (leaf mood-line
+      :ensure t
+      :defvar mood-line-glyph-alist mood-line-glyphs-fira-code
+      :global-minor-mode mood-line-mode
+      :config
+      (setq mood-line-glyph-alist mood-line-glyphs-fira-code))
+    (leaf minions
+      :disabled t
+      :ensure t
+      :global-minor-mode minions-mode)
     (leaf hide-mode-line
+      :disabled t
       :ensure t
       :global-minor-mode global-hide-mode-line-mode))
+  (leaf *face
+    :config
+    (leaf modus-themes
+      :disabled t
+      :ensure t
+      :require t
+      :custom
+      (modus-themes-italic-constructs . t)
+      (modus-themes-bold-constructs . t)
+      (modus-themes-mixed-fonts . t)
+      (modus-themes-variable-pitch-ui . t)
+      (modus-themes-custom-auto-reload . t)
+      (modus-themes-disable-other-themes . t)
+      (modus-themes-prompts . '(italic bold))
+      (modus-themes-completions . '((matches . (extrabold))
+                                    (selection . (semibold text-also))))
+      (modus-themes-headings . '((1 . (variable-pitch 1.5))
+                                 (2 . (1.3))
+                                 (agenda-date . (1.3))
+                                 (agenda-structure . (variable-pitch light 1.8))
+                                 (t . (1.1))))
+      (modus-themes-mode-line . '(accented borderless))
+      :config
+      (load-theme 'modus-vivendi-tinted :no-confirm))
+    (leaf ef-themes
+      :ensure t
+      :defun (my/ef-themes-mode-line . init)
+      :custom
+      (ef-themes-headings .'((0 variable-pitch light 1.9)
+                             (1 variable-pitch light 1.8)
+                             (2 variable-pitch regular 1.7)
+                             (3 variable-pitch regular 1.6)
+                             (4 variable-pitch regular 1.5)
+                             (5 variable-pitch 1.4) ; absence of weight means `bold'
+                             (6 variable-pitch 1.3)
+                             (7 variable-pitch 1.2)
+                             (t variable-pitch 1.1)))
+      (ef-themes-mixed-fonts . t)
+      (ef-themes-variable-pitch-ui . t)
+      (ef-themes-to-toggle . '(ef-elea-dark ef-elea-light))
+      :init
+      (with-eval-after-load 'ef-themes
+        (eval-when-compile (require 'ef-themes))
+        (defun my/ef-themes-mode-line ()
+          "Tweak the style of the mode lines."
+          (ef-themes-with-colors
+            (custom-set-faces
+             `(mode-line ((,c :background ,bg-active :foreground ,fg-main :box (:line-width 1 :color ,fg-dim))))
+             `(mode-line-inactive ((,c :box (:line-width 1 :color ,bg-active)))))))
+        (add-hook 'ef-themes-post-load-hook #'my/ef-themes-mode-line))
+      :config
+      (load-theme 'ef-elea-dark :no-confirm)
+      (my/ef-themes-mode-line))
+    (leaf nord-theme
+      :disabled t
+      :ensure t
+      :require t
+      :config
+      (load-theme 'nord t))
+    (leaf doom-themes
+      :disabled t
+      :ensure t
+      :config
+      (load-theme 'doom-spacegrey t nil))
+    (leaf nano-theme
+      :disabled t
+      :ensure t))
   (leaf nerd-icons
     :ensure t
     :config
@@ -297,10 +341,6 @@ be prompted."
     (leaf nerd-icons-dired
       :ensure t
       :hook (dired-mode-hook . nerd-icons-dired-mode)))
-  (leaf minions
-    :disabled t
-    :ensure t
-    :global-minor-mode minions-mode)
   (leaf rainbow-delimiters
     :ensure t
     :hook (prog-mode-hook . rainbow-delimiters-mode))
@@ -321,7 +361,7 @@ be prompted."
   (leaf perfect-margin
     :ensure t
     :custom
-    (perfect-margin-visible-width . 100)
+    (perfect-margin-visible-width . 120)
     (perfect-margin-disable-in-splittable-check . t)
     :global-minor-mode perfect-margin-mode
     :config
@@ -505,6 +545,21 @@ be prompted."
   (completion-category-overrides . '((file (styles basic partial-completion)))))
 (leaf *completion
   :config
+  (leaf company
+    :disabled t
+    :ensure t
+    :global-minor-mode global-company-mode
+    :config
+    (leaf company-box
+      :ensure t
+      :hook (company-mode-hook . company-box-mode))
+    (leaf company-fuzzy
+      :ensure t flx
+      :custom
+      (company-fuzzy-sorting-backend . 'flx)
+      (company-fuzzy-reset-selection . t)
+      (company-fuzzy-prefix-on-top . nil)
+      (company-fuzzy-trigger-symbols . '("." "->" "<" "\"" "'" "@"))))
   (leaf corfu
     :ensure t
     :defun corfu-quit
@@ -637,8 +692,8 @@ be prompted."
     :custom
     (which-key-posframe-poshandler . #'posframe-poshandler-frame-bottom-center)
     (which-key-posframe-border-width . 5)
-    (which-key-posframe-parameters . '((left-fringe . 2)
-                                       (right-fringe . 2)))
+    ;; (which-key-posframe-parameters . '((left-fringe . 2)
+    ;;                                    (right-fringe . 2)))
     :hook (which-key-mode-hook . which-key-posframe-mode)))
 (leaf tramp
   :ensure t)
@@ -669,17 +724,17 @@ be prompted."
   (skk-inline-show-face . nil)
   :custom-face
   (skk-show-mode-inline-face . '((t (:inherit default :background "white smoke" :foreground "SlateGray4"))))
+  :init
+  (leaf ddskk-posframe
+    :ensure t
+    :hook (skk-mode-hook . ddskk-posframe-mode))
   :config
   (with-eval-after-load 'skk-vars
     (eval-when-compile (require 'skk-vars))
     (setq skk-get-jisyo-directory (locate-user-emacs-file "skk-get-jisyo/"))
     (setq skk-large-jisyo (expand-file-name "SKK-JISYO.L" skk-get-jisyo-directory))
     (setq skk-itaiji-jisyo (expand-file-name "SKK-JISYO.itaiji" skk-get-jisyo-directory))
-    (setq skk-cdb-large-jisyo (expand-file-name "SKK-JISYO.L.cdb" skk-get-jisyo-directory)))
-  (leaf ddskk-posframe
-    :ensure t
-    :after skk
-    :hook (skk-mode-hook . ddskk-posframe-mode)))
+    (setq skk-cdb-large-jisyo (expand-file-name "SKK-JISYO.L.cdb" skk-get-jisyo-directory))))
 (leaf skk-isearch
   :ensure nil
   :defun
@@ -826,7 +881,7 @@ be prompted."
         :ensure t
         :global-minor-mode org-super-agenda-mode
         :custom
-        (org-super-agenda-groups . '((:name "Past but not finished"
+        (org-super-agenda-groups . '((:name "Past"
                                             :scheduled past
                                             :deadline past)
                                      (:name "Due Today"
@@ -870,7 +925,9 @@ be prompted."
                                                      "%i %-12:c%?-12t% s")
                                                     (org-deadline-warning-days 28)
                                                     (org-super-agenda-groups
-                                                     '((:name "Past but not finished"
+                                                     '((:name "Finishied"
+                                                              :todo "DONE")
+                                                       (:name "Past"
                                                               :scheduled past
                                                               :deadline past)
                                                        (:name "Due Today"
@@ -958,6 +1015,8 @@ be prompted."
     (add-to-list 'completion-at-point-functions #'yasnippet-capf)))
 (leaf eglot
   :ensure t
+  :defvar
+  eglot-server-programs
   :defun
   eglot-completion-at-point
   eglot-hover-eldoc-function
@@ -968,6 +1027,10 @@ be prompted."
     :ensure t
     :advice
     (:override eglot-signature-eldoc-function eglot-signature-eldoc-talkative)))
+(leaf dape
+  :ensure t
+  :custom
+  (dape-buffer-window-arrangement . 'right))
 (leaf lsp-mode
   :disabled t
   :ensure t
@@ -1013,11 +1076,7 @@ be prompted."
            ([remap xref-find-definitions]
             . lsp-ui-peek-find-definitions)
            ([remap xref-find-references]
-            . lsp-ui-peek-find-references)))
-  (leaf lsp-treemacs
-    :ensure t
-    :after treemacs
-    :hook (lsp-mode-hook . lsp-treemacs-sync-mode)))
+            . lsp-ui-peek-find-references))))
 (leaf *languages
   :config
   (leaf text-mode
@@ -1034,7 +1093,7 @@ be prompted."
     :ensure t)
   (leaf web-mode
     :ensure t
-    :mode ("\\.csp\\'" "\\html\\'"))
+    :mode ("\\.csp\\'" "\\.razor\\'" "\\html\\'"))
   (leaf *elisp
     :config)
   (leaf *haskell
@@ -1056,6 +1115,17 @@ be prompted."
       :ensure t
       :hook
       (rust-mode-hook . cargo-minor-mode)))
+  (leaf *csharp
+    :config
+    (leaf csharp-mode
+      :ensure t
+      :hook
+      (csharp-mode-hook . eglot-ensure)
+      :config
+      (leaf *eglot-csharp
+        :after eglot
+        :config
+        (add-to-list 'eglot-server-programs '(csharp-mode . '("OmniSharp" "-lsp"))))))
   (leaf *fsharp
     :disabled t
     :config
@@ -1068,6 +1138,7 @@ be prompted."
         :config
         (add-to-list 'company-transformers 'company-sort-prefer-same-case-prefix)))
     (leaf eglot-fsharp
+      :disabled t
       :ensure t
       :after fsharp-mode
       :require t))
@@ -1079,6 +1150,16 @@ be prompted."
       :custom
       ((sage-shell:use-prompt-toolkit . nil)
        (sage-shell:use-simple-prompt . t))))
+  (leaf *coq
+    :config
+    (leaf proof-general
+      :ensure t))
+  (leaf *lean4
+    :disabled t
+    :config
+    (leaf lean4-mode
+      :vc (lean4-mode
+           :url "https://github.com/leanprover-community/lean4-mode")))
   (leaf *latex
     :config
     (leaf reftex
