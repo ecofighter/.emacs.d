@@ -110,34 +110,35 @@ be prompted."
       (when (or modified-buffers active-clients-or-frames) (delete-frame new-frame)))))
 ;;(add-to-list 'load-path "~/.emacs.d/inits")
 (leaf emacs
-  :custom ((make-backup-files . nil)
-           (backup-inhibited . nil)
-           (create-lockfiles . nil)
-           (fast-but-imprecise-scrolling . t)
-           (process-adaptive-read-buffering . t)
-           (indent-tabs-mode . nil)
-           (select-enable-clipboard . t)
-           (x-select-enable-clipboard-manager . t)
-           (use-file-dialog . nil)
-           (use-short-answers . t)
-           (window-min-height . 10)
-           (window-min-width . 70)
-           (split-width-threshold . 140)
-           (split-height-threshold . 20)
-           (vc-handled-backends . '(Git))
-           (fill-column . 80)
-           (tab-width . 4)
-           (truncate-lines . nil)
-           (truncate-partial-width-windows . nil)
-           (inhibit-startup-screen . nil)
-           (inhibit-x-resources . t)
-           (inhibit-startup-buffer-menu . t)
-           (blink-matching-paren . nil)
-           (auto-mode-case-fold . nil)
-           (bidi-inhibit-bpa . t)
-           (enable-recusive-minibuffers . t)
-           (completion-cycle-threshold . 3)
-           (tab-always-indent . 'complete))
+  :custom
+  (make-backup-files . nil)
+  (backup-inhibited . nil)
+  (create-lockfiles . nil)
+  (fast-but-imprecise-scrolling . t)
+  (process-adaptive-read-buffering . t)
+  (indent-tabs-mode . nil)
+  (select-enable-clipboard . t)
+  (x-select-enable-clipboard-manager . t)
+  (use-file-dialog . nil)
+  (use-short-answers . t)
+  (window-min-height . 10)
+  (window-min-width . 70)
+  (split-width-threshold . 140)
+  (split-height-threshold . 20)
+  (vc-handled-backends . '(Git))
+  (fill-column . 80)
+  (tab-width . 4)
+  (truncate-lines . nil)
+  (truncate-partial-width-windows . nil)
+  (inhibit-startup-screen . nil)
+  (inhibit-x-resources . t)
+  (inhibit-startup-buffer-menu . t)
+  (blink-matching-paren . nil)
+  (auto-mode-case-fold . nil)
+  (bidi-inhibit-bpa . t)
+  (enable-recusive-minibuffers . t)
+  (completion-cycle-threshold . 3)
+  (tab-always-indent . 'complete)
   :config
   (defvaralias 'c-basic-offset 'tab-width)
   (defvaralias 'cperl-indent-level 'tab-width)
@@ -291,7 +292,8 @@ be prompted."
       (load-theme 'modus-vivendi-tinted :no-confirm))
     (leaf ef-themes
       :ensure t
-      :defun (my/ef-themes-mode-line . init)
+      :defun
+      (my/ef-themes-mode-line . init)
       :custom
       (ef-themes-headings .'((0 variable-pitch light 1.9)
                              (1 variable-pitch light 1.8)
@@ -305,17 +307,15 @@ be prompted."
       (ef-themes-mixed-fonts . t)
       (ef-themes-variable-pitch-ui . t)
       (ef-themes-to-toggle . '(ef-elea-dark ef-elea-light))
-      :init
-      (with-eval-after-load 'ef-themes
-        (eval-when-compile (require 'ef-themes))
-        (defun my/ef-themes-mode-line ()
-          "Tweak the style of the mode lines."
-          (ef-themes-with-colors
-            (custom-set-faces
-             `(mode-line ((,c :background ,bg-active :foreground ,fg-main :box (:line-width 1 :color ,fg-dim))))
-             `(mode-line-inactive ((,c :box (:line-width 1 :color ,bg-active)))))))
-        (add-hook 'ef-themes-post-load-hook #'my/ef-themes-mode-line))
       :config
+      (eval-when-compile (require 'ef-themes))
+      (defun my/ef-themes-mode-line ()
+        "Tweak the style of the mode lines."
+        (ef-themes-with-colors
+          (custom-set-faces
+           `(mode-line ((,c :background ,bg-active :foreground ,fg-main :box (:line-width 1 :color ,fg-dim))))
+           `(mode-line-inactive ((,c :box (:line-width 1 :color ,bg-active)))))))
+      (add-hook 'ef-themes-post-load-hook #'my/ef-themes-mode-line)
       (load-theme 'ef-elea-dark :no-confirm)
       (my/ef-themes-mode-line))
     (leaf nord-theme
