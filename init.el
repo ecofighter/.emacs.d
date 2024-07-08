@@ -546,7 +546,6 @@ be prompted."
 (leaf *completion
   :config
   (leaf company
-    :disabled t
     :ensure t
     :global-minor-mode global-company-mode
     :config
@@ -561,6 +560,7 @@ be prompted."
       (company-fuzzy-prefix-on-top . nil)
       (company-fuzzy-trigger-symbols . '("." "->" "<" "\"" "'" "@"))))
   (leaf corfu
+    :disabled t
     :ensure t
     :defun corfu-quit
     :defvar corfu-map corfu-margin-formatters
@@ -834,6 +834,7 @@ be prompted."
                                 (file+headline ,(expand-file-name my/org-inbox-file org-directory)
                                                "Notes")
                                 "* %?\n  %i\n  %a")))
+    (org-edit-src-content-indentation . 0)
     :bind
     ("C-c o" . my/org-prefix)
     (:my/org-prefix
