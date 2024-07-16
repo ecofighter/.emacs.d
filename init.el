@@ -413,14 +413,14 @@ be prompted."
                          :fixed-pitch-family "Source Han Code JP"
                          :variable-pitch-family "Source Han Sans")
                         (udev
-                         :default-family "UDEVGothic"
-                         :fixed-pitch-family "UDEVGothic"
-                         :variable-pitch-family "Sarasa Gothic J"
+                         :default-family "UDEVGothic LG"
+                         :fixed-pitch-family "UDEVGothic LG"
+                         :variable-pitch-family "BIZ UDPGothic"
                          :line-spacing 0.2)
                         (udev35
-                         :default-family "UDEVGothic35"
-                         :fixed-pitch-family "UDEVGothic35"
-                         :variable-pitch-family "Sarasa Gothic J"
+                         :default-family "UDEVGothic35 LG"
+                         :fixed-pitch-family "UDEVGothic35 LG"
+                         :variable-pitch-family "BIZ UDPGothic"
                          :line-spacing 0.2)
                         (ibmplex
                          :default-family "PlemolJP"
@@ -440,7 +440,38 @@ be prompted."
   :config
   (if (or (display-graphic-p)
           (daemonp))
-      (fontaine-set-preset (or (fontaine-restore-latest-preset) 'ibmplex))))
+      (fontaine-set-preset (or (fontaine-restore-latest-preset) 'udev))))
+(leaf ligature
+  :ensure t
+  :global-minor-mode global-ligature-mode
+  :defun ligature-set-ligatures
+  :config
+  (ligature-set-ligatures 'rust-mode '("--" "---" "==" "===" "!=" "!==" "=!="
+                                       "=:=" "=/=" "<=" ">=" "&&" "&&&" "&=" "++" "+++" "***" ";;" "!!"
+                                       "??" "???" "?:" "?." "?=" "<:" ":<" ":>" ">:" "<:<" "<>"
+                                       "||" "-|" "_|_" "|-" "||-" "|=" "||=" "##" "###" "####"
+                                       "#{" "#[" "]#" "#(" "#?" "#_" "#_(" "#:" "#!" "#=" "^=" "<$>" "<$"
+                                       "$>" "<+>" "<+" "+>" "<*>" "<*" "*>" "</" "</>" "/>" "<!--" "<#--"
+                                       "-->" "->" "->>" "<<-" "<-" "<=<" "=<<" "<<=" "<==" "<=>" "<==>"
+                                       "==>" "=>" "=>>" ">=>" ">>=" ">>-" ">-" "-<" "-<<" ">->" "<-<" "<-|"
+                                       "<=|" "|=>" "|->" "<->" "<~~" "<~" "<~>" "~~" "~~>" "~>" "~-" "-~"
+                                       "~@" "[||]" "|]" "[|" "|}" "{|" "[<" ">]" "|>" "<|" "||>" "<||"
+                                       "|||>" "<|||" "<|>" "..." ".." ".=" "..<" ".?" "::" ":::" ":=" "::="
+                                       ":?" ":?>" "//" "///" "/*" "*/" "/=" "//=" "/==" "@_" "__" "???"
+                                       "<:<" ";;;"))
+  (ligature-set-ligatures 'prog-mode '("--" "---" "==" "===" "!=" "!==" "=!="
+                                       "=:=" "=/=" "<=" ">=" "&&" "&&&" "&=" "++" "+++" "***" ";;" "!!"
+                                       "??" "???" "?:" "?." "?=" "<:" ":<" ":>" ">:" "<:<" "<>" "<<<" ">>>"
+                                       "<<" ">>" "||" "-|" "_|_" "|-" "||-" "|=" "||=" "##" "###" "####"
+                                       "#{" "#[" "]#" "#(" "#?" "#_" "#_(" "#:" "#!" "#=" "^=" "<$>" "<$"
+                                       "$>" "<+>" "<+" "+>" "<*>" "<*" "*>" "</" "</>" "/>" "<!--" "<#--"
+                                       "-->" "->" "->>" "<<-" "<-" "<=<" "=<<" "<<=" "<==" "<=>" "<==>"
+                                       "==>" "=>" "=>>" ">=>" ">>=" ">>-" ">-" "-<" "-<<" ">->" "<-<" "<-|"
+                                       "<=|" "|=>" "|->" "<->" "<~~" "<~" "<~>" "~~" "~~>" "~>" "~-" "-~"
+                                       "~@" "[||]" "|]" "[|" "|}" "{|" "[<" ">]" "|>" "<|" "||>" "<||"
+                                       "|||>" "<|||" "<|>" "..." ".." ".=" "..<" ".?" "::" ":::" ":=" "::="
+                                       ":?" ":?>" "//" "///" "/*" "*/" "/=" "//=" "/==" "@_" "__" "???"
+                                       "<:<" ";;;")))
 (leaf *platform-spec
   :config
   (leaf alert
@@ -1128,18 +1159,15 @@ be prompted."
         :config
         (add-to-list 'eglot-server-programs '(csharp-mode . '("OmniSharp" "-lsp"))))))
   (leaf *fsharp
-    :disabled t
     :config
     (leaf fsharp-mode
       :ensure t
       :config
       (leaf *fsharp-company
         :after company
-        :disabled t
         :config
         (add-to-list 'company-transformers 'company-sort-prefer-same-case-prefix)))
     (leaf eglot-fsharp
-      :disabled t
       :ensure t
       :after fsharp-mode
       :require t))
