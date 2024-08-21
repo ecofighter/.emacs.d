@@ -127,7 +127,7 @@ be prompted."
   (split-height-threshold . 20)
   (vc-handled-backends . '(Git))
   (fill-column . 80)
-  (tab-width . 4)
+  (tab-width . 2)
   (truncate-lines . nil)
   (truncate-partial-width-windows . nil)
   (inhibit-startup-screen . nil)
@@ -148,12 +148,12 @@ be prompted."
     "Alternative `split-window-sensibly'."
     (let ((window (or window (selected-window))))
       (or (and (window-splittable-p window t)
-	           (with-selected-window window
-	             (split-window-right)))
+	             (with-selected-window window
+	               (split-window-right)))
           (and (window-splittable-p window)
-	           (with-selected-window window
-	             (split-window-below)))
-	      (and
+	             (with-selected-window window
+	               (split-window-below)))
+	        (and
            (let ((frame (window-frame window)))
              (or
               (eq window (frame-root-window frame))
@@ -164,11 +164,11 @@ be prompted."
                                       (throw 'done nil)))
                                   frame nil 'nomini)
                 t)))
-	       (not (window-minibuffer-p window))
-	       (let ((split-height-threshold 0))
-	         (when (window-splittable-p window t)
-	           (with-selected-window window
-	             (split-window-right))))))))
+	         (not (window-minibuffer-p window))
+	         (let ((split-height-threshold 0))
+	           (when (window-splittable-p window t)
+	             (with-selected-window window
+	               (split-window-right))))))))
   (declare-function my/split-window-sensibly-prefer-horizontally "init")
   (advice-add #'split-window-sensibly :override #'my/split-window-sensibly-prefer-horizontally)
   (leaf treesit
@@ -308,16 +308,17 @@ be prompted."
       (ef-themes-variable-pitch-ui . t)
       (ef-themes-to-toggle . '(ef-elea-dark ef-elea-light))
       :config
-      (eval-when-compile (require 'ef-themes))
-      (defun my/ef-themes-mode-line ()
-        "Tweak the style of the mode lines."
-        (ef-themes-with-colors
-          (custom-set-faces
-           `(mode-line ((,c :background ,bg-active :foreground ,fg-main :box (:line-width 1 :color ,fg-dim))))
-           `(mode-line-inactive ((,c :box (:line-width 1 :color ,bg-active)))))))
-      (add-hook 'ef-themes-post-load-hook #'my/ef-themes-mode-line)
-      (load-theme 'ef-elea-dark :no-confirm)
-      (my/ef-themes-mode-line))
+      (with-eval-after-load 'ef-themes
+        (eval-when-compile (require 'ef-themes))
+        (defun my/ef-themes-mode-line ()
+          "Tweak the style of the mode lines."
+          (ef-themes-with-colors
+            (custom-set-faces
+             `(mode-line ((,c :background ,bg-active :foreground ,fg-main :box (:line-width 1 :color ,fg-dim))))
+             `(mode-line-inactive ((,c :box (:line-width 1 :color ,bg-active)))))))
+        (add-hook 'ef-themes-post-load-hook #'my/ef-themes-mode-line)
+        (my/ef-themes-mode-line))
+      (load-theme 'ef-elea-dark :no-confirm))
     (leaf nord-theme
       :disabled t
       :ensure t
