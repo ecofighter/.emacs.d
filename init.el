@@ -96,7 +96,7 @@ be prompted."
                                      (- (length (frame-list)) 2))))
                                         ; If the user quits during the save dialog then don't exit emacs.
                                         ; Still close the terminal though.
-        (let((inhibit-quit t))
+        (let ((inhibit-quit t))
                                         ; Save buffers
           (with-local-quit
             (save-some-buffers))
@@ -306,7 +306,7 @@ be prompted."
                              (t variable-pitch 1.1)))
       (ef-themes-mixed-fonts . t)
       (ef-themes-variable-pitch-ui . t)
-      (ef-themes-to-toggle . '(ef-elea-dark ef-elea-light))
+      (ef-themes-to-toggle . '(ef-owl ef-eagle))
       :config
       (with-eval-after-load 'ef-themes
         (eval-when-compile (require 'ef-themes))
@@ -318,7 +318,7 @@ be prompted."
              `(mode-line-inactive ((,c :box (:line-width 1 :color ,bg-active)))))))
         (add-hook 'ef-themes-post-load-hook #'my/ef-themes-mode-line)
         (my/ef-themes-mode-line))
-      (load-theme 'ef-elea-dark :no-confirm))
+      (load-theme 'ef-owl :no-confirm))
     (leaf nord-theme
       :disabled t
       :ensure t
@@ -728,7 +728,15 @@ be prompted."
     ;;                                    (right-fringe . 2)))
     :hook (which-key-mode-hook . which-key-posframe-mode)))
 (leaf tramp
-  :ensure t)
+  :ensure t
+  :defvar
+  tramp-remote-path
+  tramp-own-remote-path
+  tramp-connection-properties
+  :defer-config
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+  (add-to-list 'tramp-connection-properties (list (regexp-quote "/ssh:(.*@){0,1}alice:")
+                                                  "remote-shell" "/usr/bin/zsh")))
 (leaf vterm
   :ensure t)
 (leaf eshell
@@ -990,7 +998,7 @@ be prompted."
     (leaf org-web-tools
       :ensure t)
     (leaf org-roam
-      :ensure t emacsql-sqlite-builtin consult-org-roam
+      :ensure t consult-org-roam
       :defvar org-roam-node-display-template
       :global-minor-mode org-roam-db-autosync-mode
       :custom
@@ -1135,6 +1143,12 @@ be prompted."
       :ensure t
       :hook
       (haskell-mode-hook . eglot-ensure)))
+  (leaf *ocaml
+    :config
+    (leaf tuareg
+      :ensure t
+      :hook
+      (tuareg-mode-hook . eglot-ensure)))
   (leaf *rust
     :config
     (leaf rust-mode
@@ -1251,6 +1265,7 @@ be prompted."
        :url "https://github.com/copilot-emacs/copilot.el")
   :custom
   (copilot-indent-offset-warning-disable . t)
+  (copilot-node-executable . "node")
   :hook
   ;; (prog-mode-hook . copilot-mode)
   ;; (conf-mode-hook . copilot-mode)
