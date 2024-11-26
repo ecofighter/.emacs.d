@@ -1148,7 +1148,9 @@ be prompted."
     (leaf tuareg
       :ensure t
       :hook
-      (tuareg-mode-hook . eglot-ensure)))
+      (tuareg-mode-hook . eglot-ensure))
+    (leaf dune
+      :ensure t))
   (leaf *rust
     :config
     (leaf rust-mode
