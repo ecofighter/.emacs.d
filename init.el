@@ -173,6 +173,8 @@ be prompted."
   (advice-add #'split-window-sensibly :override #'my/split-window-sensibly-prefer-horizontally)
   (leaf treesit
     :ensure nil
+    :when (treesit-available-p)
+    :defun (treesit-available-p . treesit)
     :custom
     (treesit-font-lock-level . 4)
     (treesit-language-source-alist . '((rust .
@@ -1139,6 +1141,17 @@ be prompted."
     :ensure t)
   (leaf *c/cpp
     :config
+    (leaf *c-treesit
+      :when (treesit-available-p)
+      :config
+      (when (fboundp 'treesit-ready-p)
+        (unless (treesit-ready-p 'c)
+          (treesit-install-language-grammar 'c))
+        (unless (treesit-ready-p 'cpp)
+          (treesit-install-language-grammar 'cpp)))
+      (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
+      (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
+      (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode)))
     (leaf bison-mode
       :ensure t
       :hook
