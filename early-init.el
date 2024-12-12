@@ -11,7 +11,7 @@
 (defun my/restore-variables-after-init ()
   "Restore variables changed in `early-init.el'."
   (setq file-name-handler-alist my/saved-file-name-handler-alist)
-  (setq gc-cons-threshold 16777216)
+  (setq gc-cons-threshold (* 128 1024 1024))
   (setq gc-cons-percentage 0.2)
   (setq inhibit-redisplay nil)
   (setq inhibit-message nil)
@@ -38,5 +38,6 @@
   (when (native-comp-available-p)
     (setq package-native-compile t)))
 
+(setenv "LSP_USE_PLISTS" "true")
 (provide 'early-init)
 ;;; early-init.el ends here

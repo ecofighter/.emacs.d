@@ -175,9 +175,15 @@ be prompted."
     :ensure nil
     :custom
     (treesit-font-lock-level . 4)
-    (treesit-language-source-alist . '(( rust .
-                                         ("https://github.com/tree-sitter/tree-sitter-rust"
-                                          nil nil nil nil))))))
+    (treesit-language-source-alist . '((rust .
+                                             ("https://github.com/tree-sitter/tree-sitter-rust"
+                                              nil nil nil nil))
+                                       (c .
+                                          ("https://github.com/tree-sitter/tree-sitter-c"
+                                           nil nil nil nil))
+                                       (cpp .
+                                            ("https://github.com/tree-sitter/tree-sitter-cpp"
+                                             nil nil nil nil))))))
 (leaf *theme
   :config
   (leaf *bars
@@ -308,8 +314,10 @@ be prompted."
       (ef-themes-variable-pitch-ui . t)
       (ef-themes-to-toggle . '(ef-owl ef-eagle))
       :config
+      (eval-and-compile
+        (when (package-installed-p 'ef-themes)
+          (require 'ef-themes)))
       (with-eval-after-load 'ef-themes
-        (eval-when-compile (require 'ef-themes))
         (defun my/ef-themes-mode-line ()
           "Tweak the style of the mode lines."
           (ef-themes-with-colors
@@ -580,6 +588,7 @@ be prompted."
   (leaf company
     :ensure t
     :global-minor-mode global-company-mode
+    :defvar company-transformers
     :config
     (leaf company-box
       :ensure t
@@ -769,8 +778,10 @@ be prompted."
     :ensure t
     :hook (skk-mode-hook . ddskk-posframe-mode))
   :config
+  (eval-when-compile
+    (when (package-installed-p 'ddskk)
+      (require 'skk-vars)))
   (with-eval-after-load 'skk-vars
-    (eval-when-compile (require 'skk-vars))
     (setq skk-get-jisyo-directory (locate-user-emacs-file "skk-get-jisyo/"))
     (setq skk-large-jisyo (expand-file-name "SKK-JISYO.L" skk-get-jisyo-directory))
     (setq skk-itaiji-jisyo (expand-file-name "SKK-JISYO.itaiji" skk-get-jisyo-directory))
@@ -1055,6 +1066,7 @@ be prompted."
     :config
     (add-to-list 'completion-at-point-functions #'yasnippet-capf)))
 (leaf eglot
+  :disabled t
   :ensure t
   :defvar
   eglot-server-programs
@@ -1073,7 +1085,6 @@ be prompted."
   :custom
   (dape-buffer-window-arrangement . 'right))
 (leaf lsp-mode
-  :disabled t
   :ensure t
   :defvar lsp--sync-full lsp--sync-incremental
   :custom
@@ -1128,6 +1139,10 @@ be prompted."
     :ensure t)
   (leaf *c/cpp
     :config
+    (leaf bison-mode
+      :ensure t
+      :hook
+      (bison-mode-hook . (lambda () (apheleia-mode -1))))
     (leaf cmake-mode
       :ensure t))
   (leaf markdown-mode
@@ -1142,13 +1157,13 @@ be prompted."
     (leaf haskell-mode
       :ensure t
       :hook
-      (haskell-mode-hook . eglot-ensure)))
+      (haskell-mode-hook . lsp)))
   (leaf *ocaml
     :config
     (leaf tuareg
       :ensure t
       :hook
-      (tuareg-mode-hook . eglot-ensure))
+      (tuareg-mode-hook . lsp))
     (leaf dune
       :ensure t))
   (leaf *rust
@@ -1159,7 +1174,7 @@ be prompted."
       (rust-indent-offset . 4)
       (rust-mode-treesitter-derive . t)
       :hook
-      (rust-mode-hook . eglot-ensure))
+      (rust-mode-hook . lsp))
     (leaf cargo-mode
       :ensure t
       :hook
@@ -1172,6 +1187,7 @@ be prompted."
       (csharp-mode-hook . eglot-ensure)
       :config
       (leaf *eglot-csharp
+        :disabled t
         :after eglot
         :config
         (add-to-list 'eglot-server-programs '(csharp-mode . '("OmniSharp" "-lsp"))))))
