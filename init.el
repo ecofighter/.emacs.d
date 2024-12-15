@@ -370,6 +370,7 @@ be prompted."
     :ensure t
     :global-minor-mode global-hl-todo-mode)
   (leaf perfect-margin
+    :disabled t
     :ensure t
     :custom
     (perfect-margin-visible-width . 120)
@@ -1155,7 +1156,9 @@ be prompted."
     (leaf bison-mode
       :ensure t
       :hook
-      (bison-mode-hook . (lambda () (apheleia-mode -1))))
+      (bison-mode-hook . (lambda () (apheleia-mode -1)))
+      :custom
+      (bison-all-electricity-off . t))
     (leaf cmake-mode
       :ensure t))
   (leaf markdown-mode
