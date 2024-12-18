@@ -1089,7 +1089,7 @@ be prompted."
   (dape-buffer-window-arrangement . 'right))
 (leaf lsp-mode
   :ensure t
-  :defvar lsp--sync-full lsp--sync-incremental
+  :defvar lsp-language-id-configuration lsp--sync-full lsp--sync-incremental
   :custom
   (lsp-auto-guess-root . t)
   (lsp-enable-file-watchers . nil)
@@ -1110,6 +1110,10 @@ be prompted."
   :init
   (setenv "LSP_USE_PLISTS" "true")
   :config
+  (leaf *additional-mods
+    :config
+    (require 'lsp-sml)
+    (add-to-list 'lsp-language-id-configuration '(sml-mode . "sml")))
   (leaf lsp-ui
     :ensure t
     :custom
@@ -1182,6 +1186,16 @@ be prompted."
       (tuareg-mode-hook . lsp))
     (leaf dune
       :ensure t))
+  (leaf *sml
+    :config
+    (leaf sml-mode
+      :ensure t
+      :hook
+      (sml-mode-hook . lsp))
+    (leaf smlfmt
+      :ensure t
+      :hook
+      (sml-mode-hook . smlfmt-format-on-save-mode)))
   (leaf *rust
     :config
     (leaf rust-mode
