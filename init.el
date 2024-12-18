@@ -1308,6 +1308,7 @@ be prompted."
     :stream t
     :key #'gptel-api-key-from-auth-source))
 (leaf copilot
+  :disabled t
   :ensure t
   :vc (copilot
        :url "https://github.com/copilot-emacs/copilot.el")
