@@ -1174,6 +1174,8 @@ be prompted."
     :config)
   (leaf *haskell
     :config
+    (leaf lsp-haskell
+      :ensure t)
     (leaf haskell-mode
       :ensure t
       :hook
