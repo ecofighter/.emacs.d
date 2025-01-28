@@ -425,13 +425,13 @@ be prompted."
                          :fixed-pitch-family "Source Han Code JP"
                          :variable-pitch-family "Source Han Sans")
                         (udev
-                         :default-family "UDEVGothic LG"
-                         :fixed-pitch-family "UDEVGothic LG"
+                         :default-family "UDEV Gothic LG"
+                         :fixed-pitch-family "UDEV Gothic LG"
                          :variable-pitch-family "BIZ UDPGothic"
                          :line-spacing 0.2)
                         (udev35
-                         :default-family "UDEVGothic35 LG"
-                         :fixed-pitch-family "UDEVGothic35 LG"
+                         :default-family "UDEV Gothic 35LG"
+                         :fixed-pitch-family "UDEV Gothic 35LG"
                          :variable-pitch-family "BIZ UDPGothic"
                          :line-spacing 0.2)
                         (ibmplex
