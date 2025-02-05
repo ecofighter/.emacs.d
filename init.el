@@ -454,6 +454,7 @@ be prompted."
           (daemonp))
       (fontaine-set-preset (or (fontaine-restore-latest-preset) 'udev))))
 (leaf ligature
+  :disabled t
   :ensure t
   :global-minor-mode global-ligature-mode
   :defun ligature-set-ligatures
