@@ -1333,7 +1333,7 @@ be prompted."
   :vc (copilot-chat
        :url "https://github.com/chep/copilot-chat.el")
   :bind
-  (("C-x c" . copilot-chat-transient)))
+  (("C-c c" . copilot-chat-transient)))
 (leaf meow
   :ensure t
   :require t
