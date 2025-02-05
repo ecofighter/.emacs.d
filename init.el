@@ -560,6 +560,10 @@ be prompted."
                        ("C-m" . 'vertico-exit)
                        ("C-j" . 'vertico-exit-input)))
   :global-minor-mode vertico-mode)
+(leaf icomplete
+  :disabled t
+  :ensure nil
+  :global-minor-mode fido-vertical-mode)
 (leaf embark
   :ensure t
   :bind
@@ -1300,17 +1304,18 @@ be prompted."
                                   (expand-file-name
                                    (TeX-active-master (TeX-output-extension)))))))))))
 (leaf editorconfig
+  :disabled t
   :ensure t
   :global-minor-mode editorconfig-mode)
 (leaf gptel
+  :disabled t
   :ensure t
   :defun gptel-api-key-from-auth-source
   :config
   (gptel-make-anthropic "Claude"
-    :stream t
-    :key #'gptel-api-key-from-auth-source))
+                        :stream t
+                        :key #'gptel-api-key-from-auth-source))
 (leaf copilot
-  :disabled t
   :ensure t
   :vc (copilot
        :url "https://github.com/copilot-emacs/copilot.el")
@@ -1322,6 +1327,13 @@ be prompted."
   ;; (conf-mode-hook . copilot-mode)
   :bind (:copilot-completion-map
          ("<tab>" . 'copilot-accept-completion)))
+(leaf copilot-chat
+  :ensure t
+  :vc (copilot-chat
+       :url "https://github.com/chep/copilot-chat.el")
+  :bind
+  (("C-c c d" . copilot-chat-display)
+   ("C-c c c" . copilot-chat-transient)))
 (leaf meow
   :ensure t
   :require t
