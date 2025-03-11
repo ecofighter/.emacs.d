@@ -303,17 +303,17 @@ be prompted."
       :defun
       (my/ef-themes-mode-line . init)
       :custom
-      (ef-themes-headings .'((0 variable-pitch light 1.9)
-                             (1 variable-pitch light 1.8)
-                             (2 variable-pitch regular 1.7)
-                             (3 variable-pitch regular 1.6)
-                             (4 variable-pitch regular 1.5)
-                             (5 variable-pitch 1.4) ; absence of weight means `bold'
-                             (6 variable-pitch 1.3)
-                             (7 variable-pitch 1.2)
-                             (t variable-pitch 1.1)))
-      (ef-themes-mixed-fonts . t)
-      (ef-themes-variable-pitch-ui . t)
+      ;; (ef-themes-headings .'((0 variable-pitch light 1.9)
+      ;;                        (1 variable-pitch light 1.8)
+      ;;                        (2 variable-pitch regular 1.7)
+      ;;                        (3 variable-pitch regular 1.6)
+      ;;                        (4 variable-pitch regular 1.5)
+      ;;                        (5 variable-pitch 1.4) ; absence of weight means `bold'
+      ;;                        (6 variable-pitch 1.3)
+      ;;                        (7 variable-pitch 1.2)
+      ;;                        (t variable-pitch 1.1)))
+      (ef-themes-mixed-fonts . nil)
+      (ef-themes-variable-pitch-ui . nil)
       (ef-themes-to-toggle . '(ef-owl ef-eagle))
       :config
       (eval-and-compile
@@ -345,9 +345,14 @@ be prompted."
       :ensure t))
   (leaf nerd-icons
     :ensure t
+    :custom
+    (nerd-icons-font-family . "Symbols Nerd Font Mono")
     :config
     (leaf nerd-icons-completion
       :ensure t
+      :after marginalia
+      :hook
+      (marginalia-mode-hook . nerd-icons-completion-marginalia-setup)
       :global-minor-mode nerd-icons-completion-mode)
     (leaf nerd-icons-dired
       :ensure t
@@ -1340,7 +1345,7 @@ be prompted."
   :custom (meow-use-clipboard . t)
   :defun
   (meow-setup . init)
-  (meow-motion-overwrite-define-key . meow-helpers)
+  (meow-motion-define-key . meow-helpers)
   (meow-leader-define-key . meow-helpers)
   (meow-normal-define-key . meow-helpers)
   :defvar
@@ -1349,7 +1354,7 @@ be prompted."
   :config
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-    (meow-motion-overwrite-define-key
+    (meow-motion-define-key
      '("j" . meow-next)
      '("k" . meow-prev)
      '("<escape>" . ignore))
