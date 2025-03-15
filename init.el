@@ -196,7 +196,7 @@ be prompted."
   (leaf *modeline
     :config
     (leaf doom-modeline
-      :disabled t
+      :disabled nil
       :ensure t
       :global-minor-mode doom-modeline-mode
       :custom
@@ -261,6 +261,7 @@ be prompted."
       (moody-replace-eldoc-minibuffer-message-function)
       (moody-replace-vc-mode))
     (leaf mood-line
+      :disabled t
       :ensure t
       :defvar mood-line-glyph-alist mood-line-glyphs-fira-code
       :global-minor-mode mood-line-mode
@@ -303,17 +304,17 @@ be prompted."
       :defun
       (my/ef-themes-mode-line . init)
       :custom
-      ;; (ef-themes-headings .'((0 variable-pitch light 1.9)
-      ;;                        (1 variable-pitch light 1.8)
-      ;;                        (2 variable-pitch regular 1.7)
-      ;;                        (3 variable-pitch regular 1.6)
-      ;;                        (4 variable-pitch regular 1.5)
-      ;;                        (5 variable-pitch 1.4) ; absence of weight means `bold'
-      ;;                        (6 variable-pitch 1.3)
-      ;;                        (7 variable-pitch 1.2)
-      ;;                        (t variable-pitch 1.1)))
-      (ef-themes-mixed-fonts . nil)
-      (ef-themes-variable-pitch-ui . nil)
+      (ef-themes-headings .'((0 variable-pitch light 1.9)
+                             (1 variable-pitch light 1.8)
+                             (2 variable-pitch regular 1.7)
+                             (3 variable-pitch regular 1.6)
+                             (4 variable-pitch regular 1.5)
+                             (5 variable-pitch 1.4) ; absence of weight means `bold'
+                             (6 variable-pitch 1.3)
+                             (7 variable-pitch 1.2)
+                             (t variable-pitch 1.1)))
+      (ef-themes-mixed-fonts . t)
+      (ef-themes-variable-pitch-ui . t)
       (ef-themes-to-toggle . '(ef-owl ef-eagle))
       :config
       (eval-and-compile
@@ -430,14 +431,14 @@ be prompted."
                          :fixed-pitch-family "Source Han Code JP"
                          :variable-pitch-family "Source Han Sans")
                         (udev
-                         :default-family "UDEV Gothic LG"
-                         :fixed-pitch-family "UDEV Gothic LG"
-                         :variable-pitch-family "BIZ UDPGothic"
+                         :default-family "UDEV Gothic"
+                         :fixed-pitch-family "UDEV Gothic"
+                         :variable-pitch-family "BIZUDP Gothic"
                          :line-spacing 0.2)
                         (udev35
                          :default-family "UDEV Gothic 35LG"
                          :fixed-pitch-family "UDEV Gothic 35LG"
-                         :variable-pitch-family "BIZ UDPGothic"
+                         :variable-pitch-family "BIZUDP Gothic"
                          :line-spacing 0.2)
                         (ibmplex
                          :default-family "PlemolJP"
@@ -707,10 +708,8 @@ be prompted."
   :ensure t)
 (leaf vundo
   :ensure t)
-(leaf apheleia
-  :ensure t
-  :global-minor-mode apheleia-global-mode)
 (leaf shackle
+  :disabled t
   :ensure t
   :global-minor-mode shackle-mode
   :custom
@@ -760,11 +759,13 @@ be prompted."
   (add-to-list 'tramp-connection-properties (list (regexp-quote "/ssh:(.*@){0,1}alice:")
                                                   "remote-shell" "/usr/bin/zsh")))
 (leaf vterm
+  :unless (eq system-type 'windows-nt)
   :ensure t)
 (leaf eshell
   :ensure t
   :config
   (leaf eshell-vterm
+    :unless (eq system-type 'windows-nt)
     :ensure t))
 (leaf ddskk
   :ensure t
@@ -1169,8 +1170,6 @@ be prompted."
       (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode)))
     (leaf bison-mode
       :ensure t
-      :hook
-      (bison-mode-hook . (lambda () (apheleia-mode -1)))
       :custom
       (bison-all-electricity-off . t))
     (leaf cmake-mode
@@ -1184,26 +1183,20 @@ be prompted."
     :config)
   (leaf *haskell
     :config
-    (leaf lsp-haskell
-      :ensure t)
     (leaf haskell-mode
-      :ensure t
-      :hook
-      (haskell-mode-hook . lsp)))
+      :ensure t)
+    (leaf lsp-haskell
+      :ensure t))
   (leaf *ocaml
     :config
     (leaf tuareg
-      :ensure t
-      :hook
-      (tuareg-mode-hook . lsp))
+      :ensure t)
     (leaf dune
       :ensure t))
   (leaf *sml
     :config
     (leaf sml-mode
-      :ensure t
-      :hook
-      (sml-mode-hook . lsp))
+      :ensure t)
     (leaf smlfmt
       :ensure t
       :hook
@@ -1440,7 +1433,6 @@ be prompted."
   (leaf *meow-leader-maps
     :config
     (meow-leader-define-key
-     '("=" . apheleia-format-buffer)
      '("q" . previous-buffer)
      '("Q" . next-buffer)
      '("w" . ace-window)
