@@ -1029,7 +1029,6 @@ be prompted."
       :custom
       (org-roam-directory . `,(expand-file-name "roam" org-directory))
       (org-roam-db-location . `,(locate-user-emacs-file "org-roam.db"))
-      (org-roam-database-connector . 'sqlite-builtin)
       (org-roam-capture-templates . '(("p" "Permanent Note" plain "%?"
                                        :target (file+head
                                                 "permanent/%<%Y%m%d%H%M%S>-${slug}.org"
