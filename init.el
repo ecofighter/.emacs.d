@@ -376,7 +376,7 @@ be prompted."
     :ensure t
     :global-minor-mode global-hl-todo-mode)
   (leaf perfect-margin
-    :disabled t
+    :disabled nil
     :ensure t
     :custom
     (perfect-margin-visible-width . 120)
@@ -676,6 +676,20 @@ be prompted."
             cape-keyword
             cape-file
             cape-tex))))
+(leaf centaur-tabs
+  :ensure t
+  :global-minor-mode centaur-tabs-mode
+  :hook
+  (dired-mode-hook . centaur-tabs-local-mode)
+  :custom
+  (centaur-tabs-set-icons . t)
+  (centaur-tabs-icon-type . 'nerd-icons)
+  (centaur-tabs-set-bar . 'over)
+  (centaur-tabs-set-close-button . nil)
+  (centaur-tabs-set-modified-marker . t)
+  :bind
+  ("C-<left>" . centaur-tabs-backward)
+  ("C-<right>" . centaur-tabs-forward))
 (leaf perspective
   :ensure t
   :defvar persp-consult-source
@@ -763,10 +777,8 @@ be prompted."
   :ensure t)
 (leaf eshell
   :ensure t
-  :config
-  (leaf eshell-vterm
-    :unless (eq system-type 'windows-nt)
-    :ensure t))
+  :bind
+  ("C-c '" . eshell))
 (leaf ddskk
   :ensure t
   :defvar skk-isearch-mode-enable
@@ -1301,10 +1313,6 @@ be prompted."
                                 (with-current-buffer TeX-command-buffer
                                   (expand-file-name
                                    (TeX-active-master (TeX-output-extension)))))))))))
-(leaf editorconfig
-  :disabled t
-  :ensure t
-  :global-minor-mode editorconfig-mode)
 (leaf gptel
   :disabled t
   :ensure t
