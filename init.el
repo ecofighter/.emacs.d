@@ -678,9 +678,12 @@ be prompted."
             cape-tex))))
 (leaf centaur-tabs
   :ensure t
+  :defun centaur-tabs-get-group-name
   :global-minor-mode centaur-tabs-mode
   :hook
+  (dashboard-mode-hook . centaur-tabs-local-mode)
   (dired-mode-hook . centaur-tabs-local-mode)
+  (org-agenda-mode-hook . centaur-tabs-local-mode)
   :custom
   (centaur-tabs-set-icons . t)
   (centaur-tabs-icon-type . 'nerd-icons)
@@ -689,7 +692,49 @@ be prompted."
   (centaur-tabs-set-modified-marker . t)
   :bind
   ("C-<left>" . centaur-tabs-backward)
-  ("C-<right>" . centaur-tabs-forward))
+  ("C-<right>" . centaur-tabs-forward)
+  ("C-S-<left>" . centaur-tabs-move-current-tab-to-left)
+  ("C-S-<right>" . centaur-tabs-move-current-tab-to-right)
+  :config
+  (defun centaur-tabs-buffer-groups ()
+    (list
+     (cond
+      ;; ((not (eq (file-remote-p (buffer-file-name)) nil))
+      ;; "Remote")
+      ((derived-mode-p 'prog-mode)
+       "Editing")
+      ((derived-mode-p 'dired-mode)
+       "Dired")
+      ((memq major-mode '(helpful-mode
+                          help-mode))
+       "Help")
+      ((memq major-mode '(magit-process-mode
+                          magit-status-mode
+                          magit-diff-mode
+                          magit-log-mode
+                          magit-file-mode
+                          magit-blob-mode
+                          magit-blame-mode))
+       "Magit")
+      ((memq major-mode '(org-mode
+                          org-agenda-clockreport-mode
+                          org-src-mode
+                          org-agenda-mode
+                          org-beamer-mode
+                          org-indent-mode
+                          org-bullets-mode
+                          org-cdlatex-mode
+                          org-agenda-log-mode
+                          diary-mode))
+       "OrgMode")
+      ((derived-mode-p 'eshell-mode)
+       "EShell")
+      ((derived-mode-p 'dashboard-mode)
+       "Dashboard")
+      ((string-equal "*" (substring (buffer-name) 0 1))
+       "Emacs")
+      (t
+       (centaur-tabs-get-group-name (current-buffer)))))))
 (leaf perspective
   :ensure t
   :defvar persp-consult-source
@@ -722,15 +767,6 @@ be prompted."
   :ensure t)
 (leaf vundo
   :ensure t)
-(leaf shackle
-  :disabled t
-  :ensure t
-  :global-minor-mode shackle-mode
-  :custom
-  (shackle-rules . '((compilation-mode :align below)
-                     ("*Flycheck errors*" :align below)
-                     ("*Help*" :align right)
-                     ("*Completions*" :align below))))
 (leaf avy
   :ensure t
   :bind
@@ -738,8 +774,10 @@ be prompted."
   ("C-c j l" . avy-goto-line))
 (leaf ace-window
   :ensure t
-  :custom-face
-  (aw-leading-char-face . '((t :height 4.0))))
+  ;; :custom-face
+  ;; (aw-leading-char-face . '((t :height 4.0)))
+  :bind
+  ("C-c w" . ace-window))
 (leaf winner
   :ensure nil
   :global-minor-mode winner-mode
@@ -1442,8 +1480,6 @@ be prompted."
     (meow-leader-define-key
      '("q" . previous-buffer)
      '("Q" . next-buffer)
-     '("w" . ace-window)
-     '("e" . embark-act)
      '("u" . vundo)
      '("I" . imenu-list))))
 
