@@ -1227,7 +1227,7 @@ be prompted."
     :ensure t)
   (leaf web-mode
     :ensure t
-    :mode ("\\.csp\\'" "\\.razor\\'" "\\html\\'"))
+    :mode ("\\.csp\\'" "\\.razor\\'" "\\.html?\\'"))
   (leaf *elisp
     :config)
   (leaf *haskell
