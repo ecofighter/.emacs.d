@@ -684,6 +684,7 @@ be prompted."
   (dashboard-mode-hook . centaur-tabs-local-mode)
   (dired-mode-hook . centaur-tabs-local-mode)
   (org-agenda-mode-hook . centaur-tabs-local-mode)
+  (eldoc-box-buffer-setup-hook . centaur-tabs-local-mode)
   :custom
   (centaur-tabs-set-icons . t)
   (centaur-tabs-icon-type . 'nerd-icons)
