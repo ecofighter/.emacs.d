@@ -691,6 +691,7 @@ be prompted."
   (centaur-tabs-set-bar . 'over)
   (centaur-tabs-set-close-button . nil)
   (centaur-tabs-set-modified-marker . t)
+  (centaur-tabs-modified-marker . "*")
   :bind
   ("C-<left>" . centaur-tabs-backward)
   ("C-<right>" . centaur-tabs-forward)
@@ -702,13 +703,12 @@ be prompted."
      (cond
       ;; ((not (eq (file-remote-p (buffer-file-name)) nil))
       ;; "Remote")
-      ((derived-mode-p 'prog-mode)
-       "Editing")
-      ((derived-mode-p 'dired-mode)
-       "Dired")
-      ((memq major-mode '(helpful-mode
-                          help-mode))
-       "Help")
+      ((derived-mode-p 'eshell-mode)
+       "EShell")
+      ((derived-mode-p 'dashboard-mode)
+       "Dashboard")
+      ((string-equal "*" (substring (buffer-name) 0 1))
+       "Emacs")
       ((memq major-mode '(magit-process-mode
                           magit-status-mode
                           magit-diff-mode
@@ -717,6 +717,13 @@ be prompted."
                           magit-blob-mode
                           magit-blame-mode))
        "Magit")
+      ((derived-mode-p 'prog-mode)
+       "Editing")
+      ((derived-mode-p 'dired-mode)
+       "Dired")
+      ((memq major-mode '(helpful-mode
+                          help-mode))
+       "Help")
       ((memq major-mode '(org-mode
                           org-agenda-clockreport-mode
                           org-src-mode
@@ -728,12 +735,6 @@ be prompted."
                           org-agenda-log-mode
                           diary-mode))
        "OrgMode")
-      ((derived-mode-p 'eshell-mode)
-       "EShell")
-      ((derived-mode-p 'dashboard-mode)
-       "Dashboard")
-      ((string-equal "*" (substring (buffer-name) 0 1))
-       "Emacs")
       (t
        (centaur-tabs-get-group-name (current-buffer)))))))
 (leaf perspective
