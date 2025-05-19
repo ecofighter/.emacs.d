@@ -499,6 +499,11 @@ be prompted."
     (leaf *linux
       :when (eq system-type 'linux)
       :custom (alert-default-style . 'libnotify))
+    (leaf *mac
+      :when (eq system-type 'darwin)
+      :custom
+      (ns-command-modifier . 'meta)
+      (ns-alternate-modifier . 'option))
     (leaf alert-toast
       :when (or (getenv "WSL_DISTRO_NAME")
                 (eq system-type 'windows-nt))
