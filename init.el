@@ -170,7 +170,7 @@ be prompted."
 	             (with-selected-window window
 	               (split-window-right))))))))
   (declare-function my/split-window-sensibly-prefer-horizontally "init")
-  ;; (advice-add #'split-window-sensibly :override #'my/split-window-sensibly-prefer-horizontally)
+  (advice-add #'split-window-sensibly :override #'my/split-window-sensibly-prefer-horizontally)
   (leaf treesit
     :ensure nil
     :when (treesit-available-p)
