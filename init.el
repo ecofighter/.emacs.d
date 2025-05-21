@@ -428,37 +428,29 @@ be prompted."
   (fontaine-latest-state-file . `,(locate-user-emacs-file "fontaine-latest-state.eld"))
   (fontaine-presets . '((source-han
                          :default-family "Source Han Code JP"
-                         :fixed-pitch-family "Source Han Code JP"
                          :variable-pitch-family "Source Han Sans")
                         (udev
                          :default-family "UDEV Gothic"
-                         :fixed-pitch-family "UDEV Gothic"
-                         :variable-pitch-family "BIZUDP Gothic"
-                         :line-spacing 0.2)
+                         :variable-pitch-family "BIZ UDPGothic")
                         (udev35
-                         :default-family "UDEV Gothic 35LG"
-                         :fixed-pitch-family "UDEV Gothic 35LG"
-                         :variable-pitch-family "BIZUDP Gothic"
-                         :line-spacing 0.2)
+                         :default-family "UDEV Gothic 35"
+                         :variable-pitch-family "BIZ UDPGothic")
                         (ibmplex
+                         :default-family "IBM Plex Mono"
+                         :variable-pitch-family "IBM Plex Sans")
+                        (plemol
                          :default-family "PlemolJP"
-                         :fixed-pitch-family "PlemolJP"
-                         :variable-pitch-family "IBM Plex Sans JP"
-                         :line-spacing 0.2)
-                        (ibmplex35
+                         :variable-pitch-family "IBM Plex Sans")
+                        (plemol35
                          :default-family "PlemolJP35"
-                         :fixed-pitch-family "PlemolJP35"
-                         :variable-pitch-family "IBM Plex Sans JP"
-                         :line-spacing 0.2)
+                         :variable-pitch-family "IBM Plex Sans")
                         (sarasa
                          :default-family "Sarasa Mono J"
-                         :fixed-pitch-family "Sarasa Mono J"
-                         :variable-pitch-family "Sarasa Gothic J"
-                         :line-spacing 0.2)))
+                         :variable-pitch-family "Sarasa Gothic J")))
   :config
   (if (or (display-graphic-p)
           (daemonp))
-      (fontaine-set-preset (or (fontaine-restore-latest-preset) 'udev))))
+      (fontaine-set-preset (or (fontaine-restore-latest-preset) 'ibmplex))))
 (leaf ligature
   :disabled t
   :ensure t
