@@ -357,22 +357,22 @@
   (use-package company
     :ensure t
     :init
-    (global-company-mode 1)
+    (global-company-mode +1)
     :config
     (use-package company-box
       :ensure t
       :hook (company-mode-hook . company-box-mode))
     (use-package company-fuzzy
       :ensure t
+      :preface
+      (use-package liquidmetal
+        :ensure t)
       :custom
-      (company-fuzzy-sorting-backend 'flx)
+      (company-fuzzy-sorting-backend 'liquidmetal)
       (company-fuzzy-reset-selection t)
       (company-fuzzy-prefix-on-top nil)
       (company-fuzzy-trigger-symbols '("." "->" "<" "\"" "'" "@"))
-      :hook (company-mode-hook . company-fuzzy-mode)
-      :config
-      (use-package flx
-        :ensure t)))
+      :hook (company-mode-hook . company-fuzzy-mode)))
   (use-package cape
     :ensure t
     :custom
