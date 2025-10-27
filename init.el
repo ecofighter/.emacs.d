@@ -225,6 +225,16 @@
     (with-eval-after-load 'doom-modeline
       (eval-when-compile (require 'doom-modeline nil t))
       (setq mode-line-right-align-edge 'window)))
+  (use-package spacious-padding
+    :ensure t
+    :custom
+    (spacious-padding-width . ( :internal-border-width 15
+                                :header-line-width 4
+                                :mode-line-width 6
+                                :right-divider-width 30
+                                :scroll-bar-width 8))
+    :config
+    (spacious-padding-mode +1))
   (use-package dashboard
     :ensure t
     :custom
@@ -929,7 +939,7 @@
                                   (expand-file-name
                                    (TeX-active-master (TeX-output-extension)))))))
         (declare-function my/run-after-compilation-finished-funcs "init")
-        (advice-add #'my/run-after-compilation-finished-funcs :after #'auctex-cluttex--TeX-ClutTeX-sentinel)))))
+        (advice-add #'auctex-cluttex--TeX-ClutTeX-sentinel :after #'my/run-after-compilation-finished-funcs)))))
 (use-package meow
   :ensure t
   :custom (meow-use-clipboard t)
