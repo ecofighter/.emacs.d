@@ -144,57 +144,41 @@
 (use-package auto-compile
   :ensure t
   :custom (auto-compile-native-compile t)
-  :hook (emacs-lisp-mode-hook . auto-compile-on-save-mode))
+  :hook
+  (emacs-lisp-mode . auto-compile-on-save-mode))
 (progn ; theme
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   (scroll-bar-mode -1)
   (use-package doom-modeline
-      :ensure t
-      :init
-      (doom-modeline-mode +1)
-      :custom
-      (doom-modeline-window-width-limit 60)
-      (doom-modeline-buffer-file-name-style 'truncate-with-project)
-      (doom-modeline-icon t)
-      (doom-modeline-buffer-modification-icon t)
-      (doom-modeline-buffer-state-icon t)
-      (doom-modeline-buffer-encoding t)
-      (doom-modeline-buffer-major-mode t)
-      (doom-modeline-major-mode-icon t)
-      (doom-modeline-major-mode-color-icon nil)
-      (doom-modeline-buffer-minor-modes nil)
-      (doom-modeline-indent-info nil)
-      (doom-modeline-lsp t)
-      (doom-modeline-github nil)
-      (doom-modeline-gnus nil)
-      (doom-modeline-irc nil)
-      (doom-modeline-mu4e nil)
-      (doom-modeline-persp-name t)
-      (doom-modeline-persp-icon t)
-      (doom-modeline-project-detection 'auto)
-      (doom-modeline-unicode-fallback nil))
+    :ensure t
+    :init
+    (doom-modeline-mode +1)
+    :custom
+    (doom-modeline-window-width-limit 60)
+    (doom-modeline-buffer-file-name-style 'truncate-with-project)
+    (doom-modeline-icon t)
+    (doom-modeline-buffer-modification-icon t)
+    (doom-modeline-buffer-state-icon t)
+    (doom-modeline-buffer-encoding t)
+    (doom-modeline-buffer-major-mode t)
+    (doom-modeline-major-mode-icon t)
+    (doom-modeline-major-mode-color-icon nil)
+    (doom-modeline-buffer-minor-modes nil)
+    (doom-modeline-indent-info nil)
+    (doom-modeline-lsp t)
+    (doom-modeline-github nil)
+    (doom-modeline-gnus nil)
+    (doom-modeline-irc nil)
+    (doom-modeline-mu4e nil)
+    (doom-modeline-persp-name t)
+    (doom-modeline-persp-icon t)
+    (doom-modeline-project-detection 'auto)
+    (doom-modeline-unicode-fallback nil))
   (use-package minions
-      :ensure t
-      :init
-      (minions-mode +1))
-  (use-package ef-themes
-      :ensure t
-      :custom
-      (ef-themes-headings '((0 variable-pitch light 1.9)
-                            (1 variable-pitch light 1.8)
-                            (2 variable-pitch regular 1.7)
-                            (3 variable-pitch regular 1.6)
-                            (4 variable-pitch regular 1.5)
-                            (5 variable-pitch 1.4) ; absence of weight means `bold'
-                            (6 variable-pitch 1.3)
-                            (7 variable-pitch 1.2)
-                            (t variable-pitch 1.1)))
-      (ef-themes-mixed-fonts t)
-      (ef-themes-variable-pitch-ui t)
-      (ef-themes-to-toggle '(ef-owl ef-eagle))
-      :config
-      (load-theme 'ef-owl :no-confirm))
+    :ensure t
+    :init
+    (minions-mode +1))
   (use-package nerd-icons
     :ensure t
     :custom
@@ -204,15 +188,15 @@
       :ensure t
       :after marginalia
       :hook
-      (marginalia-mode-hook . nerd-icons-completion-marginalia-setup)
+      (marginalia-mode . nerd-icons-completion-marginalia-setup)
       :init
       (nerd-icons-completion-mode +1))
     (use-package nerd-icons-dired
       :ensure t
-      :hook (dired-mode-hook . nerd-icons-dired-mode)))
+      :hook (dired-mode . nerd-icons-dired-mode)))
   (use-package rainbow-delimiters
     :ensure t
-    :hook (prog-mode-hook . rainbow-delimiters-mode))
+    :hook (prog-mode . rainbow-delimiters-mode))
   (use-package whitespace
     :custom
     (show-trailing-whitespace t)
@@ -221,8 +205,8 @@
     (global-whitespace-mode +1))
   (use-package display-line-numbers
     :hook
-    (prog-mode-hook . display-line-numbers-mode)
-    (conf-mode-hook . display-line-numbers-mode))
+    (prog-mode . display-line-numbers-mode)
+    (conf-mode . display-line-numbers-mode))
   (use-package hl-line
     :init
     (global-hl-line-mode +1))
@@ -259,46 +243,50 @@
     :config
     (when (daemonp)
       (setq initial-buffer-choice #'(lambda () (get-buffer-create "*dashboard*"))))
-    (dashboard-setup-startup-hook)))
-(use-package fontaine
-  :ensure t
-  :custom
-  (inhibit-compacting-font-caches t)
-  (fontaine-latest-state-file `,(locate-user-emacs-file "fontaine-latest-state.eld"))
-  (fontaine-presets '((source-han
-                       :default-family "Source Han Code JP"
-                       :variable-pitch-family "Source Han Sans")
-                      (udev
-                       :default-family "UDEV Gothic"
-                       :variable-pitch-family "BIZ UDPGothic")
-                      (udev35
-                       :default-family "UDEV Gothic 35"
-                       :variable-pitch-family "BIZ UDPGothic")
-                      (ibmplex
-                       :default-family "IBM Plex Mono"
-                       :variable-pitch-family "IBM Plex Sans")
-                      (plemol
-                       :default-family "PlemolJP"
-                       :variable-pitch-family "IBM Plex Sans")
-                      (plemol35
-                       :default-family "PlemolJP35"
-                       :variable-pitch-family "IBM Plex Sans")
-                      (0xproto
-                       :default-family "0xProto"
-                       :variable-pitch-family "IBM Plex Sans")
-                      (sarasa
-                       :default-family "Sarasa Mono J"
-                       :variable-pitch-family "Sarasa Gothic J")))
-  :init
-  (fontaine-mode +1)
-  :config
-  (if (or (display-graphic-p)
-          (daemonp))
-      (fontaine-set-preset (or (fontaine-restore-latest-preset) 'ibmplex))))
+    (dashboard-setup-startup-hook))
+  (use-package catppuccin-theme
+    :ensure t
+    :config
+    (load-theme 'catppuccin :no-confirm))
+  (use-package fontaine
+    :ensure t
+    :custom
+    (inhibit-compacting-font-caches t)
+    (fontaine-latest-state-file `,(locate-user-emacs-file "fontaine-latest-state.eld"))
+    (fontaine-presets '((source-han
+                         :default-family "Source Han Code JP"
+                         :variable-pitch-family "Source Han Sans")
+                        (udev
+                         :default-family "UDEV Gothic"
+                         :variable-pitch-family "BIZ UDPGothic")
+                        (udev35
+                         :default-family "UDEV Gothic 35"
+                         :variable-pitch-family "BIZ UDPGothic")
+                        (ibmplex
+                         :default-family "IBM Plex Mono"
+                         :variable-pitch-family "IBM Plex Sans")
+                        (plemol
+                         :default-family "PlemolJP"
+                         :variable-pitch-family "IBM Plex Sans")
+                        (plemol35
+                         :default-family "PlemolJP35"
+                         :variable-pitch-family "IBM Plex Sans")
+                        (0xproto
+                         :default-family "0xProto"
+                         :variable-pitch-family "IBM Plex Sans")
+                        (sarasa
+                         :default-family "Sarasa Mono J"
+                         :variable-pitch-family "Sarasa Gothic J")))
+    :init
+    (fontaine-mode +1)
+    :config
+    (if (or (display-graphic-p)
+            (daemonp))
+        (fontaine-set-preset (or (fontaine-restore-latest-preset) 'ibmplex)))))
 (use-package exec-path-from-shell
   :ensure t
   :unless (eq system-type 'windows-nt)
-  :hook (emacs-startup-hook . exec-path-from-shell-initialize)
+  :hook (emacs-startup . exec-path-from-shell-initialize)
   :custom
   (exec-path-from-shell-arguments nil)
   (exec-path-from-shell-check-startup-files nil)
@@ -310,15 +298,7 @@
                      "/tmp.*")))
 (use-package eldoc
   :init
-  (global-eldoc-mode +1)
-  :config
-  (use-package eldoc-box
-    :ensure t
-    :config
-    (defun my/enable-eldoc-box-hover-mode-when-graphical ()
-      (when (display-graphic-p)
-        (eldoc-box-hover-mode 1)))
-    :hook (eldoc-mode-hook . my/enable-eldoc-box-hover-mode-when-graphical)))
+  (global-eldoc-mode +1))
 (use-package vertico
   :ensure t
   :bind (:map vertico-map
@@ -343,7 +323,7 @@
   :config
   (use-package embark-consult
     :ensure t
-    :hook (embark-collect-mode-hook . consult-preview-at-point-mode)))
+    :hook (embark-collect-mode . consult-preview-at-point-mode)))
 (use-package marginalia
   :ensure t
   :init
@@ -356,12 +336,13 @@
 (progn ; completion
   (use-package company
     :ensure t
-    :init
-    (global-company-mode +1)
     :config
+    (global-company-mode +1)
     (use-package company-box
+      :disabled t
       :ensure t
-      :hook (company-mode-hook . company-box-mode))
+      :hook
+      (company-mode . company-box-mode))
     (use-package company-fuzzy
       :ensure t
       :preface
@@ -372,7 +353,7 @@
       (company-fuzzy-reset-selection t)
       (company-fuzzy-prefix-on-top nil)
       (company-fuzzy-trigger-symbols '("." "->" "<" "\"" "'" "@"))
-      :hook (company-mode-hook . company-fuzzy-mode)))
+      :hook (company-mode . company-fuzzy-mode)))
   (use-package cape
     :ensure t
     :custom
@@ -386,11 +367,11 @@
             cape-tex))))
 (use-package centaur-tabs
   :ensure t
+  :demand t
   :hook
-  (dashboard-mode-hook . centaur-tabs-local-mode)
-  (dired-mode-hook . centaur-tabs-local-mode)
-  (org-agenda-mode-hook . centaur-tabs-local-mode)
-  (eldoc-box-buffer-setup-hook . centaur-tabs-local-mode)
+  (dashboard-mode . centaur-tabs-local-mode)
+  (dired-mode . centaur-tabs-local-mode)
+  (org-agenda-mode . centaur-tabs-local-mode)
   :custom
   (centaur-tabs-set-icons t)
   (centaur-tabs-icon-type 'nerd-icons)
@@ -399,13 +380,12 @@
   (centaur-tabs-set-modified-marker t)
   (centaur-tabs-modified-marker "*")
   :bind
-  ("C-<left>" . centaur-tabs-backward)
-  ("C-<right>" . centaur-tabs-forward)
-  ("C-S-<left>" . centaur-tabs-move-current-tab-to-left)
-  ("C-S-<right>" . centaur-tabs-move-current-tab-to-right)
-  :init
-  (centaur-tabs-mode +1)
+  ("M-<left>" . centaur-tabs-backward)
+  ("M-<right>" . centaur-tabs-forward)
+  ("M-S-<left>" . centaur-tabs-move-current-tab-to-left)
+  ("M-S-<right>" . centaur-tabs-move-current-tab-to-right)
   :config
+  (centaur-tabs-mode t)
   (declare-function centaur-tabs-get-group-name "centaur-tabs-functions")
   (defun centaur-tabs-buffer-groups ()
     (list
@@ -512,7 +492,7 @@
   :init
   (use-package ddskk-posframe
     :ensure t
-    :hook (skk-mode-hook . ddskk-posframe-mode))
+    :hook (skk-mode . ddskk-posframe-mode))
   :config
   (eval-when-compile
     (when (package-installed-p 'ddskk)
@@ -538,14 +518,14 @@
                                            (skk-isearch-mode-cleanup))))))
 (use-package flymake
   :ensure t
-  :hook (prog-mode-hook . flymake-mode)
+  :hook (prog-mode . flymake-mode)
   :config
   (use-package flymake-collection
     :ensure t
     :after flymake)
   (use-package flymake-popon
     :ensure t
-    :hook (flymake-mode-hook . flymake-popon-mode)))
+    :hook (flymake-mode . flymake-popon-mode)))
 (use-package ispell
   :custom
   (ispell-program-name "hunspell")
@@ -562,13 +542,13 @@
   (electric-pair-mode +1))
 (use-package puni
   :ensure t
-  :hook (vterm-mode-hook . puni-disable-puni-mode)
+  :hook (vterm-mode . puni-disable-puni-mode)
   :init
   (puni-global-mode +1))
 (use-package highlight-indent-guides
   :ensure t
   :hook
-  ((prog-mode-hook conf-mode-hook) . highlight-indent-guides-mode)
+  ((prog-mode conf-mode) . highlight-indent-guides-mode)
   :custom
   (highlight-indent-guides-auto-odd-face-perc 10)
   (highlight-indent-guides-auto-even-face-perc 15)
@@ -619,16 +599,16 @@
     :bind
     ("C-c o" . my/org-prefix)
     (:map my/org-prefix
-     ("a" . org-agenda)
-     ("o" . my/open-org-inbox)
-     ("O" . my/open-org-dir)
-     ("p" . org-pomodoro)
-     ("l" . org-web-tools-insert-link-for-url)
-     ("c" . org-capture)
-     ("r t" . org-roam-buffer-toggle)
-     ("r f" . org-roam-node-find)
-     ("r i" . org-roam-node-insert)
-     ("r c" . org-roam-capture))
+          ("a" . org-agenda)
+          ("o" . my/open-org-inbox)
+          ("O" . my/open-org-dir)
+          ("p" . org-pomodoro)
+          ("l" . org-web-tools-insert-link-for-url)
+          ("c" . org-capture)
+          ("r t" . org-roam-buffer-toggle)
+          ("r f" . org-roam-node-find)
+          ("r i" . org-roam-node-insert)
+          ("r c" . org-roam-capture))
     :config
     (let ((inbox-file-name (expand-file-name my/org-inbox-file org-directory)))
       (unless (file-exists-p inbox-file-name)
@@ -722,14 +702,14 @@
       (org-modern-star nil)
       (org-modern-table nil)
       :hook
-      (org-mode-hook . org-modern-mode)
-      (org-agenda-finalize-hook . org-modern-agenda))
+      (org-mode . org-modern-mode)
+      (org-agenda-finalize . org-modern-agenda))
     (use-package valign
       :ensure t
       :custom
       (valign-fancy-bar t)
       :hook
-      (org-mode-hook . valign-mode))
+      (org-mode . valign-mode))
     (use-package org-tidy
       :ensure t)
     (use-package org-web-tools
@@ -777,7 +757,7 @@
 (use-package yasnippet
   :ensure t
   :hook
-  (prog-mode-hook . yas-minor-mode-on)
+  (prog-mode . yas-minor-mode-on)
   :config
   (use-package yasnippet-capf
     :ensure t
@@ -805,7 +785,8 @@
   (lsp-completion-provider :none)
   (lsp-modeline-diagnostics-scope :workspace)
   (lsp-keymap-prefix "C-c l")
-  :hook (lsp-mode-hook . lsp-enable-which-key-integration)
+  :hook
+  (lsp-mode . lsp-enable-which-key-integration)
   :preface
   (setenv "LSP_USE_PLISTS" "true")
   :config
@@ -827,10 +808,11 @@
     (lsp-ui-imenu-enable t)
     (lsp-ui-peek-enable t)
     (lsp-ui-peek-fontify 'on-demand)
-    :hook (lsp-mode-hook . lsp-ui-mode)
+    :hook
+    (lsp-mode . lsp-ui-mode)
     :bind (:map lsp-ui-mode-map
-           ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
-           ([remap xref-find-references] . lsp-ui-peek-find-references))))
+                ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+                ([remap xref-find-references] . lsp-ui-peek-find-references))))
 (progn ; languages
   (use-package text-mode
     :custom
@@ -865,14 +847,16 @@
     (use-package tuareg
       :ensure t)
     (use-package dune
-      :ensure t))
+      :ensure t)
+    (custom-set-variables
+     '(lsp-ocaml-lsp-server-command '("dune" "tools" "exec" "ocamllsp"))))
   (progn ; sml
     (use-package sml-mode
       :ensure t)
     (use-package smlfmt
       :ensure t
       :hook
-      (sml-mode-hook . smlfmt-format-on-save-mode)))
+      (sml-mode . smlfmt-format-on-save-mode)))
   (progn ; rust
     (use-package rust-mode
       :ensure t
@@ -880,16 +864,16 @@
       (rust-indent-offset 4)
       (rust-mode-treesitter-derive t)
       :hook
-      (rust-mode-hook . lsp))
+      (rust-mode . lsp))
     (use-package cargo-mode
       :ensure t
       :hook
-      (rust-mode-hook . cargo-minor-mode)))
+      (rust-mode . cargo-minor-mode)))
   (progn ;csharp
     (use-package csharp-mode
       :ensure t
       :hook
-      (csharp-mode-hook . eglot-ensure)))
+      (csharp-mode . lsp)))
   (progn ; fsharp
     (use-package fsharp-mode
       :ensure t
@@ -900,15 +884,8 @@
     (use-package lean4-mode
       :commands lean4-mode
       :vc (:url "https://github.com/leanprover-community/lean4-mode"
-           :rev :newest)))
+                :rev :newest)))
   (progn ; latex
-    (use-package reftex
-      :ensure t
-      :hook
-      (LaTeX-mode-hook . turn-on-reftex)
-      :custom
-      (reftex-plug-into-AUCTeX t)
-      (reftex-ref-style-default-list '("Cleveref" "Default")))
     (use-package auctex
       :ensure t
       :custom
@@ -923,13 +900,23 @@
       (TeX-view-program-selection '((output-pdf "PDF Tools")))
       (TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view)))
       :hook
-      (TeX-after-compilation-finished-functions . TeX-revert-document-buffer)
-      (LaTeX-mode-hook . turn-on-flyspell)
+      (LaTeX-mode . turn-on-flyspell)
       :config
+      (declare-function TeX-revert-document-buffer "tex")
+      (with-eval-after-load "tex"
+        (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer))
+      (use-package reftex
+        :ensure t
+        :hook
+        (LaTeX-mode . turn-on-reftex)
+        :custom
+        (reftex-plug-into-AUCTeX t)
+        (reftex-ref-style-default-list '("Cleveref" "Default")))
       (use-package auctex-cluttex
         :ensure t
         :after tex
-        :hook (LaTeX-mode-hook . auctex-cluttex-mode)
+        :hook
+        (LaTeX-mode . auctex-cluttex-mode)
         :config
         (declare-function TeX-active-master "tex")
         (declare-function TeX-output-extension "tex")
@@ -942,8 +929,7 @@
                                   (expand-file-name
                                    (TeX-active-master (TeX-output-extension)))))))
         (declare-function my/run-after-compilation-finished-funcs "init")
-        (advice-add #'my/run-after-compilation-finished-funcs :after #'auctex-cluttex--TeX-ClutTeX-sentinel)
-        ))))
+        (advice-add #'my/run-after-compilation-finished-funcs :after #'auctex-cluttex--TeX-ClutTeX-sentinel)))))
 (use-package meow
   :ensure t
   :custom (meow-use-clipboard t)
@@ -1040,10 +1026,10 @@
   (meow-global-mode +1)
   :config
   (meow-leader-define-key
-     '("q" . previous-buffer)
-     '("Q" . next-buffer)
-     '("u" . vundo)
-     '("I" . imenu-list)))
+   '("q" . previous-buffer)
+   '("Q" . next-buffer)
+   '("u" . vundo)
+   '("I" . imenu-list)))
 
 (provide 'init)
 ;;; init.el ends here
