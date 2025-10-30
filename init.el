@@ -228,11 +228,13 @@
   (use-package spacious-padding
     :ensure t
     :custom
-    (spacious-padding-width . ( :internal-border-width 15
-                                :header-line-width 4
-                                :mode-line-width 6
-                                :right-divider-width 30
-                                :scroll-bar-width 8))
+    (spacious-padding-width '( :internal-border-width 15
+                              :header-line-width 4
+                              :mode-line-width 6
+                              :right-divider-width 30
+                              :scroll-bar-width 8))
+    (spacious-padding `( :mode-line-active 'default
+                         :mode-line-inactive vertical-border))
     :config
     (spacious-padding-mode +1))
   (use-package dashboard
@@ -255,9 +257,19 @@
       (setq initial-buffer-choice #'(lambda () (get-buffer-create "*dashboard*"))))
     (dashboard-setup-startup-hook))
   (use-package catppuccin-theme
+    :disabled t
     :ensure t
     :config
     (load-theme 'catppuccin :no-confirm))
+  (use-package doom-themes
+    :ensure t
+    :custom
+    (doom-themes-enable-bold t)
+    (doom-themes-enable-italic t)
+    :config
+    (load-theme 'doom-tokyo-night t)
+    (doom-themes-visual-bell-config)
+    (doom-themes-org-config))
   (use-package fontaine
     :ensure t
     :custom
@@ -779,6 +791,7 @@
   (dape-buffer-window-arrangement 'right))
 (use-package lsp-mode
   :ensure t
+  :defer
   :custom
   (lsp-auto-guess-root t)
   (lsp-enable-file-watchers t)
@@ -839,37 +852,49 @@
       (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode)))
     (use-package bison-mode
       :ensure t
+      :defer
       :custom
       (bison-all-electricity-off t))
     (use-package cmake-mode
-      :ensure t))
+      :ensure t
+      :defer))
   (use-package markdown-mode
-    :ensure t)
+    :ensure t
+    :defer)
   (use-package web-mode
     :ensure t
+    :defer
     :mode ("\\.csp\\'" "\\.razor\\'" "\\.html?\\'"))
   (progn ; haskell
     (use-package haskell-mode
-      :ensure t)
+      :ensure t
+      :defer)
     (use-package lsp-haskell
-      :ensure t))
+      :ensure t
+      :defer))
   (progn ; ocaml
     (use-package tuareg
-      :ensure t)
+      :ensure t
+      :defer)
     (use-package dune
-      :ensure t)
-    (custom-set-variables
-     '(lsp-ocaml-lsp-server-command '("dune" "tools" "exec" "ocamllsp"))))
+      :ensure t
+      :defer)
+    (with-eval-after-load "lsp-ocaml"
+      (custom-set-variables
+       '(lsp-ocaml-lsp-server-command '("dune" "tools" "exec" "ocamllsp")))))
   (progn ; sml
     (use-package sml-mode
-      :ensure t)
+      :ensure t
+      :defer)
     (use-package smlfmt
       :ensure t
+      :defer
       :hook
       (sml-mode . smlfmt-format-on-save-mode)))
   (progn ; rust
     (use-package rust-mode
       :ensure t
+      :defer
       :custom
       (rust-indent-offset 4)
       (rust-mode-treesitter-derive t)
@@ -877,16 +902,25 @@
       (rust-mode . lsp))
     (use-package cargo-mode
       :ensure t
+      :defer
       :hook
       (rust-mode . cargo-minor-mode)))
+  (progn ; python
+    (use-package python-mode
+      :ensure t
+      :defer
+      :hook
+      (python-mode . python-ts-mode)))
   (progn ;csharp
     (use-package csharp-mode
       :ensure t
+      :defer
       :hook
       (csharp-mode . lsp)))
   (progn ; fsharp
     (use-package fsharp-mode
       :ensure t
+      :defer
       :config
       (with-eval-after-load 'company
         (add-to-list 'company-transformers 'company-sort-prefer-same-case-prefix))))
