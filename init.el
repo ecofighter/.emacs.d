@@ -267,7 +267,7 @@
     (doom-themes-enable-bold t)
     (doom-themes-enable-italic t)
     :config
-    (load-theme 'doom-tokyo-night t)
+    (load-theme 'doom-henna t)
     (doom-themes-visual-bell-config)
     (doom-themes-org-config))
   (use-package fontaine
