@@ -108,10 +108,6 @@
      ((eq system-type 'linux)
       (custom-set-variables
        '(alert-default-style 'libnotify)))
-     ((eq system-type 'darwin)
-      (custom-set-variables
-       '(ns-command-modifier 'meta)
-       '(ns-alternate-modifier 'option)))
      ((or (getenv "WSL_DISTRO_NAME")
           (eq system-type 'windows-nt))
       (use-package alert-toast
@@ -140,9 +136,14 @@
           nil ; should return nil if we're the current paste owner
         (shell-command-to-string "wl-paste -n | tr -d \r")))
     (setq interprogram-cut-function 'wl-copy)
-    (setq interprogram-paste-function 'wl-paste)))
+    (setq interprogram-paste-function 'wl-paste))
+  (when (eq system-type 'darwin)
+    (custom-set-variables
+     '(ns-command-modifier 'meta)
+     '(ns-alternate-modifier 'option))))
 (use-package auto-compile
   :ensure t
+  :defer
   :custom (auto-compile-native-compile t)
   :hook
   (emacs-lisp-mode . auto-compile-on-save-mode))
