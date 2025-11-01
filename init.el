@@ -261,7 +261,18 @@
     (when (daemonp)
       (setq initial-buffer-choice #'(lambda () (get-buffer-create "*dashboard*"))))
     (dashboard-setup-startup-hook))
+  (use-package ef-themes
+    :ensure t
+    :demand t
+    :custom
+    (modus-themes-mixed-fonts t)
+    (modus-themes-italic-constructs t)
+    :init
+    (ef-themes-take-over-modus-themes-mode +1)
+    :config
+    (modus-themes-load-theme 'ef-owl))
   (use-package doom-themes
+    :disabled t
     :ensure t
     :demand t
     :custom
