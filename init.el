@@ -22,6 +22,8 @@
     (package-install 'use-package)))
 
 (require 'use-package)
+(use-package bind-key
+  :demand t)
 (use-package emacs
   :custom
   (make-backup-files nil)
@@ -143,7 +145,7 @@
      '(ns-alternate-modifier 'option))))
 (use-package auto-compile
   :ensure t
-  :defer
+  :defer t
   :custom (auto-compile-native-compile t)
   :hook
   (emacs-lisp-mode . auto-compile-on-save-mode))
@@ -153,6 +155,7 @@
   (scroll-bar-mode -1)
   (use-package doom-modeline
     :ensure t
+    :demand t
     :init
     (doom-modeline-mode +1)
     :custom
@@ -176,10 +179,6 @@
     (doom-modeline-persp-icon t)
     (doom-modeline-project-detection 'auto)
     (doom-modeline-unicode-fallback nil))
-  (use-package minions
-    :ensure t
-    :init
-    (minions-mode +1))
   (use-package nerd-icons
     :ensure t
     :custom
@@ -187,16 +186,18 @@
     :config
     (use-package nerd-icons-completion
       :ensure t
-      :after marginalia
+      :demand t
       :hook
       (marginalia-mode . nerd-icons-completion-marginalia-setup)
       :init
       (nerd-icons-completion-mode +1))
     (use-package nerd-icons-dired
       :ensure t
+      :defer t
       :hook (dired-mode . nerd-icons-dired-mode)))
   (use-package rainbow-delimiters
     :ensure t
+    :demand t
     :hook (prog-mode . rainbow-delimiters-mode))
   (use-package whitespace
     :custom
@@ -217,6 +218,7 @@
     (global-hl-todo-mode +1))
   (use-package perfect-margin
     :ensure t
+    :demand t
     :custom
     (perfect-margin-visible-width 120)
     (perfect-margin-disable-in-splittable-check t)
@@ -228,6 +230,7 @@
       (setq mode-line-right-align-edge 'window)))
   (use-package spacious-padding
     :ensure t
+    :demand t
     :custom
     (spacious-padding-width '( :internal-border-width 15
                               :header-line-width 4
@@ -240,6 +243,7 @@
     (spacious-padding-mode +1))
   (use-package dashboard
     :ensure t
+    :defer t
     :custom
     (dashboard-force-refresh t)
     (dashboard-center-content t)
@@ -257,13 +261,9 @@
     (when (daemonp)
       (setq initial-buffer-choice #'(lambda () (get-buffer-create "*dashboard*"))))
     (dashboard-setup-startup-hook))
-  (use-package catppuccin-theme
-    :disabled t
-    :ensure t
-    :config
-    (load-theme 'catppuccin :no-confirm))
   (use-package doom-themes
     :ensure t
+    :demand t
     :custom
     (doom-themes-enable-bold t)
     (doom-themes-enable-italic t)
@@ -273,6 +273,7 @@
     (doom-themes-org-config))
   (use-package fontaine
     :ensure t
+    :demand t
     :custom
     (inhibit-compacting-font-caches t)
     (fontaine-latest-state-file `,(locate-user-emacs-file "fontaine-latest-state.eld"))
@@ -308,6 +309,7 @@
         (fontaine-set-preset (or (fontaine-restore-latest-preset) 'ibmplex)))))
 (use-package exec-path-from-shell
   :ensure t
+  :demand t
   :unless (eq system-type 'windows-nt)
   :hook (emacs-startup . exec-path-from-shell-initialize)
   :custom
@@ -324,6 +326,7 @@
   (global-eldoc-mode +1))
 (use-package vertico
   :ensure t
+  :demand t
   :bind (:map vertico-map
               ("C-h" . vertico-directory-up)
               ("C-m" . vertico-exit)
@@ -332,11 +335,13 @@
   (vertico-mode +1))
 (use-package embark
   :ensure t
+  :defer t
   :bind
   ("C-." . embark-act)
   ("C-," . embark-dwim))
 (use-package consult
   :ensure t
+  :demand t
   :bind
   ("C-c i e" . consult-flymake)
   ("C-c i i" . consult-imenu)
@@ -349,25 +354,29 @@
     :hook (embark-collect-mode . consult-preview-at-point-mode)))
 (use-package marginalia
   :ensure t
+  :demand t
   :init
   (marginalia-mode +1))
 (use-package orderless
   :ensure t
+  :demand t
   :custom
   (completion-styles '(substring orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 (progn ; completion
   (use-package company
     :ensure t
+    :demand t
     :config
     (global-company-mode +1)
     (use-package company-box
-      :disabled t
       :ensure t
+      :demand t
       :hook
       (company-mode . company-box-mode))
     (use-package company-fuzzy
       :ensure t
+      :demand t
       :preface
       (use-package liquidmetal
         :ensure t)
@@ -379,6 +388,7 @@
       :hook (company-mode . company-fuzzy-mode)))
   (use-package cape
     :ensure t
+    :demand t
     :custom
     (cape-dabbrev-check-other-buffers nil)
     :config
@@ -451,6 +461,7 @@
        (centaur-tabs-get-group-name (current-buffer)))))))
 (use-package perspective
   :ensure t
+  :demand t
   :custom
   (persp-mode-prefix-key `,(kbd "C-x x"))
   (persp-sort 'created)
@@ -464,36 +475,45 @@
     (consult-customize consult--source-buffer :hidden t :default nil)
     (add-to-list 'consult-buffer-sources persp-consult-source)))
 (use-package imenu-list
-  :ensure t)
+  :ensure t
+  :demand t)
 (use-package vundo
-  :ensure t)
+  :ensure t
+  :demand t)
 (use-package avy
   :ensure t
+  :demand t
   :bind
   ("C-c j j" . avy-goto-word-or-subword-1)
   ("C-c j l" . avy-goto-line))
 (use-package ace-window
   :ensure t
+  :demand t
   :bind
   ("C-c w" . ace-window))
 (use-package which-key
   :ensure t
+  :demand t
   :init
   (which-key-mode +1))
 (use-package tramp
   :ensure t
+  :defer t
   :config
   (eval-when-compile
     (defvar tramp-remote-path))
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 (use-package vterm
   :unless (eq system-type 'windows-nt)
-  :ensure t)
+  :ensure t
+  :defer t)
 (use-package eshell
   :ensure t
+  :defer t
   :bind
   ("C-c '" . eshell))
 (use-package ddskk
+  :disabled t
   :ensure t
   :bind
   ("C-x j" . skk-mode)
@@ -540,7 +560,9 @@
                                                     skk-isearch-mode-enable)
                                            (skk-isearch-mode-cleanup))))))
 (use-package flymake
+  :disabled t
   :ensure t
+  :defer t
   :hook (prog-mode . flymake-mode)
   :config
   (use-package flymake-collection
@@ -549,7 +571,13 @@
   (use-package flymake-popon
     :ensure t
     :hook (flymake-mode . flymake-popon-mode)))
+(use-package flycheck
+  :ensure t
+  :demand t
+  :config
+  (add-hook 'after-init-hook #'global-flycheck-mode))
 (use-package ispell
+  :defer t
   :custom
   (ispell-program-name "hunspell")
   (ispell-really-hunspell t)
@@ -565,11 +593,13 @@
   (electric-pair-mode +1))
 (use-package puni
   :ensure t
+  :demand t
   :hook (vterm-mode . puni-disable-puni-mode)
   :init
   (puni-global-mode +1))
 (use-package highlight-indent-guides
   :ensure t
+  :defer t
   :hook
   ((prog-mode conf-mode) . highlight-indent-guides-mode)
   :custom
@@ -582,11 +612,13 @@
   (highlight-indent-guides-method 'column))
 (use-package magit
   :ensure t
+  :defer t
   :bind
   ("C-x g" . #'magit)
   :config
   (use-package difftastic
     :ensure t
+    :defer t
     :bind
     (:map magit-blame-read-only-mode-map
           ("D" . 'difftastic-magit-show)
@@ -603,6 +635,7 @@
   (define-prefix-command 'my/org-prefix)
   (use-package org
     :ensure t
+    :defer t
     :custom
     (org-directory "~/Documents/org")
     (org-startup-indented nil)
@@ -659,6 +692,7 @@
       :config
       (use-package org-super-agenda
         :ensure t
+        :defer t
         :init
         (org-super-agenda-mode +1)
         :custom
@@ -721,6 +755,7 @@
                                                             :scheduled future)))))))))))
     (use-package org-modern
       :ensure t
+      :defer t
       :custom
       (org-modern-star nil)
       (org-modern-table nil)
@@ -729,16 +764,20 @@
       (org-agenda-finalize . org-modern-agenda))
     (use-package valign
       :ensure t
+      :defer t
       :custom
       (valign-fancy-bar t)
       :hook
       (org-mode . valign-mode))
     (use-package org-tidy
-      :ensure t)
+      :ensure t
+      :defer t)
     (use-package org-web-tools
-      :ensure t)
+      :ensure t
+      :defer t)
     (use-package org-roam
       :ensure t
+      :defer t
       :init
       (org-roam-db-autosync-mode +1)
       :custom
@@ -760,16 +799,19 @@
                                                 (propertize "${tags:10}" 'face 'org-tag))))))
 (use-package pdf-tools
   :ensure t
+  :defer t
   :config
   (pdf-loader-install))
 (use-package literate-calc-mode
   :ensure t
+  :defer t
   :config
   (with-eval-after-load 'org
     (eval-when-compile (require 'org))
     (require 'literate-calc-mode)))
 (use-package graphviz-dot-mode
   :ensure t
+  :defer t
   :config
   (with-eval-after-load 'org
     (eval-when-compile (require 'org))
@@ -779,20 +821,23 @@
     (setf (alist-get "dot" org-src-lang-modes nil nil #'string=) 'graphviz-dot-mode)))
 (use-package yasnippet
   :ensure t
+  :defer t
   :hook
   (prog-mode . yas-minor-mode-on)
   :config
   (use-package yasnippet-capf
     :ensure t
+    :defer t
     :config
     (add-to-list 'completion-at-point-functions #'yasnippet-capf)))
 (use-package dape
   :ensure t
+  :demand t
   :custom
   (dape-buffer-window-arrangement 'right))
 (use-package lsp-mode
   :ensure t
-  :defer
+  :defer t
   :custom
   (lsp-auto-guess-root t)
   (lsp-enable-file-watchers t)
@@ -818,6 +863,7 @@
   (add-to-list 'lsp-language-id-configuration '(sml-mode . "sml"))
   (use-package lsp-ui
     :ensure t
+    :defer t
     :custom
     (lsp-ui-doc-enable t)
     (lsp-ui-doc-header t)
@@ -853,75 +899,79 @@
       (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode)))
     (use-package bison-mode
       :ensure t
-      :defer
+      :defer t
       :custom
       (bison-all-electricity-off t))
     (use-package cmake-mode
       :ensure t
-      :defer))
+      :defer t))
   (use-package markdown-mode
     :ensure t
-    :defer)
+    :defer t)
   (use-package web-mode
     :ensure t
-    :defer
+    :defer t
     :mode ("\\.csp\\'" "\\.razor\\'" "\\.html?\\'"))
   (progn ; haskell
     (use-package haskell-mode
       :ensure t
-      :defer)
+      :defer t)
     (use-package lsp-haskell
       :ensure t
-      :defer))
+      :defer t))
   (progn ; ocaml
     (use-package tuareg
       :ensure t
-      :defer)
+      :defer t)
     (use-package dune
       :ensure t
-      :defer)
+      :defer t)
     (with-eval-after-load "lsp-ocaml"
       (custom-set-variables
        '(lsp-ocaml-lsp-server-command '("dune" "tools" "exec" "ocamllsp")))))
   (progn ; sml
     (use-package sml-mode
       :ensure t
-      :defer)
+      :defer t)
     (use-package smlfmt
       :ensure t
-      :defer
+      :defer t
       :hook
       (sml-mode . smlfmt-format-on-save-mode)))
   (progn ; rust
     (use-package rust-mode
       :ensure t
-      :defer
+      :defer t
       :custom
       (rust-indent-offset 4)
       (rust-mode-treesitter-derive t)
       :hook
-      (rust-mode . lsp))
+      (rust-mode . rust-ts-mode))
     (use-package cargo-mode
       :ensure t
-      :defer
+      :defer t
       :hook
       (rust-mode . cargo-minor-mode)))
   (progn ; python
     (use-package python-mode
       :ensure t
-      :defer
+      :defer t
       :hook
       (python-mode . python-ts-mode)))
-  (progn ;csharp
+  (progn ; dotnet
+    (use-package sharper
+      :ensure t
+      :demand t
+      :bind
+      ("C-c n" . sharper-main-transient))
     (use-package csharp-mode
       :ensure t
-      :defer
+      :defer t
       :hook
-      (csharp-mode . lsp)))
-  (progn ; fsharp
+      (csharp-mode . lsp))
     (use-package fsharp-mode
       :ensure t
-      :defer
+      :defer t
       :config
       (with-eval-after-load 'company
         (add-to-list 'company-transformers 'company-sort-prefer-same-case-prefix))))
