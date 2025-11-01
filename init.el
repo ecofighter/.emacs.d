@@ -268,7 +268,7 @@
     (doom-themes-enable-bold t)
     (doom-themes-enable-italic t)
     :config
-    (load-theme 'doom-henna t)
+    (load-theme 'doom-monokai-pro t)
     (doom-themes-visual-bell-config)
     (doom-themes-org-config))
   (use-package fontaine
@@ -947,7 +947,11 @@
       (tuareg-mode . ocaml-eglot)
       (ocaml-eglot . eglot-ensure)
       :custom
-      (ocaml-eglot-syntax-checker 'flymake))
+      (ocaml-eglot-syntax-checker 'flymake)
+      :config
+      (with-eval-after-load "eglot"
+        (add-to-list 'eglot-server-programs
+                     '(tuareg-mode . ("dune" "tools" "exec" "ocamllsp")))))
     (with-eval-after-load "lsp-ocaml"
       (custom-set-variables
        '(lsp-ocaml-lsp-server-command '("dune" "tools" "exec" "ocamllsp")))))
