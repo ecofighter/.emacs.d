@@ -233,10 +233,10 @@
     :demand t
     :custom
     (spacious-padding-width '( :internal-border-width 15
-                              :header-line-width 4
-                              :mode-line-width 6
-                              :right-divider-width 30
-                              :scroll-bar-width 8))
+                               :header-line-width 4
+                               :mode-line-width 6
+                               :right-divider-width 30
+                               :scroll-bar-width 8))
     (spacious-padding `( :mode-line-active 'default
                          :mode-line-inactive vertical-border))
     :config
@@ -349,6 +349,13 @@
   ("C-c i p" . consult-yank-from-kill-ring)
   ("C-c i b" . consult-buffer)
   :config
+  (use-package consult-flycheck
+    :disabled t
+    :ensure t
+    :demand t
+    :after flycheck
+    :bind
+    ("C-c i e" . consult-flycheck))
   (use-package embark-consult
     :ensure t
     :hook (embark-collect-mode . consult-preview-at-point-mode)))
@@ -560,18 +567,20 @@
                                                     skk-isearch-mode-enable)
                                            (skk-isearch-mode-cleanup))))))
 (use-package flymake
-  :disabled t
   :ensure t
   :defer t
   :hook (prog-mode . flymake-mode)
   :config
   (use-package flymake-collection
     :ensure t
+    :demand t
     :after flymake)
   (use-package flymake-popon
     :ensure t
+    :defer t
     :hook (flymake-mode . flymake-popon-mode)))
 (use-package flycheck
+  :disabled t
   :ensure t
   :demand t
   :config
@@ -835,7 +844,11 @@
   :demand t
   :custom
   (dape-buffer-window-arrangement 'right))
+(use-package eglot
+  :ensure t
+  :defer t)
 (use-package lsp-mode
+  :disabled t
   :ensure t
   :defer t
   :custom
@@ -926,6 +939,15 @@
     (use-package dune
       :ensure t
       :defer t)
+    (use-package ocaml-eglot
+      :ensure t
+      :after tuareg
+      :defer t
+      :hook
+      (tuareg-mode . ocaml-eglot)
+      (ocaml-eglot . eglot-ensure)
+      :custom
+      (ocaml-eglot-syntax-checker 'flymake))
     (with-eval-after-load "lsp-ocaml"
       (custom-set-variables
        '(lsp-ocaml-lsp-server-command '("dune" "tools" "exec" "ocamllsp")))))
@@ -966,13 +988,15 @@
       ("C-c n" . sharper-main-transient))
     (use-package csharp-mode
       :ensure t
-      :defer t
-      :hook
-      (csharp-mode . lsp))
+      :defer t)
     (use-package fsharp-mode
       :ensure t
       :defer t
       :config
+      (use-package eglot-fsharp
+        :ensure t
+        :after fsharp-mode
+        :demand t)
       (with-eval-after-load 'company
         (add-to-list 'company-transformers 'company-sort-prefer-same-case-prefix))))
   (progn ; lean4
