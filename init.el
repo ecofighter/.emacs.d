@@ -349,6 +349,12 @@
   ("C-c i p" . consult-yank-from-kill-ring)
   ("C-c i b" . consult-buffer)
   :config
+  (use-package consult-eglot
+    :ensure t
+    :defer t
+    :after eglot
+    :bind
+    ("C-c i s" . consult-eglot-symbols))
   (use-package consult-flycheck
     :disabled t
     :ensure t
@@ -930,12 +936,19 @@
       :ensure t
       :defer t)
     (use-package lsp-haskell
+      :disabled t
       :ensure t
       :defer t))
   (progn ; ocaml
     (use-package tuareg
       :ensure t
       :defer t)
+    (use-package ocamlformat
+      :ensure t
+      :defer t
+      :after tuareg
+      :custom
+      (ocamlformat-command '("dune" "tool" "exec" "ocamlformat")))
     (use-package dune
       :ensure t
       :defer t)
