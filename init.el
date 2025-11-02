@@ -208,6 +208,7 @@
   (use-package display-line-numbers
     :hook
     (prog-mode . display-line-numbers-mode)
+    (text-mode . display-line-numbers-mode)
     (conf-mode . display-line-numbers-mode))
   (use-package hl-line
     :init
