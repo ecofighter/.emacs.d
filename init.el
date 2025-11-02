@@ -615,8 +615,8 @@
   :disabled t
   :ensure t
   :demand t
-  :config
-  (add-hook 'after-init-hook #'global-flycheck-mode))
+  :hook
+  (after-init . global-flycheck-mode))
 (use-package ispell
   :defer t
   :custom
