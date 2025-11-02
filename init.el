@@ -827,7 +827,7 @@
 (use-package pdf-tools
   :ensure t
   :defer t
-  :config
+  :init
   (pdf-loader-install))
 (use-package literate-calc-mode
   :ensure t
