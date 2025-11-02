@@ -107,7 +107,7 @@
     :ensure t
     :config
     (cond
-     ((eq system-type 'linux)
+     ((eq system-type 'gnu/linux)
       (custom-set-variables
        '(alert-default-style 'libnotify)))
      ((or (getenv "WSL_DISTRO_NAME")
@@ -115,14 +115,19 @@
       (use-package alert-toast
         :ensure t
         :custom
-        (alert-default-style 'toast))
-      (with-eval-after-load 'browse-url
-        (defun my/browse-url-via-powershell (url &rest _args)
-          (shell-command (concat "powershell.exe start \"" url "\"")))
-        (declare-function my/browse-url-via-powershell "init")
-        (setf browse-url-browser-function #'my/browse-url-via-powershell)))))
-  (when (getenv "WAYLAND_DISPLAY")
-    :config
+        (alert-default-style 'toast)))))
+  (cond
+   ((eq system-type 'gnu/linux)
+    (use-package fcitx
+      :ensure t
+      :demand t
+      :custom
+      (fcitx-use-dbus 'fcitx5)
+      :config
+      (setq fcitx-remote-command "fcitx5-remote")
+      (if (display-graphic-p)
+          (fcitx-aggressive-setup)
+        (add-hook 'server-after-make-frame-hook #'fcitx-aggressive-setup)))
     ;; credit: yorickvP on Github
     (defvar wl-copy-process nil)
     (defun wl-copy (text)
@@ -139,10 +144,17 @@
         (shell-command-to-string "wl-paste -n | tr -d \r")))
     (setq interprogram-cut-function 'wl-copy)
     (setq interprogram-paste-function 'wl-paste))
-  (when (eq system-type 'darwin)
+   ((eq system-type 'darwin)
     (custom-set-variables
      '(ns-command-modifier 'meta)
-     '(ns-alternate-modifier 'option))))
+     '(ns-alternate-modifier 'option)))
+   ((or (getenv "WSL_DISTRO_NAME")
+        (eq system-type 'windows-nt))
+    (with-eval-after-load 'browse-url
+      (defun my/browse-url-via-powershell (url &rest _args)
+        (shell-command (concat "powershell.exe start \"" url "\"")))
+      (declare-function my/browse-url-via-powershell "init")
+      (setf browse-url-browser-function #'my/browse-url-via-powershell)))))
 (use-package auto-compile
   :ensure t
   :defer t
