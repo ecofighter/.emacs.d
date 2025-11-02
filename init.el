@@ -595,6 +595,7 @@
     :demand t
     :after flymake)
   (use-package flymake-popon
+    :disabled t
     :ensure t
     :defer t
     :hook (flymake-mode . flymake-popon-mode)))
@@ -880,7 +881,7 @@
   (lsp-log-io nil)
   (lsp-semantic-tokens-enable t)
   (lsp-enable-snippet nil)
-  (lsp-diagnostics-provider :auto)
+  (lsp-diagnostics-provider :flymake)
   (lsp-enable-completion t)
   (lsp-completion-provider :none)
   (lsp-modeline-diagnostics-scope :workspace)
@@ -893,6 +894,7 @@
   (require 'lsp-sml)
   (add-to-list 'lsp-language-id-configuration '(sml-mode . "sml"))
   (use-package lsp-ui
+    :disabled t
     :ensure t
     :defer t
     :custom
@@ -1024,7 +1026,7 @@
       :config
       (use-package eglot-fsharp
         :ensure t
-        :after fsharp-mode
+        :after eglot
         :demand t)
       (with-eval-after-load 'company
         (add-to-list 'company-transformers 'company-sort-prefer-same-case-prefix))))
