@@ -242,6 +242,7 @@
     :config
     (spacious-padding-mode +1))
   (use-package dashboard
+    :disabled t
     :ensure t
     :defer t
     :custom
@@ -865,7 +866,6 @@
   :ensure t
   :defer t)
 (use-package lsp-mode
-  :disabled t
   :ensure t
   :defer t
   :custom
