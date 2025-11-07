@@ -368,7 +368,7 @@
   :ensure t
   :demand t
   :bind
-  ("C-c i e" . consult-flymake)
+  ;; ("C-c i e" . consult-flymake)
   ("C-c i i" . consult-imenu)
   ("C-c i l" . consult-line)
   ("C-c i p" . consult-yank-from-kill-ring)
@@ -377,14 +377,13 @@
   (use-package consult-eglot
     :ensure t
     :defer t
-    :after eglot
+    :after (consult eglot)
     :bind
     ("C-c i s" . consult-eglot-symbols))
   (use-package consult-flycheck
-    :disabled t
     :ensure t
-    :demand t
-    :after flycheck
+    :defer t
+    :after (consult flycheck)
     :bind
     ("C-c i e" . consult-flycheck))
   (use-package embark-consult
@@ -598,6 +597,7 @@
                                                     skk-isearch-mode-enable)
                                            (skk-isearch-mode-cleanup))))))
 (use-package flymake
+  :disabled t
   :ensure t
   :defer t
   :hook (prog-mode . flymake-mode)
@@ -612,11 +612,17 @@
     :defer t
     :hook (flymake-mode . flymake-popon-mode)))
 (use-package flycheck
-  :disabled t
   :ensure t
   :demand t
   :hook
-  (after-init . global-flycheck-mode))
+  (after-init . global-flycheck-mode)
+  :config
+  (use-package flycheck-eglot
+    :ensure t
+    :defer t
+    :after (flycheck eglot)
+    :hook
+    (eglot-manage-dmode . flycheck-eglot-mode)))
 (use-package ispell
   :defer t
   :custom
@@ -893,7 +899,7 @@
   (lsp-log-io nil)
   (lsp-semantic-tokens-enable t)
   (lsp-enable-snippet nil)
-  (lsp-diagnostics-provider :flymake)
+  (lsp-diagnostics-provider :auto)
   (lsp-enable-completion t)
   (lsp-completion-provider :none)
   (lsp-modeline-diagnostics-scope :workspace)
@@ -952,7 +958,17 @@
       :defer t))
   (use-package markdown-mode
     :ensure t
-    :defer t)
+    :defer t
+    :mode
+    ("\\.md\\'" . gfm-mode)
+    :custom
+    (markdown-command '("pandoc" "--from=gfm" "--to=html5"))
+    (markdown-fontify-code-blocks-natively t)
+    (markdown-header-scaling t)
+    (markdown-indent-on-enter 'indent-and-new-item)
+    :bind
+    (:map markdown-mode-map
+          ("<S-tab>" . markdown-shift-tab)))
   (use-package web-mode
     :ensure t
     :defer t
@@ -983,7 +999,6 @@
       :after tuareg
       :defer t
       :hook
-      (tuareg-mode . ocaml-eglot)
       (ocaml-eglot . eglot-ensure)
       :custom
       (ocaml-eglot-syntax-checker 'flymake)
