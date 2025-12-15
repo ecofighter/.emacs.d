@@ -232,12 +232,12 @@
   (use-package perfect-margin
     :ensure t
     :demand t
+    :defun perfect-margin-mode
     :custom
     (perfect-margin-visible-width 120)
     (perfect-margin-disable-in-splittable-check t)
-    :init
-    (perfect-margin-mode +1)
     :config
+    (perfect-margin-mode +1)
     (with-eval-after-load 'doom-modeline
       (eval-when-compile (require 'doom-modeline nil t))
       (setq mode-line-right-align-edge 'window)))
@@ -347,6 +347,7 @@
                      ,(locate-user-emacs-file "elpa")
                      "/tmp.*")))
 (use-package eldoc
+  :ensure t
   :init
   (global-eldoc-mode +1))
 (use-package vertico
@@ -511,9 +512,6 @@
       (declare-function consult--customize-put "ext:consult.el"))
     (consult-customize consult--source-buffer :hidden t :default nil)
     (add-to-list 'consult-buffer-sources persp-consult-source)))
-(use-package imenu-list
-  :ensure t
-  :demand t)
 (use-package vundo
   :ensure t
   :demand t)
@@ -1077,7 +1075,7 @@
       (TeX-view-program-selection '((output-pdf "PDF Tools")))
       (TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view)))
       :hook
-      (LaTeX-mode . turn-on-flyspell)
+      (LaTeX-mode . flyspell-mode)
       :config
       (declare-function TeX-revert-document-buffer "tex")
       (with-eval-after-load "tex"
@@ -1109,9 +1107,9 @@
         (advice-add #'auctex-cluttex--TeX-ClutTeX-sentinel :after #'my/run-after-compilation-finished-funcs)))))
 (use-package meow
   :ensure t
+  :demand t
   :custom (meow-use-clipboard t)
-  :init
-  (require 'meow)
+  :config
   (declare-function meow-motion-define-key "meow-helpers")
   (declare-function meow-leader-define-key "meow-helpers")
   (declare-function meow-normal-define-key "meow-helpers")
