@@ -232,11 +232,11 @@
   (use-package perfect-margin
     :ensure t
     :demand t
-    :defun perfect-margin-mode
     :custom
     (perfect-margin-visible-width 120)
     (perfect-margin-disable-in-splittable-check t)
     :config
+    (declare-function perfect-margin-mode "perfect-margin")
     (perfect-margin-mode +1)
     (with-eval-after-load 'doom-modeline
       (eval-when-compile (require 'doom-modeline nil t))
@@ -284,6 +284,7 @@
     :init
     (ef-themes-take-over-modus-themes-mode +1)
     :config
+    (declare-function modus-themes-load-theme "modus-themes")
     (modus-themes-load-theme 'ef-owl))
   (use-package doom-themes
     :disabled t
@@ -341,6 +342,9 @@
   (exec-path-from-shell-arguments nil)
   (exec-path-from-shell-check-startup-files nil)
   (exec-path-from-shell-variables '("PATH" "MANPATH" "LD_LIBRARY_PATH")))
+(use-package envrc
+  :ensure t
+  :hook (after-init . envrc-global-mode))
 (use-package recentf
   :custom
   (recentf-exclude `(,(locate-user-emacs-file "bookmarks")
@@ -1109,7 +1113,8 @@
   :ensure t
   :demand t
   :custom (meow-use-clipboard t)
-  :config
+  :init
+  (require 'meow)
   (declare-function meow-motion-define-key "meow-helpers")
   (declare-function meow-leader-define-key "meow-helpers")
   (declare-function meow-normal-define-key "meow-helpers")
