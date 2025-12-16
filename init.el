@@ -1057,6 +1057,9 @@
         :ensure t
         :after eglot
         :demand t)
+      (with-eval-after-load 'lsp-fsharp
+        (custom-set-variables
+         '(lsp-fsharp-use-dotnet-tool-for-fsac nil)))
       (with-eval-after-load 'company
         (add-to-list 'company-transformers 'company-sort-prefer-same-case-prefix))))
   (progn ; lean4
