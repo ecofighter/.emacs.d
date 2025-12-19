@@ -992,7 +992,7 @@
       :defer t
       :after tuareg
       :custom
-      (ocamlformat-command '("dune" "tool" "exec" "ocamlformat")))
+      (ocamlformat-command '("ocamlformat")))
     (use-package dune
       :ensure t
       :defer t)
@@ -1005,12 +1005,14 @@
       :custom
       (ocaml-eglot-syntax-checker 'flymake)
       :config
-      (with-eval-after-load "eglot"
-        (add-to-list 'eglot-server-programs
-                     '(tuareg-mode . ("dune" "tools" "exec" "ocamllsp")))))
-    (with-eval-after-load "lsp-ocaml"
-      (custom-set-variables
-       '(lsp-ocaml-lsp-server-command '("dune" "tools" "exec" "ocamllsp")))))
+      ;; (with-eval-after-load "eglot"
+      ;;   (add-to-list 'eglot-server-programs
+      ;;                '(tuareg-mode . ("dune" "tools" "exec" "ocamllsp"))))
+      )
+    ;; (with-eval-after-load "lsp-ocaml"
+    ;;   (custom-set-variables
+    ;;    '(lsp-ocaml-lsp-server-command '("dune" "tools" "exec" "ocamllsp"))))
+    )
   (progn ; sml
     (use-package sml-mode
       :ensure t
