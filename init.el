@@ -624,7 +624,7 @@
     :defer t
     :after (flycheck eglot)
     :hook
-    (eglot-manage-dmode . flycheck-eglot-mode)))
+    (eglot-managed-mode . flycheck-eglot-mode)))
 (use-package ispell
   :defer t
   :custom
