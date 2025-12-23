@@ -98,6 +98,8 @@
     (treesit-font-lock-level 4)
     (treesit-language-source-alist '((rust . ("https://github.com/tree-sitter/tree-sitter-rust"
                                               nil nil nil nil))
+                                     (nix . ("https://github.com/nix-community/tree-sitter-nix"
+                                             nil nil nil nil))
                                      (c . ("https://github.com/tree-sitter/tree-sitter-c"
                                            nil nil nil nil))
                                      (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"
@@ -1012,6 +1014,11 @@
     ;;   (custom-set-variables
     ;;    '(lsp-ocaml-lsp-server-command '("dune" "tools" "exec" "ocamllsp"))))
     )
+  (progn ; nix
+    (use-package nix-ts-mode
+      :ensure t
+      :defer t
+      :mode "\\.nix\\'"))
   (progn ; sml
     (use-package sml-mode
       :ensure t
