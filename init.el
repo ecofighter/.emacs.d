@@ -275,7 +275,15 @@
     (when (daemonp)
       (setq initial-buffer-choice #'(lambda () (get-buffer-create "*dashboard*"))))
     (dashboard-setup-startup-hook))
+  (use-package modus-themes
+    :ensure t
+    :demand t
+    :config
+    (declare-function modus-themes-load-theme "modus-themes")
+    (add-to-list 'custom-theme-load-path (locate-user-emacs-file "theme/"))
+    (load-theme 'kanagawa-wave :no-confirm))
   (use-package ef-themes
+    :disabled t
     :ensure t
     :demand t
     :custom
@@ -363,12 +371,6 @@
               ("C-j" . vertico-exit-input))
   :init
   (vertico-mode +1))
-(use-package embark
-  :ensure t
-  :defer t
-  :bind
-  ("C-." . embark-act)
-  ("C-," . embark-dwim))
 (use-package consult
   :ensure t
   :demand t
@@ -390,10 +392,7 @@
     :defer t
     :after (consult flycheck)
     :bind
-    ("C-c i e" . consult-flycheck))
-  (use-package embark-consult
-    :ensure t
-    :hook (embark-collect-mode . consult-preview-at-point-mode)))
+    ("C-c i e" . consult-flycheck)))
 (use-package marginalia
   :ensure t
   :demand t
