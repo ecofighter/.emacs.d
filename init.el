@@ -945,8 +945,12 @@
     (when (treesit-available-p)
       (when (fboundp 'treesit-ready-p)
         (unless (treesit-ready-p 'c)
+          (add-to-list 'treesit-language-source-alist '(c . ("https://github.com/tree-sitter/tree-sitter-c"
+                                                         nil nil nil nil)))
           (treesit-install-language-grammar 'c))
         (unless (treesit-ready-p 'cpp)
+          (add-to-list 'treesit-language-source-alist '(cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"
+                                                         nil nil nil nil)))
           (treesit-install-language-grammar 'cpp)))
       (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
       (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
@@ -959,19 +963,12 @@
     (use-package cmake-mode
       :ensure t
       :defer t))
-  (use-package markdown-mode
-    :ensure t
+  (use-package markdown-ts-mode
+    :mode ("\\.md\\'" . markdown-ts-mode)
     :defer t
-    :mode
-    ("\\.md\\'" . gfm-mode)
-    :custom
-    (markdown-command '("pandoc" "--from=gfm" "--to=html5"))
-    (markdown-fontify-code-blocks-natively t)
-    (markdown-header-scaling t)
-    (markdown-indent-on-enter 'indent-and-new-item)
-    :bind
-    (:map markdown-mode-map
-          ("<S-tab>" . markdown-shift-tab)))
+    :config
+    (add-to-list 'treesit-language-source-alist '(markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown/src"))
+    (add-to-list 'treesit-language-source-alist '(markdown-inline "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown-inline/src")))
   (use-package web-mode
     :ensure t
     :defer t
@@ -1018,7 +1015,14 @@
     (use-package nix-ts-mode
       :ensure t
       :defer t
-      :mode "\\.nix\\'"))
+      :mode "\\.nix\\'"
+      :init
+      (when (treesit-available-p)
+        (when (fboundp 'treesit-ready-p)
+          (unless (treesit-ready-p 'nix)
+            (add-to-list 'treesit-language-source-alist '(nix . ("https://github.com/nix-community/tree-sitter-nix"
+                                                                 nil nil nil nil)))
+            (treesit-install-language-grammar 'nix))))))
   (progn ; sml
     (use-package sml-mode
       :ensure t
@@ -1035,8 +1039,13 @@
       :custom
       (rust-indent-offset 4)
       (rust-mode-treesitter-derive t)
-      :hook
-      (rust-mode . rust-ts-mode))
+      :config
+      (when (treesit-available-p)
+        (when (fboundp 'treesit-ready-p)
+          (unless (treesit-ready-p 'rust)
+            (add-to-list 'treesit-language-source-alist '(rust . ("https://github.com/tree-sitter/tree-sitter-rust"
+                                                               nil nil nil nil)))
+            (treesit-install-language-grammar 'rust)))))
     (use-package cargo-mode
       :ensure t
       :defer t
