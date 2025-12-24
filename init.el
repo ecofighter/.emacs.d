@@ -95,15 +95,7 @@
     :ensure nil
     :when (treesit-available-p)
     :custom
-    (treesit-font-lock-level 4)
-    (treesit-language-source-alist '((rust . ("https://github.com/tree-sitter/tree-sitter-rust"
-                                              nil nil nil nil))
-                                     (nix . ("https://github.com/nix-community/tree-sitter-nix"
-                                             nil nil nil nil))
-                                     (c . ("https://github.com/tree-sitter/tree-sitter-c"
-                                           nil nil nil nil))
-                                     (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"
-                                             nil nil nil nil))))))
+    (treesit-font-lock-level 4)))
 (progn ; platform-spec
   (use-package alert
     :ensure t
@@ -234,11 +226,11 @@
   (use-package perfect-margin
     :ensure t
     :demand t
+    :autoload perfect-margin-mode
     :custom
     (perfect-margin-visible-width 120)
     (perfect-margin-disable-in-splittable-check t)
     :config
-    (declare-function perfect-margin-mode "perfect-margin")
     (perfect-margin-mode +1)
     (with-eval-after-load 'doom-modeline
       (eval-when-compile (require 'doom-modeline nil t))
@@ -280,8 +272,8 @@
   (use-package modus-themes
     :ensure t
     :demand t
+    :autoload modus-themes-load-theme
     :config
-    (declare-function modus-themes-load-theme "modus-themes")
     (add-to-list 'custom-theme-load-path (locate-user-emacs-file "theme/"))
     (load-theme 'kanagawa-wave :no-confirm))
   (use-package ef-themes
@@ -294,7 +286,6 @@
     :init
     (ef-themes-take-over-modus-themes-mode +1)
     :config
-    (declare-function modus-themes-load-theme "modus-themes")
     (modus-themes-load-theme 'ef-owl))
   (use-package doom-themes
     :disabled t
@@ -376,6 +367,7 @@
 (use-package consult
   :ensure t
   :demand t
+  :autoload consult--customize-put
   :bind
   ;; ("C-c i e" . consult-flymake)
   ("C-c i i" . consult-imenu)
@@ -444,6 +436,7 @@
 (use-package centaur-tabs
   :ensure t
   :demand t
+  :autoload (centaur-tabs-get-group-name)
   :hook
   (dashboard-mode . centaur-tabs-local-mode)
   (dired-mode . centaur-tabs-local-mode)
@@ -462,7 +455,6 @@
   ("M-S-<right>" . centaur-tabs-move-current-tab-to-right)
   :config
   (centaur-tabs-mode t)
-  (declare-function centaur-tabs-get-group-name "centaur-tabs-functions")
   (defun centaur-tabs-buffer-groups ()
     (list
      (cond
@@ -512,9 +504,6 @@
   (persp-mode +1)
   :config
   (with-eval-after-load 'consult
-    (eval-when-compile
-      (require 'consult)
-      (declare-function consult--customize-put "ext:consult.el"))
     (consult-customize consult--source-buffer :hidden t :default nil)
     (add-to-list 'consult-buffer-sources persp-consult-source)))
 (use-package vundo
@@ -587,9 +576,9 @@
     (setq skk-cdb-large-jisyo (expand-file-name "SKK-JISYO.L.cdb" skk-get-jisyo-directory)))
   (use-package skk-isearch
     :ensure nil
+    :autoload (skk-isearch-mode-setup
+               skk-isearch-mode-cleanup)
     :config
-    (declare-function skk-isearch-mode-setup "skk-isearch")
-    (declare-function skk-isearch-mode-cleanup "skk-isearch")
     (add-hook 'isearch-mode-hook #'(lambda ()
                                      (when (and (boundp 'skk-mode)
                                                 skk-mode
@@ -669,11 +658,31 @@
   (use-package difftastic
     :ensure t
     :defer t
-    :bind
-    :config
-    (transient-append-suffix 'magit-diff '(-1 -1)
-      [("D" "Difftastic diff (dwim)" difftastic-magit-diff)
-       ("S" "Difftastic show" difftastic-magit-show)])))
+    :after magit
+    :init
+    (use-package transient
+      :autoload (transient-get-suffix
+                 transient-parse-suffix))
+    (use-package magit-blame
+      :ensure magit
+      :defer t
+      :bind
+      (:map magit-blame-read-only-mode-map
+            ("M-RET" . #'difftastic-magit-show))
+      :config
+      (let ((suffix '("M-RET" "Difftastic show" difftastic-magit-show)))
+        (unless (equal (transient-parse-suffix 'magit-blame suffix)
+                       (transient-get-suffix 'magit-blame "b"))
+          (transient-append-suffix 'magit-blame "b" suffix)))
+      (use-package magit-diff
+        :ensure magit
+        :defer t
+        :config
+        (let ((suffix [("M-d" "Difftastic diff (dwim)" difftastic-magit-diff)
+                       ("M-c" "Difftastic show" difftastic-magit-show)]))
+          (unless (equal (transient-parse-suffix 'magit-diff suffix)
+                         (transient-get-suffix 'magit-diff '(-1 -1)))
+            (transient-append-suffix 'magit-diff '(-1 -1) suffix)))))))
 (progn ; org
   (defconst my/org-inbox-file "inbox.org"
     "Org file to use with org-capture.")
@@ -1116,6 +1125,9 @@
   (progn ; latex
     (use-package auctex
       :ensure t
+      :autoload (TeX-revert-document-buffer
+                 TeX-active-master
+                 TeX-output-extension)
       :custom
       (TeX-engine 'luatex)
       (LaTeX-using-Biber t)
@@ -1130,7 +1142,6 @@
       :hook
       (LaTeX-mode . flyspell-mode)
       :config
-      (declare-function TeX-revert-document-buffer "tex")
       (with-eval-after-load "tex"
         (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer))
       (use-package reftex
@@ -1143,12 +1154,10 @@
       (use-package auctex-cluttex
         :ensure t
         :after tex
+        :autoload (auctex-cluttex--TeXClutTeX-sentinel)
         :hook
         (LaTeX-mode . auctex-cluttex-mode)
         :config
-        (declare-function TeX-active-master "tex")
-        (declare-function TeX-output-extension "tex")
-        (declare-function auctex-cluttex--TeX-ClutTeX-sentinel "auctex-cluttex")
         (defun my/run-after-compilation-finished-funcs (&rest _args)
           "run AUCTeX's TeX-after-compilation-finished-functions hook. Ignore all ARGS"
           (unless TeX-error-list
@@ -1161,12 +1170,11 @@
 (use-package meow
   :ensure t
   :demand t
+  :autoload (meow-motion-define-key
+             meow-leader-define-key
+             meow-normal-define-key)
   :custom (meow-use-clipboard t)
-  :init
-  (require 'meow)
-  (declare-function meow-motion-define-key "meow-helpers")
-  (declare-function meow-leader-define-key "meow-helpers")
-  (declare-function meow-normal-define-key "meow-helpers")
+  :config
   (defun meow-setup ()
     (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
     (meow-motion-define-key
