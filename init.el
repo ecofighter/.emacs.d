@@ -54,6 +54,7 @@
   (enable-recusive-minibuffers t)
   (completion-cycle-threshold 3)
   (tab-always-indent 'complete)
+  (ring-bell-function 'ignore)
   :config
   (defvaralias 'c-basic-offset 'tab-width)
   (defvaralias 'cperl-indent-level 'tab-width)
