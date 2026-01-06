@@ -238,6 +238,7 @@
     :init
     (global-hl-todo-mode +1))
   (use-package perfect-margin
+    :disabled t
     :ensure t
     :autoload perfect-margin-mode
     :custom
@@ -872,7 +873,9 @@
   (lsp-auto-guess-root t)
   (lsp-enable-file-watchers t)
   (lsp-enable-folding nil)
+  (lsp-enable-snippet t)
   (lsp-enable-on-type-formatting t)
+  (lsp-headerline-breadcrumb-enable nil)
   (lsp-document-sync-method nil)
   (lsp-response-timeout 5)
   (lsp-use-plist t)
