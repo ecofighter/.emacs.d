@@ -631,6 +631,8 @@
   :custom
   (highlight-indent-guides-auto-odd-face-perc 15)
   (highlight-indent-guides-auto-even-face-perc 20)
+  (highlight-indent-guides-auto-stack-odd-face-perc 40)
+  (highlight-indent-guides-auto-stack-even-face-perc 45)
   (highlight-indent-guides-auto-top-odd-face-perc 50)
   (highlight-indent-guides-auto-top-even-face-perc 55)
   (highlight-indent-guides-auto-enabled t)
