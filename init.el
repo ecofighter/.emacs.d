@@ -885,7 +885,7 @@
   (lsp-enable-snippet nil)
   (lsp-diagnostics-provider :auto)
   (lsp-enable-completion t)
-  (lsp-completion-provider :none)
+  (lsp-completion-provider :capf)
   (lsp-modeline-diagnostics-scope :workspace)
   (lsp-keymap-prefix "C-c l")
   :hook
