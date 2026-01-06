@@ -671,7 +671,6 @@
           (transient-append-suffix 'magit-blame "b" suffix)))
       (use-package magit-diff
         :ensure magit
-        :defer t
         :config
         (let ((suffix [("M-d" "Difftastic diff (dwim)" difftastic-magit-diff)
                        ("M-c" "Difftastic show" difftastic-magit-show)]))
@@ -925,7 +924,6 @@
   (use-package lsp-ui
     :disabled t
     :ensure t
-    :defer t
     :custom
     (lsp-ui-doc-enable t)
     (lsp-ui-doc-header t)
@@ -997,11 +995,10 @@
       :hook
       (ocaml-eglot . eglot-ensure)
       :custom
-      (ocaml-eglot-syntax-checker 'flymake)))
+      (ocaml-eglot-syntax-checker 'flycheck)))
   (progn ; nix
     (use-package nix-ts-mode
       :ensure t
-      :defer t
       :mode "\\.nix\\'"
       :init
       (when (treesit-available-p)
