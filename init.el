@@ -229,17 +229,20 @@
     :ensure t
     :hook (prog-mode . rainbow-delimiters-mode))
   (use-package whitespace
+    :ensure nil
     :custom
     (show-trailing-whitespace t)
     (whitespace-style '(face trailing))
     :init
     (global-whitespace-mode +1))
   (use-package display-line-numbers
+    :ensure nil
     :hook
     (prog-mode . display-line-numbers-mode)
     (text-mode . display-line-numbers-mode)
     (conf-mode . display-line-numbers-mode))
   (use-package hl-line
+    :ensure nil
     :init
     (global-hl-line-mode +1))
   (use-package hl-todo
@@ -714,8 +717,6 @@
           ("r f" . org-roam-node-find)
           ("r i" . org-roam-node-insert)
           ("r c" . org-roam-capture))
-    :hook
-    (org-mode . org-indent-mode)
     :config
     (let ((inbox-file-name (expand-file-name my/org-inbox-file org-directory)))
       (unless (file-exists-p inbox-file-name)
@@ -729,6 +730,9 @@
       "Open the inbox file."
       (interactive)
       (find-file (expand-file-name my/org-inbox-file org-directory)))
+    (use-package org-indent
+      :ensure nil
+      :hook (org-mode . org-indent-mode))
     (use-package org-agenda
       :ensure nil
       :custom
