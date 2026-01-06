@@ -885,68 +885,8 @@
   (lsp-modeline-diagnostics-scope :workspace)
   (lsp-keymap-prefix "C-c l")
   :hook
-  (lsp-mode . lsp-enable-which-key-integration)
-  :config
-  (require 'lsp-sml)
-  (add-to-list 'lsp-language-id-configuration '(sml-mode . "sml"))
-  (when (executable-find "emacs-lsp-booster")
-    (defun lsp-booster--advice-json-parse (old-fn &rest args)
-      "Try to parse bytecode instead of json."
-      (or
-       (when (equal (following-char) ?#)
-         (let ((bytecode (read (current-buffer))))
-           (when (byte-code-function-p bytecode)
-             (funcall bytecode))))
-       (apply old-fn args)))
-    (advice-add (if (progn (require 'json)
-                           (fboundp 'json-parse-buffer))
-                    'json-parse-buffer
-                  'json-read)
-                :around
-                #'lsp-booster--advice-json-parse)
-    (declare-function lsp-booster--advice-json-parse "init")
-    (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-      "Prepend emacs-lsp-booster command to lsp CMD."
-      (let ((orig-result (funcall old-fn cmd test?)))
-        (if (and (not test?)
-                 (not (file-remote-p default-directory))
-                 lsp-use-plists
-                 (not (functionp 'json-rpc-connection))
-                 (executable-find "emacs-lsp-booster"))
-            (progn
-              (when-let* ((command-from-exec-path (executable-find (car orig-result))))
-                (setcar orig-result command-from-exec-path))
-              (message "Using emacs-lsp-booster for %s!" orig-result)
-              (cons "emacs-lsp-booster" orig-result))
-          orig-result)))
-    (declare-function lsp-booster--advice-final-command "init")
-    (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command))
-  (use-package lsp-ui
-    :disabled t
-    :ensure t
-    :custom
-    (lsp-ui-doc-enable t)
-    (lsp-ui-doc-header t)
-    (lsp-ui-doc-include-signature t)
-    (lsp-ui-doc-use-childframe t)
-    (lsp-ui-doc-use-webkit nil)
-    (lsp-ui-doc-position 'at-point)
-    (lsp-ui-doc-show-with-cursor t)
-    (lsp-ui-doc-show-with-mouse nil)
-    (lsp-ui-doc-alignment 'window)
-    (lsp-ui-flycheck-enable t)
-    (lsp-ui-imenu-enable t)
-    (lsp-ui-peek-enable t)
-    (lsp-ui-peek-fontify 'on-demand)
-    :hook
-    (lsp-mode . lsp-ui-mode)
-    :bind (:map lsp-ui-mode-map
-                ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
-                ([remap xref-find-references] . lsp-ui-peek-find-references))))
+  (lsp-mode . lsp-enable-which-key-integration))
 (progn ; languages
-  (use-package text-mode
-    :custom
-    (text-mode-ispell-word-completion nil))
   (progn ; c/cpp
     (when (treesit-available-p)
       (when (fboundp 'treesit-ready-p)
@@ -978,7 +918,9 @@
     :mode ("\\.csp\\'" "\\.razor\\'" "\\.html?\\'"))
   (progn ; haskell
     (use-package haskell-mode
-      :ensure t))
+      :ensure t
+      :hook
+      (haskell-mode . eglot-ensure)))
   (progn ; ocaml
     (use-package tuareg
       :ensure t)
@@ -993,6 +935,7 @@
       :ensure t
       :after tuareg
       :hook
+      (tuareg-mode . ocaml-eglot)
       (ocaml-eglot . eglot-ensure)
       :custom
       (ocaml-eglot-syntax-checker 'flycheck)))
@@ -1000,6 +943,8 @@
     (use-package nix-ts-mode
       :ensure t
       :mode "\\.nix\\'"
+      :hook
+      (nix-ts-mode . eglot-ensure)
       :init
       (when (treesit-available-p)
         (when (fboundp 'treesit-ready-p)
@@ -1020,6 +965,8 @@
       :custom
       (rust-indent-offset 4)
       (rust-mode-treesitter-derive t)
+      :hook
+      (rust-mode . eglot-ensure)
       :config
       (when (treesit-available-p)
         (when (fboundp 'treesit-ready-p)
@@ -1034,8 +981,14 @@
   (progn ; python
     (use-package python-mode
       :ensure t
-      :hook
-      (python-mode . python-ts-mode)))
+      :config
+      (when (treesit-available-p)
+        (when (fboundp 'treesit-ready-p)
+          (unless (treesit-ready-p 'python)
+            (add-to-list 'treesit-language-source-alist '(python . ("https://github.com/tree-sitter/tree-sitter-python"
+                                                                  nil nil nil nil)))
+            (treesit-install-language-grammar 'python)))
+        (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode)))))
   (progn ; dotnet
     (use-package sharper
       :ensure t
@@ -1045,13 +998,17 @@
       :ensure t)
     (use-package fsharp-mode
       :ensure t
+      :hook
+      (fsharp-mode . eglot-ensure)
       :config
       (use-package eglot-fsharp
         :ensure t
-        :after eglot)
-      (with-eval-after-load 'lsp-fsharp
-        (custom-set-variables
-         '(lsp-fsharp-use-dotnet-tool-for-fsac nil)))))
+        :after eglot
+        :config
+        (when-let* ((executable (executable-find "fsautocomplete"))
+                    (bindir (file-name-directory executable)))
+          (setq eglot-fsharp-server-path bindir)
+          (setq eglot-fsharp-server-install-dir nil)))))
   (progn ; lean4
     (use-package lean4-mode
       :commands lean4-mode
