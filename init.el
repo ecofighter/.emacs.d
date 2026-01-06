@@ -614,6 +614,7 @@
     :hook
     (eglot-managed-mode . flycheck-eglot-mode)))
 (use-package ispell
+  :ensure nil
   :custom
   (ispell-program-name "hunspell")
   (ispell-really-hunspell t)
@@ -1074,8 +1075,6 @@
       (TeX-auto-save t)
       (TeX-view-program-selection '((output-pdf "PDF Tools")))
       (TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view)))
-      :hook
-      (LaTeX-mode . flyspell-mode)
       :config
       (TeX-source-correlate-mode +1)
       (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
