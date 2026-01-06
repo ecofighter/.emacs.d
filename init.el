@@ -89,6 +89,10 @@
 	               (split-window-right))))))))
   (declare-function my/split-window-sensibly-prefer-horizontally "init")
   (advice-add #'split-window-sensibly :override #'my/split-window-sensibly-prefer-horizontally))
+(use-package editorconfig
+  :ensure t
+  :config
+  (editorconfig-mode +1))
 (use-package saveplace
   :ensure nil
   :init
@@ -264,15 +268,21 @@
   (use-package spacious-padding
     :ensure t
     :custom
-    (spacious-padding-width '( :internal-border-width 15
-                               :header-line-width 4
-                               :mode-line-width 6
-                               :right-divider-width 30
-                               :scroll-bar-width 8))
-    (spacious-padding `( :mode-line-active 'default
-                         :mode-line-inactive vertical-border))
-    :init
+    (spacious-padding-widths '( :internal-border-width 15
+                                :header-line-width 8
+                                :mode-line-width 12
+                                :right-divider-width 30
+                                :scroll-bar-width 8))
+    (spacious-padding-subtle-frame-lines `( :mode-line-active spacious-padding-line-active
+                                            :mode-line-inactive spacious-padding-line-inactive
+                                            :header-line-active spacious-padding-line-active
+                                            :header-line-inactive spacious-padding-line-inactive))
+    :config
     (spacious-padding-mode +1))
+  (use-package breadcrumb
+    :ensure t
+    :config
+    (breadcrumb-mode +1))
   (use-package modus-themes
     :ensure t
     :autoload modus-themes-load-theme
@@ -642,13 +652,13 @@
   :hook
   ((prog-mode conf-mode) . highlight-indent-guides-mode)
   :custom
-  (highlight-indent-guides-auto-odd-face-perc 10)
-  (highlight-indent-guides-auto-even-face-perc 15)
-  (highlight-indent-guides-auto-top-odd-face-perc 40)
-  (highlight-indent-guides-auto-top-even-face-perc 45)
+  (highlight-indent-guides-auto-odd-face-perc 15)
+  (highlight-indent-guides-auto-even-face-perc 20)
+  (highlight-indent-guides-auto-top-odd-face-perc 50)
+  (highlight-indent-guides-auto-top-even-face-perc 55)
   (highlight-indent-guides-auto-enabled t)
-  (highlight-indent-guides-responsive 'top)
-  (highlight-indent-guides-method 'column))
+  (highlight-indent-guides-responsive 'stack)
+  (highlight-indent-guides-method 'fill))
 (use-package magit
   :ensure t
   :bind
