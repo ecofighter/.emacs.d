@@ -89,10 +89,10 @@
 	               (split-window-right))))))))
   (declare-function my/split-window-sensibly-prefer-horizontally "init")
   (advice-add #'split-window-sensibly :override #'my/split-window-sensibly-prefer-horizontally))
-(use-package editorconfig
-  :ensure t
-  :config
-  (editorconfig-mode +1))
+(use-package repeat
+  :ensure nil
+  :init
+  (repeat-mode +1))
 (use-package saveplace
   :ensure nil
   :init
@@ -113,6 +113,10 @@
   :ensure nil
   :init
   (global-auto-revert-mode +1))
+(use-package editorconfig
+  :ensure t
+  :config
+  (editorconfig-mode +1))
 (use-package treesit
   :ensure nil
   :when (treesit-available-p)
