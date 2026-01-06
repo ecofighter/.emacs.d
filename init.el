@@ -608,12 +608,7 @@
 (use-package flycheck
   :ensure t
   :config
-  (global-flycheck-mode +1)
-  (use-package flycheck-eglot
-    :ensure t
-    :after (flycheck eglot)
-    :hook
-    (eglot-managed-mode . flycheck-eglot-mode)))
+  (global-flycheck-mode +1))
 (use-package ispell
   :ensure nil
   :custom
@@ -866,7 +861,13 @@
     (eval-when-compile (require 'org-src))
     (setf (alist-get "dot" org-src-lang-modes nil nil #'string=) 'graphviz-dot-mode)))
 (use-package eglot
-  :ensure t)
+  :ensure t
+  :config
+  (use-package flycheck-eglot
+    :ensure t
+    :after (flycheck eglot)
+    :hook
+    (eglot-managed-mode . flycheck-eglot-mode)))
 (use-package lsp-mode
   :ensure t
   :custom
