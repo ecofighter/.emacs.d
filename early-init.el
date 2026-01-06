@@ -32,7 +32,7 @@
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars . 0) default-frame-alist)
 (push '(width . 120) default-frame-alist)
-(push '(height . 48) default-frame-alist)
+(push '(height . 40) default-frame-alist)
 ;; (push '(undecorated . t) default-frame-alist)
 ;; (push '(fullscreen . maximized) default-frame-alist)
 
