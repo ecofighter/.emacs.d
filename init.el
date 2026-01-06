@@ -167,8 +167,8 @@
       (custom-set-variables
        '(ns-command-modifier 'meta)
        '(ns-alternate-modifier 'option)))
-     ((or (getenv "WSL_DISTRO_NAME")
-          is-windows)
+     ((or is-windows
+          (getenv "WSL_DISTRO_NAME"))
       (when is-windows
         (setopt file-name-coding-system 'cp932
                 default-process-coding-system '(utf-8-dos . japanese-cp932-dos)))
