@@ -117,29 +117,35 @@
 (progn ; platform-spec
   (use-package alert
     :ensure t
+    :custom
+    (alert-default-style `,(cond
+                            ((and is-linux
+                                  (not (getenv "WSL_DISTRO_NAME")))
+                             'notifications)
+                            (is-darwin
+                             'osx-notifier)
+                            ((or is-windows
+                                 (getenv "WSL_DISTRO_NAME"))
+                             'toast)))
     :config
-    (cond
-     (is-linux
-      (custom-set-variables
-       '(alert-default-style 'libnotify)))
-     ((or (getenv "WSL_DISTRO_NAME")
-          is-windows)
-      (use-package alert-toast
-        :ensure t
-        :custom
-        (alert-default-style 'toast)))))
+    (use-package alert-toast
+      :when (or is-windows
+                (getenv "WSL_DISTRO_NAME"))
+      :ensure t
+      :demand t))
+  (use-package fcitx
+    :ensure t
+    :when is-linux
+    :custom
+    (fcitx-use-dbus 'fcitx5)
+    :config
+    (setq fcitx-remote-command "fcitx5-remote")
+    (if (display-graphic-p)
+        (fcitx-aggressive-setup)
+      (add-hook 'server-after-make-frame-hook #'fcitx-aggressive-setup)))
   `,(cond
      ((and is-linux
            (not (getenv "WSL_DISTRO_NAME")))
-      (use-package fcitx
-        :ensure t
-        :custom
-        (fcitx-use-dbus 'fcitx5)
-        :config
-        (setq fcitx-remote-command "fcitx5-remote")
-        (if (display-graphic-p)
-            (fcitx-aggressive-setup)
-          (add-hook 'server-after-make-frame-hook #'fcitx-aggressive-setup)))
       ;; credit: yorickvP on Github
       (when (executable-find "wl-copy")
         (defvar wl-copy-process nil)
