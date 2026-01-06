@@ -127,16 +127,15 @@
                                   (not (getenv "WSL_DISTRO_NAME")))
                              'notifications)
                             (is-darwin
-                             'osx-notifier)
-                            ((or is-windows
-                                 (getenv "WSL_DISTRO_NAME"))
-                             'toast)))
+                             'osx-notifier)))
     :config
     (use-package alert-toast
       :when (or is-windows
                 (getenv "WSL_DISTRO_NAME"))
       :ensure t
-      :demand t))
+      :demand t
+      :custom
+      (alert-default-style 'toast)))
   (use-package fcitx
     :ensure t
     :when is-linux
@@ -317,10 +316,10 @@
   (global-eldoc-mode +1))
 (use-package vertico
   :ensure t
-  :bind (:map vertico-map
-              ("C-h" . vertico-directory-up)
-              ("C-m" . vertico-exit)
-              ("C-j" . vertico-exit-input))
+  :bind
+  (:map vertico-map
+        ("C-m" . vertico-exit)
+        ("C-j" . vertico-exit-input))
   :init
   (vertico-mode +1)
   :config
@@ -539,8 +538,6 @@
 (use-package tramp
   :ensure t
   :config
-  (eval-when-compile
-    (defvar tramp-remote-path))
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 (use-package vterm
   :unless is-windows
