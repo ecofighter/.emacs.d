@@ -190,31 +190,12 @@
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   (scroll-bar-mode -1)
-  (use-package doom-modeline
+  (use-package mood-line
     :ensure t
-    :init
-    (doom-modeline-mode +1)
     :custom
-    (doom-modeline-window-width-limit 60)
-    (doom-modeline-buffer-file-name-style 'truncate-with-project)
-    (doom-modeline-icon t)
-    (doom-modeline-buffer-modification-icon t)
-    (doom-modeline-buffer-state-icon t)
-    (doom-modeline-buffer-encoding t)
-    (doom-modeline-buffer-major-mode t)
-    (doom-modeline-major-mode-icon t)
-    (doom-modeline-major-mode-color-icon nil)
-    (doom-modeline-buffer-minor-modes nil)
-    (doom-modeline-indent-info nil)
-    (doom-modeline-lsp t)
-    (doom-modeline-github nil)
-    (doom-modeline-gnus nil)
-    (doom-modeline-irc nil)
-    (doom-modeline-mu4e nil)
-    (doom-modeline-persp-name t)
-    (doom-modeline-persp-icon t)
-    (doom-modeline-project-detection 'auto)
-    (doom-modeline-unicode-fallback nil))
+    (mood-line-glyph-alist mood-line-glyphs-fira-code)
+    :config
+    (mood-line-mode +1))
   (use-package nerd-icons
     :ensure t
     :custom
@@ -260,11 +241,7 @@
     (perfect-margin-visible-width 120)
     (perfect-margin-disable-in-splittable-check t)
     :init
-    (perfect-margin-mode +1)
-    :config
-    (with-eval-after-load 'doom-modeline
-      (eval-when-compile (require 'doom-modeline nil t))
-      (setq mode-line-right-align-edge 'window)))
+    (perfect-margin-mode +1))
   (use-package spacious-padding
     :ensure t
     :custom
