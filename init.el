@@ -837,6 +837,8 @@
                                                 (propertize "${tags:10}" 'face 'org-tag))))))
 (use-package pdf-tools
   :ensure t
+  :custom
+  (pdf-view-display-size 'fit-page)
   :init
   (pdf-loader-install))
 (use-package literate-calc-mode
@@ -876,8 +878,6 @@
   (lsp-keymap-prefix "C-c l")
   :hook
   (lsp-mode . lsp-enable-which-key-integration)
-  :preface
-  (setenv "LSP_USE_PLISTS" "true")
   :config
   (require 'lsp-sml)
   (add-to-list 'lsp-language-id-configuration '(sml-mode . "sml"))
@@ -971,9 +971,6 @@
     :mode ("\\.csp\\'" "\\.razor\\'" "\\.html?\\'"))
   (progn ; haskell
     (use-package haskell-mode
-      :ensure t)
-    (use-package lsp-haskell
-      :disabled t
       :ensure t))
   (progn ; ocaml
     (use-package tuareg
@@ -991,16 +988,7 @@
       :hook
       (ocaml-eglot . eglot-ensure)
       :custom
-      (ocaml-eglot-syntax-checker 'flymake)
-      :config
-      ;; (with-eval-after-load "eglot"
-      ;;   (add-to-list 'eglot-server-programs
-      ;;                '(tuareg-mode . ("dune" "tools" "exec" "ocamllsp"))))
-      )
-    ;; (with-eval-after-load "lsp-ocaml"
-    ;;   (custom-set-variables
-    ;;    '(lsp-ocaml-lsp-server-command '("dune" "tools" "exec" "ocamllsp"))))
-    )
+      (ocaml-eglot-syntax-checker 'flymake)))
   (progn ; nix
     (use-package nix-ts-mode
       :ensure t
@@ -1064,16 +1052,14 @@
       :vc (:url "https://github.com/leanprover-community/lean4-mode"
                 :rev :newest)))
   (progn ; latex
-    (use-package auctex
-      :ensure t
+    (use-package tex
+      :ensure auctex
       :autoload (TeX-revert-document-buffer
+                 TeX-source-correlate-mode
                  TeX-active-master
                  TeX-output-extension)
       :custom
       (TeX-engine 'luatex)
-      (LaTeX-using-Biber t)
-      (TeX-PDF-mode t)
-      (TeX-source-correlate-mode t)
       (TeX-source-correlate-method 'synctex)
       (TeX-source-correlate-start-server t)
       (TeX-parse-self t)
@@ -1083,8 +1069,8 @@
       :hook
       (LaTeX-mode . flyspell-mode)
       :config
-      (with-eval-after-load "tex"
-        (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer))
+      (TeX-source-correlate-mode +1)
+      (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
       (use-package reftex
         :ensure t
         :hook
@@ -1094,7 +1080,6 @@
         (reftex-ref-style-default-list '("Cleveref" "Default")))
       (use-package auctex-cluttex
         :ensure t
-        :after tex
         :autoload (auctex-cluttex--TeX-ClutTeX-sentinel)
         :hook
         (LaTeX-mode . auctex-cluttex-mode)
