@@ -401,6 +401,13 @@
     :init
     (global-corfu-mode +1)
     :config
+    (use-package corfu-terminal
+      :ensure t
+      :when (version< emacs-version "31")
+      :after corfu
+      :unless (display-graphic-p)
+      :config
+      (corfu-terminal-mode +1))
     (use-package corfu-popupinfo
       :ensure nil
       :after corfu
