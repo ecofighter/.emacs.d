@@ -268,7 +268,7 @@
     :autoload modus-themes-load-theme
     :init
     (add-to-list 'custom-theme-load-path (locate-user-emacs-file "theme/"))
-    (load-theme 'kanagawa-wave :no-confirm))
+    (modus-themes-load-theme 'kanagawa-wave))
   (use-package fontaine
     :ensure t
     :custom

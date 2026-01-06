@@ -149,9 +149,9 @@
     (mail-other cyan-cooler)
 
     (bg-search-static bg-warning)
-    (bg-search-current bg-yellow-intense)
-    (bg-search-lazy bg-cyan-intense)
-    (bg-search-replace bg-red-intense)
+    (bg-search-current bg-yellow-subtle)
+    (bg-search-lazy bg-cyan-subtle)
+    (bg-search-replace bg-red-subtle)
 
     (bg-search-rx-group-0 bg-magenta-intense)
     (bg-search-rx-group-1 bg-green-intense)
