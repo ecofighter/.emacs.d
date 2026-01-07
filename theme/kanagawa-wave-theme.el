@@ -4,10 +4,10 @@
 
 (require 'modus-themes)
 (defconst kanagawa-themes-wave-palette-partial
-  '((roninYellow "FF9E3B")
-    (springViolet2 "9CABCA")
-    (waveRed "E46876")
-    (surimiOrange "FFA066")
+  '((roninYellow "#FF9E3B")
+    (springViolet2 "#9CABCA")
+    (waveRed "#E46876")
+    (surimiOrange "#FFA066")
     (cursor "#A3D4D5") ; lightBlue
     (bg-main "#181820") ; sumiInk1
     (bg-dim "#1A1A22") ; sumiInk2
