@@ -6,7 +6,6 @@
 (defconst is-linux `,(eq system-type 'gnu/linux))
 (defconst is-darwin `,(eq system-type 'darwin))
 (defconst is-windows `,(eq system-type 'windows-nt))
-(require 'package)
 (custom-set-variables
  '(package-quickstart t)
  '(package-archives '(("melpa"        . "https://melpa.org/packages/")
@@ -16,7 +15,6 @@
  '(package-archive-priorities '(("gnu" . 1)
                                 ("nongnu" . 2)
                                 ("melpa" . 3))))
-(package-initialize)
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
@@ -30,12 +28,11 @@
   (process-adaptive-read-buffering t)
   (indent-tabs-mode nil)
   (select-enable-clipboard t)
-  (x-select-enable-clipboard-manager t)
   (use-file-dialog nil)
   (use-short-answers t)
   (window-min-height 10)
   (window-min-width 70)
-  (split-width-threshold 140)
+  (split-width-threshold 120)
   (split-height-threshold 20)
   (vc-handled-backends '(Git))
   (fill-column 80)
@@ -89,6 +86,101 @@
 	               (split-window-right))))))))
   (declare-function my/split-window-sensibly-prefer-horizontally "init")
   (advice-add #'split-window-sensibly :override #'my/split-window-sensibly-prefer-horizontally))
+(use-package meow
+  :ensure t
+  :demand t
+  :autoload (meow-motion-define-key
+             meow-leader-define-key
+             meow-normal-define-key)
+  :custom
+  (meow-use-clipboard t)
+  (meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+  :config
+  (defun meow-setup ()
+    (meow-motion-define-key
+     '("j" . meow-next)
+     '("k" . meow-prev)
+     '("<escape>" . ignore))
+    (meow-leader-define-key
+     ;; Use SPC (0-9) for digit arguments.
+     '("1" . meow-digit-argument)
+     '("2" . meow-digit-argument)
+     '("3" . meow-digit-argument)
+     '("4" . meow-digit-argument)
+     '("5" . meow-digit-argument)
+     '("6" . meow-digit-argument)
+     '("7" . meow-digit-argument)
+     '("8" . meow-digit-argument)
+     '("9" . meow-digit-argument)
+     '("0" . meow-digit-argument)
+     '("/" . meow-keypad-describe-key)
+     '("?" . meow-cheatsheet))
+    (meow-normal-define-key
+     '("0" . meow-expand-0)
+     '("9" . meow-expand-9)
+     '("8" . meow-expand-8)
+     '("7" . meow-expand-7)
+     '("6" . meow-expand-6)
+     '("5" . meow-expand-5)
+     '("4" . meow-expand-4)
+     '("3" . meow-expand-3)
+     '("2" . meow-expand-2)
+     '("1" . meow-expand-1)
+     '("-" . negative-argument)
+     '(";" . meow-reverse)
+     '("," . meow-inner-of-thing)
+     '("." . meow-bounds-of-thing)
+     '("[" . meow-beginning-of-thing)
+     '("]" . meow-end-of-thing)
+     '("a" . meow-append)
+     '("A" . meow-open-below)
+     '("b" . meow-back-word)
+     '("B" . meow-back-symbol)
+     '("c" . meow-change)
+     '("d" . meow-delete)
+     '("D" . meow-backward-delete)
+     '("e" . meow-next-word)
+     '("E" . meow-next-symbol)
+     '("f" . meow-find)
+     '("g" . meow-cancel-selection)
+     '("G" . meow-grab)
+     '("h" . meow-left)
+     '("H" . meow-left-expand)
+     '("i" . meow-insert)
+     '("I" . meow-open-above)
+     '("j" . meow-next)
+     '("J" . meow-next-expand)
+     '("k" . meow-prev)
+     '("K" . meow-prev-expand)
+     '("l" . meow-right)
+     '("L" . meow-right-expand)
+     '("m" . meow-join)
+     '("n" . meow-search)
+     '("o" . meow-block)
+     '("O" . meow-to-block)
+     '("p" . meow-yank)
+     '("q" . meow-quit)
+     '("Q" . meow-goto-line)
+     '("r" . meow-replace)
+     '("R" . meow-swap-grab)
+     '("s" . meow-kill)
+     '("t" . meow-till)
+     '("u" . meow-undo)
+     '("U" . meow-undo-in-selection)
+     '("v" . meow-visit)
+     '("w" . meow-mark-word)
+     '("W" . meow-mark-symbol)
+     '("x" . meow-line)
+     '("X" . meow-goto-line)
+     '("y" . meow-save)
+     '("Y" . meow-sync-grab)
+     '("z" . meow-pop-selection)
+     '("'" . repeat)
+     '("/" . isearch-forward-regexp)
+     '("<escape>" . ignore)))
+  (declare-function meow-setup "init")
+  (meow-setup)
+  (meow-global-mode +1))
 (use-package repeat
   :ensure nil
   :init
@@ -146,7 +238,6 @@
     :custom
     (fcitx-use-dbus 'fcitx5)
     :config
-    (setq fcitx-remote-command "fcitx5-remote")
     (if (display-graphic-p)
         (fcitx-aggressive-setup)
       (add-hook 'server-after-make-frame-hook #'fcitx-aggressive-setup)))
@@ -251,15 +342,6 @@
     :ensure t
     :init
     (global-hl-todo-mode +1))
-  (use-package perfect-margin
-    :disabled t
-    :ensure t
-    :autoload perfect-margin-mode
-    :custom
-    (perfect-margin-visible-width 120)
-    (perfect-margin-disable-in-splittable-check t)
-    :init
-    (perfect-margin-mode +1))
   (use-package spacious-padding
     :ensure t
     :custom
@@ -286,6 +368,10 @@
     (modus-themes-load-theme 'kanagawa-wave))
   (use-package fontaine
     :ensure t
+    :autoload
+    (fontaine-mode
+     fontaine-set-preset
+     fontaine-restore-latest-preset)
     :custom
     (inhibit-compacting-font-caches t)
     (fontaine-latest-state-file `,(locate-user-emacs-file "fontaine-latest-state.eld"))
@@ -370,12 +456,7 @@
     :ensure t
     :after (consult eglot)
     :bind
-    ("C-c i s" . consult-eglot-symbols))
-  (use-package consult-flycheck
-    :ensure t
-    :after (consult flycheck)
-    :bind
-    ("C-c i e" . consult-flycheck)))
+    ("C-c i s" . consult-eglot-symbols)))
 (use-package marginalia
   :ensure t
   :config
@@ -547,7 +628,9 @@
     (consult-customize consult--source-buffer :hidden t :default nil)
     (add-to-list 'consult-buffer-sources persp-consult-source)))
 (use-package vundo
-  :ensure t)
+  :ensure t
+  :bind
+  (("C-c u" . #'vundo)))
 (use-package avy
   :ensure t
   :bind
@@ -621,8 +704,14 @@
                                            (skk-isearch-mode-cleanup))))))
 (use-package flycheck
   :ensure t
+  :hook
+  (after-init . global-flycheck-mode)
   :config
-  (global-flycheck-mode +1))
+  (use-package consult-flycheck
+    :ensure t
+    :after (consult flycheck)
+    :bind
+    ("C-c i e" . consult-flycheck)))
 (use-package ispell
   :ensure nil
   :custom
@@ -877,11 +966,21 @@
 (use-package eglot
   :ensure t
   :config
+  (use-package eglot-signature-eldoc-talkative
+    :ensure t
+    :autoload (eglot-signature-eldoc-talkative)
+    :after (eldoc eglot)
+    :config
+    (defun my/eglot-specific-eldoc ()
+      "Add `eglot-signature-eldoc-talkative' to `eldoc-documentation-functions'."
+      (add-to-list 'eldoc-documentation-functions #'eglot-signature-eldoc-talkative))
+    (declare-function my/eglot-specific-eldoc "init")
+    (add-hook 'eglot-managed-mode-hook #'my/eglot-specific-eldoc))
   (use-package flycheck-eglot
     :ensure t
     :after (flycheck eglot)
-    :hook
-    (eglot-managed-mode . flycheck-eglot-mode)))
+    :config
+    (global-flycheck-eglot-mode +1)))
 (use-package lsp-mode
   :ensure t
   :custom
@@ -952,11 +1051,11 @@
     (use-package ocaml-eglot
       :ensure t
       :after tuareg
+      :custom
+      (ocaml-eglot-syntax-checker . 'flycheck)
       :hook
       (tuareg-mode . ocaml-eglot)
-      (ocaml-eglot . eglot-ensure)
-      :custom
-      (ocaml-eglot-syntax-checker 'flycheck)))
+      (ocaml-eglot . eglot-ensure)))
   (progn ; nix
     (use-package nix-ts-mode
       :ensure t
@@ -1072,107 +1171,6 @@
                                    (TeX-active-master (TeX-output-extension)))))))
         (declare-function my/run-after-compilation-finished-funcs "init")
         (advice-add #'auctex-cluttex--TeX-ClutTeX-sentinel :after #'my/run-after-compilation-finished-funcs)))))
-(use-package meow
-  :ensure t
-  :demand t
-  :autoload (meow-motion-define-key
-             meow-leader-define-key
-             meow-normal-define-key)
-  :custom
-  (meow-use-clipboard t)
-  (meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-  :config
-  (defun meow-setup ()
-    (meow-motion-define-key
-     '("j" . meow-next)
-     '("k" . meow-prev)
-     '("<escape>" . ignore))
-    (meow-leader-define-key
-     ;; Use SPC (0-9) for digit arguments.
-     '("1" . meow-digit-argument)
-     '("2" . meow-digit-argument)
-     '("3" . meow-digit-argument)
-     '("4" . meow-digit-argument)
-     '("5" . meow-digit-argument)
-     '("6" . meow-digit-argument)
-     '("7" . meow-digit-argument)
-     '("8" . meow-digit-argument)
-     '("9" . meow-digit-argument)
-     '("0" . meow-digit-argument)
-     '("/" . meow-keypad-describe-key)
-     '("?" . meow-cheatsheet))
-    (meow-normal-define-key
-     '("0" . meow-expand-0)
-     '("9" . meow-expand-9)
-     '("8" . meow-expand-8)
-     '("7" . meow-expand-7)
-     '("6" . meow-expand-6)
-     '("5" . meow-expand-5)
-     '("4" . meow-expand-4)
-     '("3" . meow-expand-3)
-     '("2" . meow-expand-2)
-     '("1" . meow-expand-1)
-     '("-" . negative-argument)
-     '(";" . meow-reverse)
-     '("," . meow-inner-of-thing)
-     '("." . meow-bounds-of-thing)
-     '("[" . meow-beginning-of-thing)
-     '("]" . meow-end-of-thing)
-     '("a" . meow-append)
-     '("A" . meow-open-below)
-     '("b" . meow-back-word)
-     '("B" . meow-back-symbol)
-     '("c" . meow-change)
-     '("d" . meow-delete)
-     '("D" . meow-backward-delete)
-     '("e" . meow-next-word)
-     '("E" . meow-next-symbol)
-     '("f" . meow-find)
-     '("g" . meow-cancel-selection)
-     '("G" . meow-grab)
-     '("h" . meow-left)
-     '("H" . meow-left-expand)
-     '("i" . meow-insert)
-     '("I" . meow-open-above)
-     '("j" . meow-next)
-     '("J" . meow-next-expand)
-     '("k" . meow-prev)
-     '("K" . meow-prev-expand)
-     '("l" . meow-right)
-     '("L" . meow-right-expand)
-     '("m" . meow-join)
-     '("n" . meow-search)
-     '("o" . meow-block)
-     '("O" . meow-to-block)
-     '("p" . meow-yank)
-     '("q" . meow-quit)
-     '("Q" . meow-goto-line)
-     '("r" . meow-replace)
-     '("R" . meow-swap-grab)
-     '("s" . meow-kill)
-     '("t" . meow-till)
-     '("u" . meow-undo)
-     '("U" . meow-undo-in-selection)
-     '("v" . meow-visit)
-     '("w" . meow-mark-word)
-     '("W" . meow-mark-symbol)
-     '("x" . meow-line)
-     '("X" . meow-goto-line)
-     '("y" . meow-save)
-     '("Y" . meow-sync-grab)
-     '("z" . meow-pop-selection)
-     '("'" . repeat)
-     '("/" . isearch-forward-regexp)
-     '("<escape>" . ignore)))
-  (declare-function meow-setup "init")
-  (meow-setup)
-  (meow-global-mode +1)
-  :config
-  (meow-leader-define-key
-   '("q" . previous-buffer)
-   '("Q" . next-buffer)
-   '("u" . vundo)
-   '("I" . imenu-list)))
 
 (provide 'init)
 ;;; init.el ends here
