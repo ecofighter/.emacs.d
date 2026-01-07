@@ -238,6 +238,7 @@
     :custom
     (fcitx-use-dbus 'fcitx5)
     :config
+    (setq-default fcitx-remote-command "fcitx5-remote")
     (if (display-graphic-p)
         (fcitx-aggressive-setup)
       (add-hook 'server-after-make-frame-hook #'fcitx-aggressive-setup)))
