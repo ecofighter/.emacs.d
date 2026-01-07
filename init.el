@@ -837,9 +837,6 @@
       "Open the inbox file."
       (interactive)
       (find-file (expand-file-name my/org-inbox-file org-directory)))
-    (use-package org-indent
-      :ensure nil
-      :hook (org-mode . org-indent-mode))
     (use-package org-agenda
       :ensure nil
       :custom
@@ -852,6 +849,33 @@
       (org-agenda-block-separator nil)
       (org-agenda-compact-blocks t)
       :config
+      (use-package org-indent
+        :ensure nil
+        :after org
+        :hook
+        (org-mode . org-indent-mode))
+      (use-package org-modern
+        :ensure t
+        :after org
+        :custom
+        (org-modern-star t)
+        (org-modern-table nil)
+        :hook
+        (org-mode . org-modern-mode)
+        (org-agenda-finalize . org-modern-agenda))
+      (use-package valign
+        :ensure t
+        :after org
+        :custom
+        (valign-fancy-bar t)
+        :hook
+        (org-mode . valign-mode))
+      (use-package org-tidy
+        :ensure t
+        :after org)
+      (use-package org-web-tools
+        :ensure t
+        :after org)
       (use-package org-super-agenda
         :ensure t
         :init
@@ -914,24 +938,6 @@
                                                             :and (:scheduled nil :deadline nil))
                                                      (:name "Future"
                                                             :scheduled future)))))))))))
-    (use-package org-modern
-      :ensure t
-      :custom
-      (org-modern-star nil)
-      (org-modern-table nil)
-      :hook
-      (org-mode . org-modern-mode)
-      (org-agenda-finalize . org-modern-agenda))
-    (use-package valign
-      :ensure t
-      :custom
-      (valign-fancy-bar t)
-      :hook
-      (org-mode . valign-mode))
-    (use-package org-tidy
-      :ensure t)
-    (use-package org-web-tools
-      :ensure t)
     (use-package org-roam
       :ensure t
       :init
@@ -959,12 +965,6 @@
   (pdf-view-display-size 'fit-page)
   :init
   (pdf-loader-install))
-(use-package literate-calc-mode
-  :ensure t
-  :config
-  (with-eval-after-load 'org
-    (eval-when-compile (require 'org))
-    (require 'literate-calc-mode)))
 (use-package graphviz-dot-mode
   :ensure t
   :config
