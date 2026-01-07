@@ -718,7 +718,11 @@
   (ispell-program-name "hunspell")
   (ispell-really-hunspell t)
   (ispell-dictionary "en_US")
-  (ispell-personal-dictionary "~/Documents/ispell_persional.dict"))
+  (ispell-personal-dictionary "~/Documents/ispell_persional.dict")
+  :config
+  (add-to-list 'ispell-skip-region-alist '("[^\000-\377]+")))
+(use-package flyspell
+  :ensure t)
 (use-package paren
   :ensure nil
   :init
