@@ -959,21 +959,22 @@
                                               "#+title: ${title}\n#+filetags: :Literature:"))))
       (org-roam-node-display-template `,(concat "${title:*} "
                                                 (propertize "${tags:10}" 'face 'org-tag))))))
+(use-package calc
+  :ensure t
+  :config
+  (with-eval-after-load 'org
+    (require 'ob-calc)))
+(use-package graphviz-dot-mode
+  :ensure t
+  :config
+  (with-eval-after-load 'org
+    (require 'ob-dot)))
 (use-package pdf-tools
   :ensure t
   :custom
   (pdf-view-display-size 'fit-page)
   :init
   (pdf-loader-install))
-(use-package graphviz-dot-mode
-  :ensure t
-  :config
-  (with-eval-after-load 'org
-    (eval-when-compile (require 'org))
-    (setf (alist-get 'dot org-babel-load-languages) t))
-  (with-eval-after-load 'org-src
-    (eval-when-compile (require 'org-src))
-    (setf (alist-get "dot" org-src-lang-modes nil nil #'string=) 'graphviz-dot-mode)))
 (use-package eglot
   :ensure t
   :config
