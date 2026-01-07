@@ -226,13 +226,27 @@
   (use-package display-line-numbers
     :ensure nil
     :hook
-    (prog-mode . display-line-numbers-mode)
-    (text-mode . display-line-numbers-mode)
-    (conf-mode . display-line-numbers-mode))
-  (use-package hl-line
-    :ensure nil
-    :init
-    (global-hl-line-mode +1))
+    ((prog-mode conf-mode text-mode) . display-line-numbers-mode))
+  (use-package lin
+    :ensure t
+    :custom
+    (lin-mode-hooks '(prog-mode-hook
+                      conf-mode-hook
+                      text-mode-hook
+                      dired-mode-hook
+                      git-rebase-mode-hook
+                      grep-mode-hook
+                      ibuffer-mode-hook
+                      ilist-mode-hook
+                      log-view-mode-hook
+                      magit-log-mode-hook
+                      occur-mode-hook
+                      org-agenda-mode-hook
+                      pdf-outline-buffer-mode-hook
+                      proced-mode-hook
+                      tabulated-list-mode-hook))
+    :config
+    (lin-global-mode +1))
   (use-package hl-todo
     :ensure t
     :init
