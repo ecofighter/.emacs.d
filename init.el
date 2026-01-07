@@ -263,10 +263,10 @@
   (use-package spacious-padding
     :ensure t
     :custom
-    (spacious-padding-widths '( :internal-border-width 15
+    (spacious-padding-widths '( :internal-border-width 4
                                 :header-line-width 8
-                                :mode-line-width 12
-                                :right-divider-width 30
+                                :mode-line-width 4
+                                :right-divider-width 24
                                 :scroll-bar-width 8))
     (spacious-padding-subtle-frame-lines `( :mode-line-active spacious-padding-line-active
                                             :mode-line-inactive spacious-padding-line-inactive
