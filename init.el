@@ -6,6 +6,7 @@
 (defconst is-linux `,(eq system-type 'gnu/linux))
 (defconst is-darwin `,(eq system-type 'darwin))
 (defconst is-windows `,(eq system-type 'windows-nt))
+(defconst is-wsl `,(and is-linux (getenv "WSL_DISTRO_NAME")))
 (custom-set-variables
  '(package-quickstart t)
  '(package-archives '(("melpa"        . "https://melpa.org/packages/")
@@ -220,14 +221,14 @@
     :custom
     (alert-default-style `,(cond
                             ((and is-linux
-                                  (not (getenv "WSL_DISTRO_NAME")))
+                                  (not is-wsl))
                              'notifications)
                             (is-darwin
                              'osx-notifier)))
     :config
     (use-package alert-toast
       :when (or is-windows
-                (getenv "WSL_DISTRO_NAME"))
+                is-wsl)
       :ensure t
       :demand t
       :custom
@@ -244,7 +245,7 @@
       (add-hook 'server-after-make-frame-hook #'fcitx-aggressive-setup)))
   `,(cond
      ((and is-linux
-           (not (getenv "WSL_DISTRO_NAME")))
+           (not is-wsl))
       ;; credit: yorickvP on Github
       (when (executable-find "wl-copy")
         (defvar wl-copy-process nil)
@@ -261,7 +262,12 @@
           (let ((default-directory temporary-file-directory))
             (if (and wl-copy-process (process-live-p wl-copy-process))
                 nil ; should return nil if we're the current paste owner
-              (shell-command-to-string "wl-paste -n | tr -d \r"))))
+              (with-temp-buffer
+                (process-file "wl-paste" nil t nil "-n")
+                (goto-char (point-min))
+                (while (search-forward "\r" nil t)
+                  (replace-match ""))
+                (buffer-string)))))
         (setq interprogram-cut-function 'wl-copy)
         (setq interprogram-paste-function 'wl-paste)))
      (is-darwin
@@ -269,7 +275,7 @@
        '(ns-command-modifier 'meta)
        '(ns-alternate-modifier 'option)))
      ((or is-windows
-          (getenv "WSL_DISTRO_NAME"))
+          is-wsl)
       (when is-windows
         (setopt file-name-coding-system 'cp932
                 default-process-coding-system '(utf-8-dos . japanese-cp932-dos)))
