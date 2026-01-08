@@ -536,7 +536,7 @@
     :ensure t
     :custom
     (cape-dabbrev-check-other-buffers nil)
-    :bind ("C-c p" . cape-prefix-map)
+    :bind ("C-c TAB" . cape-prefix-map)
     :init
     (add-hook 'completion-at-point-functions #'cape-dabbrev)
     (add-hook 'completion-at-point-functions #'cape-file)
@@ -567,64 +567,10 @@
       :after yasnippet
       :init
       (add-to-list 'completion-at-point-functions #'yasnippet-capf))))
-(use-package centaur-tabs
-  :ensure t
-  :autoload (centaur-tabs-get-group-name)
-  :hook
-  (dashboard-mode . centaur-tabs-local-mode)
-  (dired-mode . centaur-tabs-local-mode)
-  (org-agenda-mode . centaur-tabs-local-mode)
-  :custom
-  (centaur-tabs-set-icons t)
-  (centaur-tabs-icon-type 'nerd-icons)
-  (centaur-tabs-set-bar 'over)
-  (centaur-tabs-set-close-button nil)
-  (centaur-tabs-set-modified-marker t)
-  (centaur-tabs-modified-marker "*")
-  :bind
-  ("M-<left>" . centaur-tabs-backward)
-  ("M-<right>" . centaur-tabs-forward)
-  ("M-S-<left>" . centaur-tabs-move-current-tab-to-left)
-  ("M-S-<right>" . centaur-tabs-move-current-tab-to-right)
+(use-package tab-bar
+  :ensure nil
   :init
-  (centaur-tabs-mode +1)
-  (defun centaur-tabs-buffer-groups ()
-    (list
-     (cond
-      ((derived-mode-p 'eshell-mode)
-       "EShell")
-      ((derived-mode-p 'dashboard-mode)
-       "Dashboard")
-      ((string-equal "*" (substring (buffer-name) 0 1))
-       "Emacs")
-      ((memq major-mode '(magit-process-mode
-                          magit-status-mode
-                          magit-diff-mode
-                          magit-log-mode
-                          magit-file-mode
-                          magit-blob-mode
-                          magit-blame-mode))
-       "Magit")
-      ((derived-mode-p 'prog-mode)
-       "Editing")
-      ((derived-mode-p 'dired-mode)
-       "Dired")
-      ((memq major-mode '(helpful-mode
-                          help-mode))
-       "Help")
-      ((memq major-mode '(org-mode
-                          org-agenda-clockreport-mode
-                          org-src-mode
-                          org-agenda-mode
-                          org-beamer-mode
-                          org-indent-mode
-                          org-bullets-mode
-                          org-cdlatex-mode
-                          org-agenda-log-mode
-                          diary-mode))
-       "OrgMode")
-      (t
-       (centaur-tabs-get-group-name (current-buffer)))))))
+  (keymap-global-set "C-c t" tab-prefix-map))
 (use-package perspective
   :ensure t
   :custom
@@ -980,9 +926,9 @@
   :config
   (use-package eglot-signature-eldoc-talkative
     :ensure t
-    :autoload (eglot-signature-eldoc-talkative)
-    :after (eldoc eglot)
-    :config
+    :autoload eglot-signature-eldoc-talkative
+    :after (eglot eldoc)
+    :init
     (defun my/eglot-specific-eldoc ()
       "Add `eglot-signature-eldoc-talkative' to `eldoc-documentation-functions'."
       (add-to-list 'eldoc-documentation-functions #'eglot-signature-eldoc-talkative))
