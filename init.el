@@ -413,7 +413,11 @@
     :config
     (if (or (display-graphic-p)
             (daemonp))
-        (fontaine-set-preset (or (fontaine-restore-latest-preset) 'ibmplex)))))
+        (fontaine-set-preset (or (fontaine-restore-latest-preset) 'ibmplex))))
+  (use-package mixed-pitch
+    :ensure t
+    :hook
+    (text-mode . mixed-pitch-mode)))
 (use-package exec-path-from-shell
   :ensure t
   :unless is-windows
@@ -743,9 +747,11 @@
     :ensure t
     :custom
     (org-directory "~/Documents/org")
-    (org-startup-indented nil)
-    (org-startup-truncated nil)
+    (org-startup-indented t)
+    (org-startup-truncated t)
     (org-todo-keywords '((sequence "TODO" "PROG" "|" "DONE")))
+    (org-babel-load-languages '((emacs-lisp . t)
+                                (calc . t)))
     (org-clock-out-remove-zero-time-clocks t)
     (org-clock-clocked-in-display 'frame-title)
     (org-capture-templates `(("t" "Todo" entry
@@ -813,7 +819,7 @@
         :ensure t
         :after org
         :custom
-        (valign-fancy-bar t)
+        (valign-fancy-bar nil)
         :hook
         (org-mode . valign-mode))
       (use-package org-tidy
@@ -905,11 +911,6 @@
                                               "#+title: ${title}\n#+filetags: :Literature:"))))
       (org-roam-node-display-template `,(concat "${title:*} "
                                                 (propertize "${tags:10}" 'face 'org-tag))))))
-(use-package calc
-  :ensure t
-  :config
-  (with-eval-after-load 'org
-    (require 'ob-calc)))
 (use-package graphviz-dot-mode
   :ensure t
   :config
