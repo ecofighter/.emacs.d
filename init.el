@@ -8,7 +8,6 @@
 (defconst is-windows `,(eq system-type 'windows-nt))
 (defconst is-wsl `,(and is-linux (getenv "WSL_DISTRO_NAME")))
 (custom-set-variables
- '(package-quickstart t)
  '(package-archives '(("melpa"        . "https://melpa.org/packages/")
                       ("nongnu"       . "https://elpa.nongnu.org/nongnu/")
                       ("gnu-devel"    . "https://elpa.gnu.org/devel/")
@@ -16,9 +15,10 @@
  '(package-archive-priorities '(("gnu" . 1)
                                 ("nongnu" . 2)
                                 ("melpa" . 3))))
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+(when (version< emacs-version "29.1")
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package)))
 (require 'use-package)
 (use-package emacs
   :custom
