@@ -36,7 +36,7 @@
   (split-width-threshold 120)
   (split-height-threshold 20)
   (vc-handled-backends '(Git))
-  (fill-column 80)
+  (fill-column 100)
   (tab-width 2)
   (truncate-lines nil)
   (truncate-partial-width-windows nil)
@@ -351,6 +351,12 @@
     :ensure t
     :init
     (global-hl-todo-mode +1))
+  (use-package olivetti
+    :ensure t
+    :custom
+    (olivetti-body-width 110)
+    :hook
+    ((prog-mode conf-mode text-mode) . olivetti-mode))
   (use-package spacious-padding
     :ensure t
     :custom
