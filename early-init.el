@@ -38,7 +38,7 @@
 
 (require 'package)
 (setq package-enable-at-startup t)
-(setq package-install-upgrade-built-in t)
+(setq package-install-upgrade-built-in nil)
 (when (fboundp 'native-comp-available-p)
   (when (native-comp-available-p)
     (setq package-native-compile t)))
