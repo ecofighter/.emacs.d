@@ -585,7 +585,7 @@
 (use-package vundo
   :ensure t
   :bind
-  (("C-c u" . #'vundo)))
+  ("C-c u" . #'vundo))
 (use-package avy
   :ensure t
   :bind
