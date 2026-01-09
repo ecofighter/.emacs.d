@@ -210,220 +210,222 @@
   :ensure t
   :config
   (editorconfig-mode +1))
+(use-package reformatter
+  :ensure t)
 (use-package treesit
   :ensure nil
   :when (treesit-available-p)
   :custom
   (treesit-font-lock-level 4))
-(progn ; platform-spec
-  (use-package alert
+
+(use-package alert
+  :ensure t
+  :custom
+  (alert-default-style `,(cond
+                          ((and is-linux
+                                (not is-wsl))
+                           'notifications)
+                          (is-darwin
+                           'osx-notifier)))
+  :config
+  (use-package alert-toast
+    :when (or is-windows
+              is-wsl)
     :ensure t
+    :demand t
     :custom
-    (alert-default-style `,(cond
-                            ((and is-linux
-                                  (not is-wsl))
-                             'notifications)
-                            (is-darwin
-                             'osx-notifier)))
-    :config
-    (use-package alert-toast
-      :when (or is-windows
-                is-wsl)
-      :ensure t
-      :demand t
-      :custom
-      (alert-default-style 'toast)))
-  (use-package fcitx
-    :ensure t
-    :when is-linux
-    :custom
-    (fcitx-use-dbus 'fcitx5)
-    :config
-    (setq-default fcitx-remote-command "fcitx5-remote")
-    (if (display-graphic-p)
-        (fcitx-aggressive-setup)
-      (add-hook 'server-after-make-frame-hook #'fcitx-aggressive-setup)))
-  `,(cond
-     ((and is-linux
-           (not is-wsl))
-      ;; credit: yorickvP on Github
-      (when (executable-find "wl-copy")
-        (defvar wl-copy-process nil)
-        (defun wl-copy (text)
-          (let ((default-directory temporary-file-directory))
-            (setq wl-copy-process (make-process :name "wl-copy"
-                                                :buffer nil
-                                                :command '("wl-copy" "-f" "-n")
-                                                :connection-type 'pipe
-                                                :noquery t))
-            (process-send-string wl-copy-process text)
-            (process-send-eof wl-copy-process)))
-        (defun wl-paste ()
-          (let ((default-directory temporary-file-directory))
-            (if (and wl-copy-process (process-live-p wl-copy-process))
-                nil ; should return nil if we're the current paste owner
-              (with-temp-buffer
-                (process-file "wl-paste" nil t nil "-n")
-                (goto-char (point-min))
-                (while (search-forward "\r" nil t)
-                  (replace-match ""))
-                (buffer-string)))))
-        (setq interprogram-cut-function 'wl-copy)
-        (setq interprogram-paste-function 'wl-paste)))
-     (is-darwin
-      (custom-set-variables
-       '(ns-command-modifier 'meta)
-       '(ns-alternate-modifier 'option)))
-     ((or is-windows
-          is-wsl)
-      (when is-windows
-        (setopt file-name-coding-system 'cp932
-                default-process-coding-system '(utf-8-dos . japanese-cp932-dos)))
-      (with-eval-after-load 'browse-url
-        (defun my/browse-url-via-powershell (url &rest _args)
-          (shell-command (concat "powershell.exe start \"" url "\"")))
-        (declare-function my/browse-url-via-powershell "init")
-        (setf browse-url-browser-function #'my/browse-url-via-powershell)))))
+    (alert-default-style 'toast)))
+(use-package fcitx
+  :ensure t
+  :when is-linux
+  :custom
+  (fcitx-use-dbus 'fcitx5)
+  :config
+  (setq-default fcitx-remote-command "fcitx5-remote")
+  (if (display-graphic-p)
+      (fcitx-aggressive-setup)
+    (add-hook 'server-after-make-frame-hook #'fcitx-aggressive-setup)))
+`,(cond
+   ((and is-linux
+         (not is-wsl))
+    ;; credit: yorickvP on Github
+    (when (executable-find "wl-copy")
+      (defvar wl-copy-process nil)
+      (defun wl-copy (text)
+        (let ((default-directory temporary-file-directory))
+          (setq wl-copy-process (make-process :name "wl-copy"
+                                              :buffer nil
+                                              :command '("wl-copy" "-f" "-n")
+                                              :connection-type 'pipe
+                                              :noquery t))
+          (process-send-string wl-copy-process text)
+          (process-send-eof wl-copy-process)))
+      (defun wl-paste ()
+        (let ((default-directory temporary-file-directory))
+          (if (and wl-copy-process (process-live-p wl-copy-process))
+              nil ; should return nil if we're the current paste owner
+            (with-temp-buffer
+              (process-file "wl-paste" nil t nil "-n")
+              (goto-char (point-min))
+              (while (search-forward "\r" nil t)
+                (replace-match ""))
+              (buffer-string)))))
+      (setq interprogram-cut-function 'wl-copy)
+      (setq interprogram-paste-function 'wl-paste)))
+   (is-darwin
+    (custom-set-variables
+     '(ns-command-modifier 'meta)
+     '(ns-alternate-modifier 'option)))
+   ((or is-windows
+        is-wsl)
+    (when is-windows
+      (setopt file-name-coding-system 'cp932
+              default-process-coding-system '(utf-8-dos . japanese-cp932-dos)))
+    (with-eval-after-load 'browse-url
+      (defun my/browse-url-via-powershell (url &rest _args)
+        (shell-command (concat "powershell.exe start \"" url "\"")))
+      (declare-function my/browse-url-via-powershell "init")
+      (setf browse-url-browser-function #'my/browse-url-via-powershell))))
 (use-package auto-compile
   :ensure t
   :custom (auto-compile-native-compile t)
   :hook
   (emacs-lisp-mode . auto-compile-on-save-mode))
-(progn ; theme
-  (tool-bar-mode -1)
-  (menu-bar-mode -1)
-  (scroll-bar-mode -1)
-  (use-package mood-line
-    :ensure t
-    :custom
-    (mood-line-glyph-alist mood-line-glyphs-fira-code)
-    :config
-    (mood-line-mode +1))
-  (use-package nerd-icons
-    :ensure t
-    :custom
-    (nerd-icons-font-family "Symbols Nerd Font Mono")
-    :config
-    (use-package nerd-icons-completion
-      :ensure t
-      :hook
-      (marginalia-mode . nerd-icons-completion-marginalia-setup)
-      :init
-      (nerd-icons-completion-mode +1))
-    (use-package nerd-icons-dired
-      :ensure t
-      :hook (dired-mode . nerd-icons-dired-mode)))
-  (use-package rainbow-delimiters
-    :ensure t
-    :hook (prog-mode . rainbow-delimiters-mode))
-  (use-package whitespace
-    :ensure nil
-    :custom
-    (show-trailing-whitespace t)
-    (whitespace-style '(face trailing))
-    :init
-    (global-whitespace-mode +1))
-  (use-package display-line-numbers
-    :ensure nil
-    :hook
-    ((prog-mode conf-mode text-mode) . display-line-numbers-mode))
-  (use-package lin
-    :ensure t
-    :custom
-    (lin-mode-hooks '(prog-mode-hook
-                      conf-mode-hook
-                      text-mode-hook
-                      dired-mode-hook
-                      git-rebase-mode-hook
-                      grep-mode-hook
-                      ibuffer-mode-hook
-                      ilist-mode-hook
-                      log-view-mode-hook
-                      magit-log-mode-hook
-                      occur-mode-hook
-                      org-agenda-mode-hook
-                      pdf-outline-buffer-mode-hook
-                      proced-mode-hook
-                      tabulated-list-mode-hook))
-    :config
-    (lin-global-mode +1))
-  (use-package hl-todo
-    :ensure t
-    :init
-    (global-hl-todo-mode +1))
-  (use-package olivetti
-    :ensure t
-    :custom
-    (olivetti-body-width 110)
-    :hook
-    ((prog-mode conf-mode text-mode) . olivetti-mode))
-  (use-package spacious-padding
-    :ensure t
-    :custom
-    (spacious-padding-widths '( :internal-border-width 4
-                                :header-line-width 8
-                                :mode-line-width 4
-                                :right-divider-width 24
-                                :scroll-bar-width 8))
-    (spacious-padding-subtle-frame-lines `( :mode-line-active spacious-padding-line-active
-                                            :mode-line-inactive spacious-padding-line-inactive
-                                            :header-line-active spacious-padding-line-active
-                                            :header-line-inactive spacious-padding-line-inactive))
-    :config
-    (spacious-padding-mode +1))
-  (use-package breadcrumb
-    :ensure t
-    :config
-    (breadcrumb-mode +1))
-  (use-package modus-themes
-    :ensure t
-    :autoload modus-themes-load-theme
-    :init
-    (add-to-list 'custom-theme-load-path (locate-user-emacs-file "theme/"))
-    (modus-themes-load-theme 'kanagawa-wave))
-  (use-package fontaine
-    :ensure t
-    :autoload
-    (fontaine-mode
-     fontaine-set-preset
-     fontaine-restore-latest-preset)
-    :custom
-    (inhibit-compacting-font-caches t)
-    (fontaine-latest-state-file `,(locate-user-emacs-file "fontaine-latest-state.eld"))
-    (fontaine-presets '((source-han
-                         :default-family "Source Han Code JP"
-                         :variable-pitch-family "Source Han Sans")
-                        (udev
-                         :default-family "UDEV Gothic"
-                         :variable-pitch-family "BIZ UDPGothic")
-                        (udev35
-                         :default-family "UDEV Gothic 35"
-                         :variable-pitch-family "BIZ UDPGothic")
-                        (ibmplex
-                         :default-family "IBM Plex Mono"
-                         :variable-pitch-family "IBM Plex Sans")
-                        (plemol
-                         :default-family "PlemolJP"
-                         :variable-pitch-family "IBM Plex Sans")
-                        (plemol35
-                         :default-family "PlemolJP35"
-                         :variable-pitch-family "IBM Plex Sans")
-                        (0xproto
-                         :default-family "0xProto"
-                         :variable-pitch-family "IBM Plex Sans")
-                        (sarasa
-                         :default-family "Sarasa Mono J"
-                         :variable-pitch-family "Sarasa Gothic J")))
-    :init
-    (fontaine-mode +1)
-    :config
-    (if (or (display-graphic-p)
-            (daemonp))
-        (fontaine-set-preset (or (fontaine-restore-latest-preset) 'ibmplex))))
-  (use-package mixed-pitch
+;; theme
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(scroll-bar-mode -1)
+(use-package mood-line
+  :ensure t
+  :custom
+  (mood-line-glyph-alist mood-line-glyphs-fira-code)
+  :config
+  (mood-line-mode +1))
+(use-package nerd-icons
+  :ensure t
+  :custom
+  (nerd-icons-font-family "Symbols Nerd Font Mono")
+  :config
+  (use-package nerd-icons-completion
     :ensure t
     :hook
-    (text-mode . mixed-pitch-mode)))
+    (marginalia-mode . nerd-icons-completion-marginalia-setup)
+    :init
+    (nerd-icons-completion-mode +1))
+  (use-package nerd-icons-dired
+    :ensure t
+    :hook (dired-mode . nerd-icons-dired-mode)))
+(use-package rainbow-delimiters
+  :ensure t
+  :hook (prog-mode . rainbow-delimiters-mode))
+(use-package whitespace
+  :ensure nil
+  :custom
+  (show-trailing-whitespace t)
+  (whitespace-style '(face trailing))
+  :init
+  (global-whitespace-mode +1))
+(use-package display-line-numbers
+  :ensure nil
+  :hook
+  ((prog-mode conf-mode text-mode) . display-line-numbers-mode))
+(use-package lin
+  :ensure t
+  :custom
+  (lin-mode-hooks '(prog-mode-hook
+                    conf-mode-hook
+                    text-mode-hook
+                    dired-mode-hook
+                    git-rebase-mode-hook
+                    grep-mode-hook
+                    ibuffer-mode-hook
+                    ilist-mode-hook
+                    log-view-mode-hook
+                    magit-log-mode-hook
+                    occur-mode-hook
+                    org-agenda-mode-hook
+                    pdf-outline-buffer-mode-hook
+                    proced-mode-hook
+                    tabulated-list-mode-hook))
+  :config
+  (lin-global-mode +1))
+(use-package hl-todo
+  :ensure t
+  :init
+  (global-hl-todo-mode +1))
+(use-package olivetti
+  :ensure t
+  :custom
+  (olivetti-body-width 110)
+  :hook
+  ((prog-mode conf-mode text-mode) . olivetti-mode))
+(use-package spacious-padding
+  :ensure t
+  :custom
+  (spacious-padding-widths '( :internal-border-width 4
+                              :header-line-width 8
+                              :mode-line-width 4
+                              :right-divider-width 24
+                              :scroll-bar-width 8))
+  (spacious-padding-subtle-frame-lines `( :mode-line-active spacious-padding-line-active
+                                          :mode-line-inactive spacious-padding-line-inactive
+                                          :header-line-active spacious-padding-line-active
+                                          :header-line-inactive spacious-padding-line-inactive))
+  :config
+  (spacious-padding-mode +1))
+(use-package breadcrumb
+  :ensure t
+  :config
+  (breadcrumb-mode +1))
+(use-package modus-themes
+  :ensure t
+  :autoload modus-themes-load-theme
+  :init
+  (add-to-list 'custom-theme-load-path (locate-user-emacs-file "theme/"))
+  (modus-themes-load-theme 'kanagawa-wave))
+(use-package fontaine
+  :ensure t
+  :autoload
+  (fontaine-mode
+   fontaine-set-preset
+   fontaine-restore-latest-preset)
+  :custom
+  (inhibit-compacting-font-caches t)
+  (fontaine-latest-state-file `,(locate-user-emacs-file "fontaine-latest-state.eld"))
+  (fontaine-presets '((source-han
+                       :default-family "Source Han Code JP"
+                       :variable-pitch-family "Source Han Sans")
+                      (udev
+                       :default-family "UDEV Gothic"
+                       :variable-pitch-family "BIZ UDPGothic")
+                      (udev35
+                       :default-family "UDEV Gothic 35"
+                       :variable-pitch-family "BIZ UDPGothic")
+                      (ibmplex
+                       :default-family "IBM Plex Mono"
+                       :variable-pitch-family "IBM Plex Sans")
+                      (plemol
+                       :default-family "PlemolJP"
+                       :variable-pitch-family "IBM Plex Sans")
+                      (plemol35
+                       :default-family "PlemolJP35"
+                       :variable-pitch-family "IBM Plex Sans")
+                      (0xproto
+                       :default-family "0xProto"
+                       :variable-pitch-family "IBM Plex Sans")
+                      (sarasa
+                       :default-family "Sarasa Mono J"
+                       :variable-pitch-family "Sarasa Gothic J")))
+  :init
+  (fontaine-mode +1)
+  :config
+  (if (or (display-graphic-p)
+          (daemonp))
+      (fontaine-set-preset (or (fontaine-restore-latest-preset) 'ibmplex))))
+(use-package mixed-pitch
+  :ensure t
+  :hook
+  (text-mode . mixed-pitch-mode))
 (use-package exec-path-from-shell
   :ensure t
   :unless is-windows
@@ -496,87 +498,87 @@
   (use-package embark-consult
     :ensure t
     :after (consult embark)))
-(progn ; completion
-  (use-package orderless
+;; completion
+(use-package orderless
+  :ensure t
+  :demand t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles partial-completion)))))
+(use-package corfu
+  :ensure t
+  :bind
+  (:map corfu-map
+        ("RET" . nil)
+        ("<return>" . nil))
+  :custom
+  (corfu-cycle t)
+  (corfu-auto t)
+  (corfu-auto-prefix 1)
+  (corfu-auto-delay 0.2)
+  (corfu-preselect 'directory)
+  (corfu-quit-no-match t)
+  (corfu-on-exact-match 'show)
+  :init
+  (global-corfu-mode +1)
+  :config
+  (use-package corfu-terminal
     :ensure t
-    :demand t
-    :custom
-    (completion-styles '(orderless basic))
-    (completion-category-overrides '((file (styles partial-completion)))))
-  (use-package corfu
-    :ensure t
-    :bind
-    (:map corfu-map
-          ("RET" . nil)
-          ("<return>" . nil))
-    :custom
-    (corfu-cycle t)
-    (corfu-auto t)
-    (corfu-auto-prefix 1)
-    (corfu-auto-delay 0.2)
-    (corfu-preselect 'directory)
-    (corfu-quit-no-match t)
-    (corfu-on-exact-match 'show)
-    :init
-    (global-corfu-mode +1)
+    :when (version< emacs-version "31")
+    :after corfu
+    :unless (display-graphic-p)
     :config
-    (use-package corfu-terminal
-      :ensure t
-      :when (version< emacs-version "31")
-      :after corfu
-      :unless (display-graphic-p)
-      :config
-      (corfu-terminal-mode +1))
-    (use-package corfu-popupinfo
-      :ensure nil
-      :after corfu
-      :hook
-      (corfu-mode . corfu-popupinfo-mode))
-    (use-package corfu-history
-      :ensure nil
-      :after corfu
-      :init
-      (corfu-history-mode))
-    (use-package nerd-icons-corfu
-      :ensure t
-      :after (corfu nerd-icons)
-      :config
-      (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
-  (use-package cape
-    :ensure t
-    :custom
-    (cape-dabbrev-check-other-buffers nil)
-    :bind ("C-c TAB" . cape-prefix-map)
+    (corfu-terminal-mode +1))
+  (use-package corfu-popupinfo
+    :ensure nil
+    :after corfu
+    :hook
+    (corfu-mode . corfu-popupinfo-mode))
+  (use-package corfu-history
+    :ensure nil
+    :after corfu
     :init
-    (add-hook 'completion-at-point-functions #'cape-dabbrev)
-    (add-hook 'completion-at-point-functions #'cape-file)
-    (add-hook 'completion-at-point-functions #'cape-keyword)
-    (add-hook 'completion-at-point-functions #'cape-elisp-block)
-    (add-hook 'completion-at-point-functions #'cape-tex)
-    (with-eval-after-load 'eglot
-      (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
-      (advice-add 'eglot-completion-at-point :around #'cape-wrap-nonexclusive))
-    (with-eval-after-load 'lsp-mode
-      (advice-add 'lsp-completion-at-point :around #'cape-wrap-buster)
-      (advice-add 'lsp-completion-at-point :around #'cape-wrap-nonexclusive)
-      (advice-add 'lsp-completion-at-point :around #'cape-wrap-noninterruptible)))
-  (use-package yasnippet
+    (corfu-history-mode))
+  (use-package nerd-icons-corfu
     :ensure t
-    :autoload (yas-expand)
-    :bind
-    (:map yas-minor-mode-map
-          ("C-<return>" . #'yas-expand))
-    :init
-    (yas-global-mode +1)
+    :after (corfu nerd-icons)
     :config
-    (use-package yasnippet-snippets
-      :ensure t
-      :after yasnippet)
-    (use-package yasnippet-capf
-      :ensure t
-      :after yasnippet
-      :init
-      (add-to-list 'completion-at-point-functions #'yasnippet-capf))))
+    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
+(use-package cape
+  :ensure t
+  :custom
+  (cape-dabbrev-check-other-buffers nil)
+  :bind ("C-c TAB" . cape-prefix-map)
+  :init
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-keyword)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  (add-hook 'completion-at-point-functions #'cape-tex)
+  (with-eval-after-load 'eglot
+    (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+    (advice-add 'eglot-completion-at-point :around #'cape-wrap-nonexclusive))
+  (with-eval-after-load 'lsp-mode
+    (advice-add 'lsp-completion-at-point :around #'cape-wrap-buster)
+    (advice-add 'lsp-completion-at-point :around #'cape-wrap-nonexclusive)
+    (advice-add 'lsp-completion-at-point :around #'cape-wrap-noninterruptible)))
+(use-package yasnippet
+  :ensure t
+  :autoload (yas-expand)
+  :bind
+  (:map yas-minor-mode-map
+        ("C-<return>" . #'yas-expand))
+  :init
+  (yas-global-mode +1)
+  :config
+  (use-package yasnippet-snippets
+    :ensure t
+    :after yasnippet)
+  (use-package yasnippet-capf
+    :ensure t
+    :after yasnippet
+    :init
+    (add-to-list 'completion-at-point-functions #'yasnippet-capf)))
 (use-package project
   :ensure nil
   :custom
@@ -974,174 +976,181 @@
   (lsp-keymap-prefix "C-c l")
   :hook
   (lsp-mode . lsp-enable-which-key-integration))
-(progn ; languages
-  (progn ; c/cpp
-    (when (treesit-available-p)
-      (when (fboundp 'treesit-ready-p)
-        (unless (treesit-ready-p 'c)
-          (add-to-list 'treesit-language-source-alist '(c . ("https://github.com/tree-sitter/tree-sitter-c"
+;; markdown
+(use-package markdown-ts-mode
+  :ensure t
+  :mode ("\\.md\\'" . markdown-ts-mode)
+  :config
+  (add-to-list 'treesit-language-source-alist '(markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown/src"))
+  (add-to-list 'treesit-language-source-alist '(markdown-inline "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown-inline/src")))
+;; web
+(use-package web-mode
+  :ensure t
+  :mode ("\\.csp\\'" "\\.razor\\'" "\\.html?\\'"))
+;; c/c++
+(when (treesit-available-p)
+  (when (fboundp 'treesit-ready-p)
+    (unless (treesit-ready-p 'c)
+      (add-to-list 'treesit-language-source-alist '(c . ("https://github.com/tree-sitter/tree-sitter-c"
+                                                         nil nil nil nil)))
+      (treesit-install-language-grammar 'c))
+    (unless (treesit-ready-p 'cpp)
+      (add-to-list 'treesit-language-source-alist '(cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"
+                                                           nil nil nil nil)))
+      (treesit-install-language-grammar 'cpp)))
+  (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode)))
+(use-package bison-mode
+  :ensure t
+  :custom
+  (bison-all-electricity-off t))
+(use-package cmake-mode
+  :ensure t)
+;; haskell
+(use-package haskell-mode
+  :ensure t
+  :hook
+  (haskell-mode . eglot-ensure))
+;; ocaml
+(use-package tuareg
+  :ensure t)
+(use-package ocamlformat
+  :ensure t
+  :after tuareg
+  :custom
+  (ocamlformat-command '("ocamlformat")))
+(use-package dune
+  :ensure t)
+(use-package ocaml-eglot
+  :ensure t
+  :after tuareg
+  :custom
+  (ocaml-eglot-syntax-checker . 'flycheck)
+  :hook
+  (tuareg-mode . ocaml-eglot)
+  (ocaml-eglot . eglot-ensure))
+;; nix
+(use-package nix-ts-mode
+  :ensure t
+  :mode "\\.nix\\'"
+  :hook
+  (nix-ts-mode . eglot-ensure)
+  :init
+  (when (treesit-available-p)
+    (when (fboundp 'treesit-ready-p)
+      (unless (treesit-ready-p 'nix)
+        (add-to-list 'treesit-language-source-alist '(nix . ("https://github.com/nix-community/tree-sitter-nix"
                                                              nil nil nil nil)))
-          (treesit-install-language-grammar 'c))
-        (unless (treesit-ready-p 'cpp)
-          (add-to-list 'treesit-language-source-alist '(cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"
-                                                               nil nil nil nil)))
-          (treesit-install-language-grammar 'cpp)))
-      (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
-      (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
-      (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode)))
-    (use-package bison-mode
-      :ensure t
-      :custom
-      (bison-all-electricity-off t))
-    (use-package cmake-mode
-      :ensure t))
-  (use-package markdown-ts-mode
+        (treesit-install-language-grammar 'nix)))))
+;; standard ml
+(use-package sml-mode
+  :ensure t)
+(use-package smlfmt
+  :ensure t
+  :hook
+  (sml-mode . smlfmt-format-on-save-mode))
+;; rust
+(use-package rust-mode
+  :ensure t
+  :custom
+  (rust-indent-offset 4)
+  (rust-mode-treesitter-derive t)
+  :hook
+  (rust-mode . eglot-ensure)
+  :config
+  (when (treesit-available-p)
+    (when (fboundp 'treesit-ready-p)
+      (unless (treesit-ready-p 'rust)
+        (add-to-list 'treesit-language-source-alist '(rust . ("https://github.com/tree-sitter/tree-sitter-rust"
+                                                              nil nil nil nil)))
+        (treesit-install-language-grammar 'rust)))))
+(use-package cargo-mode
+  :ensure t
+  :hook
+  (rust-mode . cargo-minor-mode))
+;; python
+(use-package python-mode
+  :ensure t
+  :config
+  (when (treesit-available-p)
+    (when (fboundp 'treesit-ready-p)
+      (unless (treesit-ready-p 'python)
+        (add-to-list 'treesit-language-source-alist '(python . ("https://github.com/tree-sitter/tree-sitter-python"
+                                                                nil nil nil nil)))
+        (treesit-install-language-grammar 'python)))
+    (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))))
+;; dotnet
+(use-package sharper
+  :ensure t
+  :bind
+  ("C-c n" . sharper-main-transient))
+(use-package csharp-mode
+  :ensure t)
+(use-package fsharp-mode
+  :ensure t
+  :hook
+  (fsharp-mode . eglot-ensure)
+  :config
+  (use-package eglot-fsharp
     :ensure t
-    :mode ("\\.md\\'" . markdown-ts-mode)
+    :after eglot
     :config
-    (add-to-list 'treesit-language-source-alist '(markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown/src"))
-    (add-to-list 'treesit-language-source-alist '(markdown-inline "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown-inline/src")))
-  (use-package web-mode
+    (when-let* ((executable (executable-find "fsautocomplete"))
+                (bindir (file-name-directory executable)))
+      (setq-default eglot-fsharp-server-path bindir)
+      (setq-default eglot-fsharp-server-install-dir nil))))
+(use-package lean4-mode
+  :commands lean4-mode
+  :vc (:url "https://github.com/leanprover-community/lean4-mode"
+            :rev :newest))
+;; latex
+(defgroup latexindent nil
+  "Indent with latexindent."
+  :group 'extensions
+  :prefix 'latexindent-)
+(reformatter-define latexindent
+  :program "latexindent"
+  :args '("--pipe"))
+(use-package tex
+  :ensure auctex
+  :autoload (TeX-revert-document-buffer
+             TeX-source-correlate-mode
+             TeX-active-master
+             TeX-output-extension)
+  :custom
+  (TeX-engine 'luatex)
+  (TeX-source-correlate-method 'synctex)
+  (TeX-source-correlate-start-server t)
+  (TeX-parse-self t)
+  (TeX-auto-save t)
+  (TeX-view-program-selection '((output-pdf "PDF Tools")))
+  (TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view)))
+  :config
+  (TeX-source-correlate-mode +1)
+  (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
+  (use-package reftex
     :ensure t
-    :mode ("\\.csp\\'" "\\.razor\\'" "\\.html?\\'"))
-  (progn ; haskell
-    (use-package haskell-mode
-      :ensure t
-      :hook
-      (haskell-mode . eglot-ensure)))
-  (progn ; ocaml
-    (use-package tuareg
-      :ensure t)
-    (use-package ocamlformat
-      :ensure t
-      :after tuareg
-      :custom
-      (ocamlformat-command '("ocamlformat")))
-    (use-package dune
-      :ensure t)
-    (use-package ocaml-eglot
-      :ensure t
-      :after tuareg
-      :custom
-      (ocaml-eglot-syntax-checker . 'flycheck)
-      :hook
-      (tuareg-mode . ocaml-eglot)
-      (ocaml-eglot . eglot-ensure)))
-  (progn ; nix
-    (use-package nix-ts-mode
-      :ensure t
-      :mode "\\.nix\\'"
-      :hook
-      (nix-ts-mode . eglot-ensure)
-      :init
-      (when (treesit-available-p)
-        (when (fboundp 'treesit-ready-p)
-          (unless (treesit-ready-p 'nix)
-            (add-to-list 'treesit-language-source-alist '(nix . ("https://github.com/nix-community/tree-sitter-nix"
-                                                                 nil nil nil nil)))
-            (treesit-install-language-grammar 'nix))))))
-  (progn ; sml
-    (use-package sml-mode
-      :ensure t)
-    (use-package smlfmt
-      :ensure t
-      :hook
-      (sml-mode . smlfmt-format-on-save-mode)))
-  (progn ; rust
-    (use-package rust-mode
-      :ensure t
-      :custom
-      (rust-indent-offset 4)
-      (rust-mode-treesitter-derive t)
-      :hook
-      (rust-mode . eglot-ensure)
-      :config
-      (when (treesit-available-p)
-        (when (fboundp 'treesit-ready-p)
-          (unless (treesit-ready-p 'rust)
-            (add-to-list 'treesit-language-source-alist '(rust . ("https://github.com/tree-sitter/tree-sitter-rust"
-                                                                  nil nil nil nil)))
-            (treesit-install-language-grammar 'rust)))))
-    (use-package cargo-mode
-      :ensure t
-      :hook
-      (rust-mode . cargo-minor-mode)))
-  (progn ; python
-    (use-package python-mode
-      :ensure t
-      :config
-      (when (treesit-available-p)
-        (when (fboundp 'treesit-ready-p)
-          (unless (treesit-ready-p 'python)
-            (add-to-list 'treesit-language-source-alist '(python . ("https://github.com/tree-sitter/tree-sitter-python"
-                                                                  nil nil nil nil)))
-            (treesit-install-language-grammar 'python)))
-        (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode)))))
-  (progn ; dotnet
-    (use-package sharper
-      :ensure t
-      :bind
-      ("C-c n" . sharper-main-transient))
-    (use-package csharp-mode
-      :ensure t)
-    (use-package fsharp-mode
-      :ensure t
-      :hook
-      (fsharp-mode . eglot-ensure)
-      :config
-      (use-package eglot-fsharp
-        :ensure t
-        :after eglot
-        :config
-        (when-let* ((executable (executable-find "fsautocomplete"))
-                    (bindir (file-name-directory executable)))
-          (setq-default eglot-fsharp-server-path bindir)
-          (setq-default eglot-fsharp-server-install-dir nil)))))
-  (progn ; lean4
-    (use-package lean4-mode
-      :commands lean4-mode
-      :vc (:url "https://github.com/leanprover-community/lean4-mode"
-                :rev :newest)))
-  (progn ; latex
-    (use-package tex
-      :ensure auctex
-      :autoload (TeX-revert-document-buffer
-                 TeX-source-correlate-mode
-                 TeX-active-master
-                 TeX-output-extension)
-      :custom
-      (TeX-engine 'luatex)
-      (TeX-source-correlate-method 'synctex)
-      (TeX-source-correlate-start-server t)
-      (TeX-parse-self t)
-      (TeX-auto-save t)
-      (TeX-view-program-selection '((output-pdf "PDF Tools")))
-      (TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view)))
-      :config
-      (TeX-source-correlate-mode +1)
-      (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
-      (use-package reftex
-        :ensure t
-        :hook
-        (LaTeX-mode . turn-on-reftex)
-        :custom
-        (reftex-plug-into-AUCTeX t)
-        (reftex-ref-style-default-list '("Cleveref" "Default")))
-      (use-package auctex-cluttex
-        :ensure t
-        :autoload (auctex-cluttex--TeX-ClutTeX-sentinel)
-        :hook
-        (LaTeX-mode . auctex-cluttex-mode)
-        :config
-        (defun my/run-after-compilation-finished-funcs (&rest _args)
-          "run AUCTeX's TeX-after-compilation-finished-functions hook. Ignore all ARGS"
-          (unless TeX-error-list
-            (run-hook-with-args 'TeX-after-compilation-finished-functions
-                                (with-current-buffer TeX-command-buffer
-                                  (expand-file-name
-                                   (TeX-active-master (TeX-output-extension)))))))
-        (declare-function my/run-after-compilation-finished-funcs "init")
-        (advice-add #'auctex-cluttex--TeX-ClutTeX-sentinel :after #'my/run-after-compilation-finished-funcs)))))
+    :hook
+    (LaTeX-mode . turn-on-reftex)
+    :custom
+    (reftex-plug-into-AUCTeX t)
+    (reftex-ref-style-default-list '("Cleveref" "Default")))
+  (use-package auctex-cluttex
+    :ensure t
+    :autoload (auctex-cluttex--TeX-ClutTeX-sentinel)
+    :hook
+    (LaTeX-mode . auctex-cluttex-mode)
+    :config
+    (defun my/run-after-compilation-finished-funcs (&rest _args)
+      "run AUCTeX's TeX-after-compilation-finished-functions hook. Ignore all ARGS"
+      (unless TeX-error-list
+        (run-hook-with-args 'TeX-after-compilation-finished-functions
+                            (with-current-buffer TeX-command-buffer
+                              (expand-file-name
+                               (TeX-active-master (TeX-output-extension)))))))
+    (declare-function my/run-after-compilation-finished-funcs "init")
+    (advice-add #'auctex-cluttex--TeX-ClutTeX-sentinel :after #'my/run-after-compilation-finished-funcs)))
 
 (provide 'init)
 ;;; init.el ends here
