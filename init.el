@@ -577,6 +577,10 @@
       :after yasnippet
       :init
       (add-to-list 'completion-at-point-functions #'yasnippet-capf))))
+(use-package project
+  :ensure nil
+  :custom
+  (project-vc-extra-root-markers '(".project" "flake.nix")))
 (use-package tab-bar
   :ensure nil
   :init
@@ -1089,8 +1093,8 @@
         :config
         (when-let* ((executable (executable-find "fsautocomplete"))
                     (bindir (file-name-directory executable)))
-          (setq eglot-fsharp-server-path bindir)
-          (setq eglot-fsharp-server-install-dir nil)))))
+          (setq-default eglot-fsharp-server-path bindir)
+          (setq-default eglot-fsharp-server-install-dir nil)))))
   (progn ; lean4
     (use-package lean4-mode
       :commands lean4-mode
