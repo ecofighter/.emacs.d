@@ -1100,6 +1100,7 @@
                 (bindir (file-name-directory executable)))
       (setq-default eglot-fsharp-server-path bindir)
       (setq-default eglot-fsharp-server-install-dir nil))))
+;; lean4
 (use-package lean4-mode
   :commands lean4-mode
   :vc (:url "https://github.com/leanprover-community/lean4-mode"
@@ -1110,8 +1111,7 @@
   :group 'extensions
   :prefix 'latexindent-)
 (reformatter-define latexindent
-  :program "latexindent"
-  :args '("--pipe"))
+  :program "latexindent")
 (use-package tex
   :ensure auctex
   :autoload (TeX-revert-document-buffer
