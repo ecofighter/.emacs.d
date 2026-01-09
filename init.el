@@ -583,8 +583,10 @@
   (project-vc-extra-root-markers '(".project" "flake.nix")))
 (use-package tab-bar
   :ensure nil
+  :custom
+  (tab-bar-show 1)
   :init
-  (keymap-global-set "C-c t" tab-prefix-map))
+  (tab-bar-mode +1))
 (use-package perspective
   :ensure t
   :custom
