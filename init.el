@@ -706,6 +706,12 @@
 (use-package puni
   :ensure t
   :hook (vterm-mode . puni-disable-puni-mode)
+  :bind
+  ("C-c p w r" . puni-wrap-round)
+  ("C-c p w s" . puni-srap-square)
+  ("C-c p w c" . puni-wrap-curly)
+  ("C-c p w a" . puni-wrap-angle)
+  ("C-c p s" . puni-splice)
   :init
   (puni-global-mode +1))
 (use-package highlight-indent-guides
