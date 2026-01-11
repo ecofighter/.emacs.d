@@ -1,4 +1,7 @@
 ;;; kanagawa-wave-theme.el --- port of 'rebelot/kanagawa.nvim' by Tommaso Laurenzi. -*- lexical-binding: t -*-
+;;; Version: 1.0.0
+;;; Package-Requires: ((emacs "28.1") (modus-themes "5.0.0"))
+
 ;;; Commentary:
 ;;; Code:
 

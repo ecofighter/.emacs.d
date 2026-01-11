@@ -22,11 +22,11 @@
   (garbage-collect))
 (add-hook 'after-init-hook #'my/restore-variables-after-init)
 
-(setq load-prefer-newer t)
-(setq read-process-output-max (* 1024 1024))
-(setq-default native-comp-async-report-warnings-errors 'silent)
-(setq-default native-comp-async-jobs-number 8)
-(setq-default native-comp-speed 2)
+(setopt load-prefer-newer t)
+(setopt read-process-output-max (* 1024 1024))
+(setopt native-comp-async-report-warnings-errors 'silent)
+(setopt native-comp-async-jobs-number 8)
+(setopt native-comp-speed 2)
 
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)
@@ -37,13 +37,13 @@
 ;; (push '(fullscreen . maximized) default-frame-alist)
 
 (require 'package)
-(setq package-enable-at-startup t)
-(setq package-quickstart t)
-(setq package-install-upgrade-built-in nil)
+(setopt package-enable-at-startup t)
+(setopt package-quickstart t)
+(setopt package-install-upgrade-built-in nil)
 (when (fboundp 'native-comp-available-p)
   (when (native-comp-available-p)
-    (setq package-native-compile t)))
-
+    (setopt package-native-compile t)))
 (setenv "LSP_USE_PLISTS" "true")
+
 (provide 'early-init)
 ;;; early-init.el ends here

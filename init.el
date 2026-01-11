@@ -357,6 +357,7 @@
   :ensure t
   :custom
   (olivetti-body-width 110)
+  (olivetti-style 'fancy)
   :hook
   ((prog-mode conf-mode text-mode) . olivetti-mode))
 (use-package spacious-padding
