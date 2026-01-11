@@ -1033,7 +1033,7 @@
   :ensure t
   :after tuareg
   :custom
-  (ocaml-eglot-syntax-checker . 'flycheck)
+  (ocaml-eglot-syntax-checker 'flycheck)
   :hook
   (tuareg-mode . ocaml-eglot)
   (ocaml-eglot . eglot-ensure))
