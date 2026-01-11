@@ -381,6 +381,9 @@
 (use-package modus-themes
   :ensure t
   :autoload modus-themes-load-theme
+  :custom
+  (modus-themes-mixed-fonts t)
+  (modus-themes-italic-constructs t)
   :init
   (add-to-list 'custom-theme-load-path (locate-user-emacs-file "theme/"))
   (modus-themes-load-theme 'kanagawa-wave))
@@ -423,10 +426,6 @@
   (if (or (display-graphic-p)
           (daemonp))
       (fontaine-set-preset (or (fontaine-restore-latest-preset) 'ibmplex))))
-(use-package mixed-pitch
-  :ensure t
-  :hook
-  (text-mode . mixed-pitch-mode))
 (use-package exec-path-from-shell
   :ensure t
   :unless is-windows
@@ -473,6 +472,7 @@
   ("C-c i l" . consult-line)
   ("C-c i p" . consult-yank-from-kill-ring)
   ("C-c i b" . consult-buffer)
+  ("C-c i g" . consult-ripgrep)
   :config
   (use-package consult-eglot
     :ensure t
@@ -986,10 +986,10 @@
 ;; markdown
 (use-package markdown-ts-mode
   :ensure t
-  :mode ("\\.md\\'" . markdown-ts-mode)
-  :config
+  :init
   (add-to-list 'treesit-language-source-alist '(markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown/src"))
-  (add-to-list 'treesit-language-source-alist '(markdown-inline "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown-inline/src")))
+  (add-to-list 'treesit-language-source-alist '(markdown-inline "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown-inline/src"))
+  (add-to-list 'major-mode-remap-alist '(markdown-mode . markdown-ts-mode)))
 ;; web
 (use-package web-mode
   :ensure t

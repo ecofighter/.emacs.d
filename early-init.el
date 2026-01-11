@@ -1,15 +1,16 @@
 ;;; early-init.el --- my early-init-file -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
+(setopt custom-file (locate-user-emacs-file "custom.el"))
+(when (file-exists-p custom-file)
+  (load custom-file))
+
 (defconst my/saved-file-name-handler-alist file-name-handler-alist)
 (setopt file-name-handler-alist nil)
 (setopt gc-cons-threshold most-positive-fixnum)
 (setopt garbage-collection-messages t)
 (setopt inhibit-redisplay t)
 (setopt inhibit-message t)
-(setopt custom-file (locate-user-emacs-file "custom.el"))
-(when (file-exists-p custom-file)
-  (load custom-file))
 
 (defun my/restore-variables-after-init ()
   "Restore variables changed in `early-init.el'."
