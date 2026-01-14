@@ -465,7 +465,6 @@
     (vertico-multiform-mode +1)))
 (use-package consult
   :ensure t
-  :autoload consult--customize-put
   :bind
   ("C-c i i" . consult-imenu)
   ("C-c i l" . consult-line)
@@ -598,7 +597,6 @@
   (persp-mode +1)
   :config
   (with-eval-after-load 'consult
-    (consult-customize consult--source-buffer :hidden t :default nil)
     (add-to-list 'consult-buffer-sources persp-consult-source)))
 (use-package vundo
   :ensure t
@@ -682,7 +680,6 @@
   :config
   (use-package consult-flycheck
     :ensure t
-    :after (consult flycheck)
     :bind
     ("C-c i e" . consult-flycheck)))
 (use-package ispell
