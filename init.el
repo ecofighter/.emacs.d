@@ -983,12 +983,11 @@
   :hook
   (lsp-mode . lsp-enable-which-key-integration))
 ;; markdown
-(use-package markdown-ts-mode
+(use-package markdown-mode
   :ensure t
-  :init
-  (add-to-list 'treesit-language-source-alist '(markdown "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown/src"))
-  (add-to-list 'treesit-language-source-alist '(markdown-inline "https://github.com/tree-sitter-grammars/tree-sitter-markdown" "split_parser" "tree-sitter-markdown-inline/src"))
-  (add-to-list 'major-mode-remap-alist '(markdown-mode . markdown-ts-mode)))
+  :mode ("\\.md\\'" . gfm-mode)
+  :custom
+  (markdown-command "pandoc --from gfm --to html5 --katex --standalone"))
 ;; web
 (use-package web-mode
   :ensure t
