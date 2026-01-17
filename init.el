@@ -15,6 +15,14 @@
  '(package-archive-priorities '(("gnu" . 1)
                                 ("nongnu" . 2)
                                 ("melpa" . 3))))
+(defun my/pin-external-packages (&rest _)
+  "Add external packages to `package-pinned-packages'."
+  (dolist (pkg-entry package-alist)
+    (let* ((pkg-name (car pkg-entry))
+           (desc (cadr pkg-entry)))
+      (when (string= (package-desc-status desc) "external")
+        (setf (alist-get pkg-name package-pinned-packages) "external")))))
+(advice-add #'package-load-descriptor :after #'my/pin-external-packages)
 (when (version< emacs-version "29.1")
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
@@ -621,11 +629,7 @@
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 (use-package vterm
   :unless is-windows
-  :ensure t
-  :config
-  (let* ((desc (package-get-descriptor 'vterm)))
-    (when (string= (package-desc-status desc) "external")
-      (add-to-list 'package-pinned-packages '(vterm . "manual")))))
+  :ensure t)
 (use-package eshell
   :ensure t
   :bind
@@ -942,11 +946,7 @@
   :custom
   (pdf-view-display-size 'fit-page)
   :init
-  (pdf-loader-install)
-  :config
-  (let* ((desc (package-get-descriptor 'pdf-tools)))
-    (when (string= (package-desc-status desc) "external")
-      (add-to-list 'package-pinned-packages '(pdf-tools . "manual")))))
+  (pdf-loader-install))
 (use-package eglot
   :ensure t
   :config
