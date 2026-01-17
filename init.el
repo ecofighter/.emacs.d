@@ -621,7 +621,11 @@
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 (use-package vterm
   :unless is-windows
-  :ensure t)
+  :ensure t
+  :config
+  (let* ((desc (package-get-descriptor 'vterm)))
+    (when (string= (package-desc-status desc) "external")
+      (add-to-list 'package-pinned-packages '(vterm . "manual")))))
 (use-package eshell
   :ensure t
   :bind
@@ -938,7 +942,11 @@
   :custom
   (pdf-view-display-size 'fit-page)
   :init
-  (pdf-loader-install))
+  (pdf-loader-install)
+  :config
+  (let* ((desc (package-get-descriptor 'pdf-tools)))
+    (when (string= (package-desc-status desc) "external")
+      (add-to-list 'package-pinned-packages '(pdf-tools . "manual")))))
 (use-package eglot
   :ensure t
   :config
