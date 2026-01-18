@@ -1118,10 +1118,10 @@
 ;; latex
 (defgroup latexindent nil
   "Indent with latexindent."
-  :group 'extensions
-  :prefix 'latexindent-)
+  :group 'extensions)
 (reformatter-define latexindent
-  :program "latexindent")
+  :program "latexindent"
+  :group 'latexindent)
 (use-package tex
   :ensure auctex
   :autoload (TeX-revert-document-buffer
