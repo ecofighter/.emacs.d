@@ -628,6 +628,7 @@
   :config
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 (use-package vterm
+  :disabled t
   :unless is-windows
   :ensure t)
 (use-package eshell
