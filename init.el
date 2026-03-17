@@ -989,7 +989,9 @@
   :hook
   (lsp-mode . lsp-enable-which-key-integration))
 (use-package devcontainer
-  :ensure t)
+  :ensure t
+  :custom
+  (devcontainer-engine 'podman))
 ;; markdown
 (use-package markdown-mode
   :ensure t
