@@ -1084,6 +1084,9 @@
   :ensure t
   :hook
   (rust-mode . cargo-minor-mode))
+;; Go
+(use-package go-mode
+  :ensure t)
 ;; python
 (use-package python-mode
   :ensure t
