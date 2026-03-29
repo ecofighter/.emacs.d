@@ -991,7 +991,9 @@
 (use-package devcontainer
   :ensure t
   :custom
-  (devcontainer-engine 'podman))
+  (devcontainer-engine 'podman)
+  :init
+  (devcontainer-mode +1))
 ;; markdown
 (use-package markdown-mode
   :ensure t
@@ -1085,8 +1087,26 @@
   :hook
   (rust-mode . cargo-minor-mode))
 ;; Go
-(use-package go-mode
-  :ensure t)
+(use-package go-ts-mode
+  :ensure t
+  :mode
+  ("\\.go\\'" . go-ts-mode)
+  ("go.mod" . go-mod-ts-mode)
+  :hook
+  (go-ts-mode . eglot-ensure)
+  :custom
+  (go-ts-mode-indent-offset 2)
+  :config
+  (when (treesit-available-p)
+    (when (fboundp 'treesit-ready-p)
+      (unless (treesit-ready-p 'go)
+        (add-to-list 'treesit-language-source-alist '(go . ("https://github.com/tree-sitter/tree-sitter-go"
+                                                              nil nil nil nil)))
+        (treesit-install-language-grammar 'go))
+      (unless (treesit-ready-p 'gomod)
+        (add-to-list 'treesit-language-source-alist '(gomod . ("https://github.com/tree-sitter/tree-sitter-go-mod"
+                                                              nil nil nil nil)))
+        (treesit-install-language-grammar 'gomod)))))
 ;; python
 (use-package python-mode
   :ensure t
