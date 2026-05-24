@@ -1117,7 +1117,13 @@
         (add-to-list 'treesit-language-source-alist '(python . ("https://github.com/tree-sitter/tree-sitter-python"
                                                                 nil nil nil nil)))
         (treesit-install-language-grammar 'python)))
-    (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))))
+    (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode)))
+  (with-eval-after-load "lsp-pylsp"
+    (custom-set-variables
+     '(lsp-pylsp-plugins-black-enabled t)
+     '(lsp-pylsp-plugins-isort-enabled t)
+     '(lsp-pylsp-plugins-flake8-enabled t)
+     '(lsp-pylsp-plugins-mypy-enabled t))))
 ;; dotnet
 (use-package sharper
   :ensure t
