@@ -54,7 +54,7 @@
   (blink-matching-paren nil)
   (auto-mode-case-fold nil)
   (bidi-inhibit-bpa t)
-  (enable-recusive-minibuffers t)
+  (enable-recursive-minibuffers t)
   (completion-cycle-threshold 3)
   (tab-always-indent 'complete)
   (ring-bell-function 'ignore)
