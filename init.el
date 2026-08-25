@@ -211,7 +211,7 @@
   :init
   (global-auto-revert-mode +1))
 (use-package editorconfig
-  :ensure t
+  :ensure nil
   :config
   (editorconfig-mode +1))
 (use-package reformatter
@@ -616,11 +616,11 @@
   :bind
   ("C-c w" . ace-window))
 (use-package which-key
-  :ensure t
+  :ensure nil
   :init
   (which-key-mode +1))
 (use-package tramp
-  :ensure t
+  :ensure nil
   :config
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 (use-package vterm
@@ -766,7 +766,7 @@
   "Prefix map for org commands.")
 (define-prefix-command 'my/org-prefix)
 (use-package org
-  :ensure t
+  :ensure nil
   :custom
   (org-directory "~/Documents/org")
   (org-startup-indented t)
@@ -945,7 +945,7 @@
   :init
   (pdf-loader-install))
 (use-package eglot
-  :ensure t
+  :ensure nil
   :config
   (use-package eglot-signature-eldoc-talkative
     :ensure t
@@ -1126,7 +1126,7 @@
   :bind
   ("C-c n" . sharper-main-transient))
 (use-package csharp-mode
-  :ensure t)
+  :ensure nil)
 (use-package fsharp-mode
   :ensure t
   :hook
