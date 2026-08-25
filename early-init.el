@@ -69,6 +69,25 @@
 ;; work.  The declarations stay in the file, so what Nix parses is unchanged.
 (require 'use-package-ensure)
 
+;; `use-package-ensure' registers `:ensure' with `add-to-list', which *prepends*
+;; it, so `:ensure' is processed outside `:if' / `:when' / `:unless' and fires
+;; even for a package the platform test excludes -- on macOS `fcitx', declared
+;; `:when is-linux', still asks to be ensured.  Move `:ensure' back inside those
+;; tests so that a platform-gated package is only ensured where it is used.
+;; `:ensure' still precedes `:vc' and everything that needs the package on
+;; `load-path'.  Nix reads the literal `:ensure t' in `init.el' either way, so
+;; the package set it builds is unchanged; this only governs runtime.
+(if (memq :unless use-package-keywords)
+    (setopt use-package-keywords
+            (mapcan (lambda (keyword)
+                      (if (eq keyword :unless)
+                          (list :unless :ensure)
+                        (list keyword)))
+                    (remq :ensure use-package-keywords)))
+  (display-warning
+   'init "`:unless' is missing from `use-package-keywords'; left `:ensure' where\
+ `use-package-ensure' put it." :error))
+
 (defvar my/packages-not-supplied nil
   "Packages `:ensure'd by `init.el' that were not supplied to this Emacs.")
 
