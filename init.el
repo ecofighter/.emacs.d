@@ -1192,10 +1192,13 @@ this is never done automatically."
     (add-to-list 'eglot-server-programs '(typst-ts-mode . ("tinymist" "lsp")))))
 (use-package typst-preview
   :ensure t
-  :commands (typst-preview-mode
-             typst-preview-start
-             typst-preview-stop
-             typst-preview-restart))
+  :commands
+  (typst-preview-mode
+   typst-preview-start
+   typst-preview-stop
+   typst-preview-restart)
+  :custom
+  (typst-preview-browser "xwidget"))
 
 (provide 'init)
 ;;; init.el ends here
