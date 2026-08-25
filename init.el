@@ -1034,7 +1034,8 @@ this is never done automatically."
                  (rust   . "https://github.com/tree-sitter/tree-sitter-rust")
                  (go     . "https://github.com/tree-sitter/tree-sitter-go")
                  (gomod  . "https://github.com/tree-sitter/tree-sitter-go-mod")
-                 (python . "https://github.com/tree-sitter/tree-sitter-python")))
+                 (python . "https://github.com/tree-sitter/tree-sitter-python")
+                 (typst  . "https://github.com/uben0/tree-sitter-typst")))
     (add-to-list 'treesit-language-source-alist
                  (list (car src) (cdr src) nil nil nil nil))))
 ;; c/c++
@@ -1188,6 +1189,31 @@ this is never done automatically."
                                (TeX-active-master (TeX-output-extension)))))))
     (declare-function my/run-after-compilation-finished-funcs "init")
     (advice-add #'auctex-cluttex--TeX-ClutTeX-sentinel :after #'my/run-after-compilation-finished-funcs)))
+
+;; typst
+(defgroup typstyle nil
+  "Format with typstyle."
+  :group 'extensions)
+(reformatter-define typstyle
+  :program "typstyle"
+  :group 'typstyle)
+(use-package typst-ts-mode
+  :ensure t
+  :mode ("\\.typ\\'" . typst-ts-mode)
+  :hook
+  (typst-ts-mode . eglot-ensure)
+  :init
+  ;; eglot ships no entry for Typst, and typst-ts-mode deliberately does not
+  ;; add one either (see typst-ts-lsp.el) to avoid clobbering a user's own.
+  ;; Register tinymist before any eglot-ensure can run.
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs '(typst-ts-mode . ("tinymist" "lsp")))))
+(use-package typst-preview
+  :ensure t
+  :commands (typst-preview-mode
+             typst-preview-start
+             typst-preview-stop
+             typst-preview-restart))
 
 (provide 'init)
 ;;; init.el ends here
