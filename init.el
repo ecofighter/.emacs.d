@@ -1198,7 +1198,8 @@ this is never done automatically."
    typst-preview-stop
    typst-preview-restart)
   :custom
-  (typst-preview-browser "xwidget"))
+  (typst-preview-browser "xwidget")
+  (typst-preview-partial-rendering nil))
 
 (provide 'init)
 ;;; init.el ends here
