@@ -39,7 +39,6 @@
 
 (require 'package)
 (setopt package-enable-at-startup t)
-(setopt package-install-upgrade-built-in nil)
 
 ;; Never use `package-quickstart'.  Packages are supplied from outside
 ;; `package-user-dir' -- under Nix, `emacsWithPackagesFromUsePackage' installs
@@ -60,9 +59,6 @@
     (with-demoted-errors "Cannot remove stale package quickstart file: %S"
       (delete-file file))))
 
-(when (fboundp 'native-comp-available-p)
-  (when (native-comp-available-p)
-    (setopt package-native-compile t)))
 (setenv "LSP_USE_PLISTS" "true")
 
 (provide 'early-init)

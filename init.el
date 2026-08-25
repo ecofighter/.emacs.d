@@ -7,22 +7,9 @@
 (defconst is-darwin `,(eq system-type 'darwin))
 (defconst is-windows `,(eq system-type 'windows-nt))
 (defconst is-wsl `,(and is-linux (getenv "WSL_DISTRO_NAME")))
-(custom-set-variables
- '(package-archives '(("melpa"        . "https://melpa.org/packages/")
-                      ("nongnu"       . "https://elpa.nongnu.org/nongnu/")
-                      ("gnu-devel"    . "https://elpa.gnu.org/devel/")
-                      ("gnu"          . "https://elpa.gnu.org/packages/")))
- '(package-archive-priorities '(("gnu" . 1)
-                                ("nongnu" . 2)
-                                ("melpa" . 3))))
-(defun my/pin-external-packages (&rest _)
-  "Add external packages to `package-pinned-packages'."
-  (dolist (pkg-entry package-alist)
-    (let* ((pkg-name (car pkg-entry))
-           (desc (cadr pkg-entry)))
-      (when (string= (package-desc-status desc) "external")
-        (setf (alist-get pkg-name package-pinned-packages) "external")))))
-(advice-add #'package-load-descriptor :after #'my/pin-external-packages)
+;; Packages come from outside `package-user-dir' -- Nix installs them into a
+;; store path listed in `package-directory-list' -- so nothing here downloads
+;; from ELPA and `package-archives' is left at its default.
 (require 'use-package)
 (use-package emacs
   :custom
@@ -290,11 +277,6 @@
         (shell-command (concat "powershell.exe start \"" url "\"")))
       (declare-function my/browse-url-via-powershell "init")
       (setf browse-url-browser-function #'my/browse-url-via-powershell))))
-(use-package auto-compile
-  :ensure t
-  :custom (auto-compile-native-compile t)
-  :hook
-  (emacs-lisp-mode . auto-compile-on-save-mode))
 ;; theme
 (tool-bar-mode -1)
 (menu-bar-mode -1)
