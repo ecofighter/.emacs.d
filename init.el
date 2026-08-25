@@ -23,10 +23,6 @@
       (when (string= (package-desc-status desc) "external")
         (setf (alist-get pkg-name package-pinned-packages) "external")))))
 (advice-add #'package-load-descriptor :after #'my/pin-external-packages)
-(when (version< emacs-version "29.1")
-  (unless (package-installed-p 'use-package)
-    (package-refresh-contents)
-    (package-install 'use-package)))
 (require 'use-package)
 (use-package emacs
   :custom
