@@ -39,8 +39,27 @@
 
 (require 'package)
 (setopt package-enable-at-startup t)
-(setopt package-quickstart t)
 (setopt package-install-upgrade-built-in nil)
+
+;; Never use `package-quickstart'.  Packages are supplied from outside
+;; `package-user-dir' -- under Nix, `emacsWithPackagesFromUsePackage' installs
+;; them into a store path that shows up in `package-directory-list' -- and
+;; quickstart is actively harmful then: `package-activate-all' short-circuits to
+;; `load'ing the quickstart file, so `package-load-all-descriptors' never runs
+;; and `package-alist' stays empty.  In that state `package-installed-p'
+;; consults only `package-activated-list' and never sees the externally supplied
+;; packages, so every `:ensure t' looks uninstalled and gets re-downloaded from
+;; ELPA on each startup.  Note that the short-circuit tests for the quickstart
+;; *file*, not the variable, so a stale file has to be removed as well --
+;; otherwise clearing `package-quickstart' changes nothing.  This runs before
+;; `package-activate-all', which is what makes the deletion effective.
+(setopt package-quickstart nil)
+(dolist (file (list (concat package-quickstart-file "c")
+                    package-quickstart-file))
+  (when (file-exists-p file)
+    (with-demoted-errors "Cannot remove stale package quickstart file: %S"
+      (delete-file file))))
+
 (when (fboundp 'native-comp-available-p)
   (when (native-comp-available-p)
     (setopt package-native-compile t)))
