@@ -632,7 +632,7 @@
   :unless is-windows
   :ensure t)
 (use-package eshell
-  :ensure t
+  :ensure nil
   :bind
   ("C-c '" . eshell))
 (use-package ddskk
@@ -872,8 +872,8 @@
                                  (:name "Not Scheduled"
                                         :scheduled nil)))
       (org-agenda-custom-commands '(("n" "Agenda and all TODOs"
-                                     ((agenda #1="")
-                                      (alltodo #1#)))
+                                     ((agenda "")
+                                      (alltodo "")))
                                     ("d" "Day agenda"
                                      ((agenda "" ((org-agenda-span 'day)))))
                                     ("w" "Week agenda"
@@ -1088,7 +1088,7 @@
   (rust-mode . cargo-minor-mode))
 ;; Go
 (use-package go-ts-mode
-  :ensure t
+  :ensure nil
   :mode
   ("\\.go\\'" . go-ts-mode)
   ("go.mod" . go-mod-ts-mode)
@@ -1174,7 +1174,7 @@
   (TeX-source-correlate-mode +1)
   (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
   (use-package reftex
-    :ensure t
+    :ensure nil
     :hook
     (LaTeX-mode . turn-on-reftex)
     :custom
