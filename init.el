@@ -1150,9 +1150,8 @@ this is never done automatically."
       (setq-default eglot-fsharp-server-install-dir nil))))
 ;; lean4
 (use-package lean4-mode
-  :commands lean4-mode
-  :vc (:url "https://github.com/leanprover-community/lean4-mode"
-            :rev :newest))
+  :ensure nil
+  :commands lean4-mode)
 ;; latex
 (defgroup latexindent nil
   "Indent with latexindent."
