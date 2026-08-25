@@ -59,6 +59,49 @@
     (with-demoted-errors "Cannot remove stale package quickstart file: %S"
       (delete-file file))))
 
+;; Supplying packages is Nix's job.  The `:ensure' keywords in `init.el' exist
+;; for `emacsWithPackagesFromUsePackage' to parse; they are not a licence to
+;; download anything at runtime.  Neutralise the runtime half of `:ensure' so
+;; that an Emacs which never received the wrapper's `EMACSLOADPATH' -- an
+;; unwrapped `Emacs.app' left behind in the LaunchServices database, say, whose
+;; `package-directory-list' therefore misses the Nix store -- says so instead of
+;; quietly refetching every package into `package-user-dir' and appearing to
+;; work.  The declarations stay in the file, so what Nix parses is unchanged.
+(require 'use-package-ensure)
+
+(defvar my/packages-not-supplied nil
+  "Packages `:ensure'd by `init.el' that were not supplied to this Emacs.")
+
+(defun my/use-package-ensure-noop (name args &rest _)
+  "Report the packages ARGS asks for as missing rather than installing them.
+Used as `use-package-ensure-function'.  ARGS is the list of `:ensure'
+values, and is destructured exactly as `use-package-ensure-elpa' does it,
+so that `:ensure nil' on a built-in stays silent.  Reporting has to happen
+here and not from `after-init-hook', because a missing package usually
+breaks the rest of `init.el' long before that hook runs."
+  (dolist (ensure args)
+    (let ((package (or (and (eq ensure t) (use-package-as-symbol name))
+                       ensure)))
+      (when (and package (not (package-installed-p package)))
+        (my/report-package-not-supplied package)))))
+
+(defun my/report-package-not-supplied (package)
+  "Warn that PACKAGE was not supplied, and will not be installed."
+  (unless my/packages-not-supplied
+    (display-warning
+     'init
+     (format "`package-alist' holds %d package(s).  When that is 0, this \
+Emacs was started without the `emacsWithPackages' wrapper that sets \
+`EMACSLOADPATH', so `package-directory-list' never picked up the Nix store \
+-- look at which Emacs binary is running rather than at this file."
+             (length package-alist))
+     :error))
+  (push package my/packages-not-supplied)
+  (display-warning
+   'init (format "%s is not supplied; refusing to install it" package) :error))
+
+(setopt use-package-ensure-function #'my/use-package-ensure-noop)
+
 (setenv "LSP_USE_PLISTS" "true")
 
 (provide 'early-init)
