@@ -1022,13 +1022,23 @@ this is never done automatically."
       (message "Installed %d tree-sitter grammar(s): %s"
                (length missing)
                (mapconcat #'symbol-name missing " ")))))
-;; c/c++
+;; Where each grammar comes from, should it ever have to be built by hand.
+;; Kept together at top level so the list is complete from startup: when
+;; these lived in the :config of their use-package block they only got
+;; registered once that mode happened to load.
 (when (treesit-available-p)
   (require 'treesit)
-  (add-to-list 'treesit-language-source-alist '(c . ("https://github.com/tree-sitter/tree-sitter-c"
-                                                     nil nil nil nil)))
-  (add-to-list 'treesit-language-source-alist '(cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"
-                                                       nil nil nil nil)))
+  (dolist (src '((c      . "https://github.com/tree-sitter/tree-sitter-c")
+                 (cpp    . "https://github.com/tree-sitter/tree-sitter-cpp")
+                 (nix    . "https://github.com/nix-community/tree-sitter-nix")
+                 (rust   . "https://github.com/tree-sitter/tree-sitter-rust")
+                 (go     . "https://github.com/tree-sitter/tree-sitter-go")
+                 (gomod  . "https://github.com/tree-sitter/tree-sitter-go-mod")
+                 (python . "https://github.com/tree-sitter/tree-sitter-python")))
+    (add-to-list 'treesit-language-source-alist
+                 (list (car src) (cdr src) nil nil nil nil))))
+;; c/c++
+(when (treesit-available-p)
   (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
   (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
   (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode)))
@@ -1066,12 +1076,7 @@ this is never done automatically."
   :ensure t
   :mode "\\.nix\\'"
   :hook
-  (nix-ts-mode . eglot-ensure)
-  :init
-  (when (treesit-available-p)
-    (require 'treesit)
-    (add-to-list 'treesit-language-source-alist '(nix . ("https://github.com/nix-community/tree-sitter-nix"
-                                                         nil nil nil nil)))))
+  (nix-ts-mode . eglot-ensure))
 ;; standard ml
 (use-package sml-mode
   :ensure t)
@@ -1086,12 +1091,7 @@ this is never done automatically."
   (rust-indent-offset 4)
   (rust-mode-treesitter-derive t)
   :hook
-  (rust-mode . eglot-ensure)
-  :config
-  (when (treesit-available-p)
-    (require 'treesit)
-    (add-to-list 'treesit-language-source-alist '(rust . ("https://github.com/tree-sitter/tree-sitter-rust"
-                                                          nil nil nil nil)))))
+  (rust-mode . eglot-ensure))
 (use-package cargo-mode
   :ensure t
   :hook
@@ -1105,22 +1105,12 @@ this is never done automatically."
   :hook
   (go-ts-mode . eglot-ensure)
   :custom
-  (go-ts-mode-indent-offset 2)
-  :config
-  (when (treesit-available-p)
-    (require 'treesit)
-    (add-to-list 'treesit-language-source-alist '(go . ("https://github.com/tree-sitter/tree-sitter-go"
-                                                        nil nil nil nil)))
-    (add-to-list 'treesit-language-source-alist '(gomod . ("https://github.com/tree-sitter/tree-sitter-go-mod"
-                                                           nil nil nil nil)))))
+  (go-ts-mode-indent-offset 2))
 ;; python
 (use-package python-mode
   :ensure t
   :config
   (when (treesit-available-p)
-    (require 'treesit)
-    (add-to-list 'treesit-language-source-alist '(python . ("https://github.com/tree-sitter/tree-sitter-python"
-                                                            nil nil nil nil)))
     (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode)))
   (with-eval-after-load "lsp-pylsp"
     (custom-set-variables
