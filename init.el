@@ -1000,17 +1000,35 @@
 (use-package web-mode
   :ensure t
   :mode ("\\.csp\\'" "\\.razor\\'" "\\.html?\\'"))
+;; Tree-sitter grammars are supplied by nix (treesit-grammars.with-grammars).
+;; The blocks below only register where each grammar comes from; nothing is
+;; fetched or compiled at startup.  Outside nix, install them by hand with
+;; M-x my/treesit-install-missing-grammars.
+(defun my/treesit-install-missing-grammars ()
+  "Install every grammar in `treesit-language-source-alist' that is not ready.
+Cloning and compiling a grammar needs network access and a C compiler, so
+this is never done automatically."
+  (interactive)
+  (unless (treesit-available-p)
+    (user-error "This Emacs was built without tree-sitter support"))
+  (require 'treesit)
+  (let ((missing (seq-remove (lambda (lang) (treesit-ready-p lang t))
+                             (mapcar #'car treesit-language-source-alist))))
+    (if (null missing)
+        (message "All registered tree-sitter grammars are ready")
+      (dolist (lang missing)
+        (message "Installing tree-sitter grammar for %s..." lang)
+        (treesit-install-language-grammar lang))
+      (message "Installed %d tree-sitter grammar(s): %s"
+               (length missing)
+               (mapconcat #'symbol-name missing " ")))))
 ;; c/c++
 (when (treesit-available-p)
-  (when (fboundp 'treesit-ready-p)
-    (unless (treesit-ready-p 'c)
-      (add-to-list 'treesit-language-source-alist '(c . ("https://github.com/tree-sitter/tree-sitter-c"
-                                                         nil nil nil nil)))
-      (treesit-install-language-grammar 'c))
-    (unless (treesit-ready-p 'cpp)
-      (add-to-list 'treesit-language-source-alist '(cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"
-                                                           nil nil nil nil)))
-      (treesit-install-language-grammar 'cpp)))
+  (require 'treesit)
+  (add-to-list 'treesit-language-source-alist '(c . ("https://github.com/tree-sitter/tree-sitter-c"
+                                                     nil nil nil nil)))
+  (add-to-list 'treesit-language-source-alist '(cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"
+                                                       nil nil nil nil)))
   (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
   (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
   (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode)))
@@ -1051,11 +1069,9 @@
   (nix-ts-mode . eglot-ensure)
   :init
   (when (treesit-available-p)
-    (when (fboundp 'treesit-ready-p)
-      (unless (treesit-ready-p 'nix)
-        (add-to-list 'treesit-language-source-alist '(nix . ("https://github.com/nix-community/tree-sitter-nix"
-                                                             nil nil nil nil)))
-        (treesit-install-language-grammar 'nix)))))
+    (require 'treesit)
+    (add-to-list 'treesit-language-source-alist '(nix . ("https://github.com/nix-community/tree-sitter-nix"
+                                                         nil nil nil nil)))))
 ;; standard ml
 (use-package sml-mode
   :ensure t)
@@ -1073,11 +1089,9 @@
   (rust-mode . eglot-ensure)
   :config
   (when (treesit-available-p)
-    (when (fboundp 'treesit-ready-p)
-      (unless (treesit-ready-p 'rust)
-        (add-to-list 'treesit-language-source-alist '(rust . ("https://github.com/tree-sitter/tree-sitter-rust"
-                                                              nil nil nil nil)))
-        (treesit-install-language-grammar 'rust)))))
+    (require 'treesit)
+    (add-to-list 'treesit-language-source-alist '(rust . ("https://github.com/tree-sitter/tree-sitter-rust"
+                                                          nil nil nil nil)))))
 (use-package cargo-mode
   :ensure t
   :hook
@@ -1094,25 +1108,19 @@
   (go-ts-mode-indent-offset 2)
   :config
   (when (treesit-available-p)
-    (when (fboundp 'treesit-ready-p)
-      (unless (treesit-ready-p 'go)
-        (add-to-list 'treesit-language-source-alist '(go . ("https://github.com/tree-sitter/tree-sitter-go"
-                                                              nil nil nil nil)))
-        (treesit-install-language-grammar 'go))
-      (unless (treesit-ready-p 'gomod)
-        (add-to-list 'treesit-language-source-alist '(gomod . ("https://github.com/tree-sitter/tree-sitter-go-mod"
-                                                              nil nil nil nil)))
-        (treesit-install-language-grammar 'gomod)))))
+    (require 'treesit)
+    (add-to-list 'treesit-language-source-alist '(go . ("https://github.com/tree-sitter/tree-sitter-go"
+                                                        nil nil nil nil)))
+    (add-to-list 'treesit-language-source-alist '(gomod . ("https://github.com/tree-sitter/tree-sitter-go-mod"
+                                                           nil nil nil nil)))))
 ;; python
 (use-package python-mode
   :ensure t
   :config
   (when (treesit-available-p)
-    (when (fboundp 'treesit-ready-p)
-      (unless (treesit-ready-p 'python)
-        (add-to-list 'treesit-language-source-alist '(python . ("https://github.com/tree-sitter/tree-sitter-python"
-                                                                nil nil nil nil)))
-        (treesit-install-language-grammar 'python)))
+    (require 'treesit)
+    (add-to-list 'treesit-language-source-alist '(python . ("https://github.com/tree-sitter/tree-sitter-python"
+                                                            nil nil nil nil)))
     (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode)))
   (with-eval-after-load "lsp-pylsp"
     (custom-set-variables
