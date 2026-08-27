@@ -1163,6 +1163,8 @@ this is never done automatically."
   :mode ("\\.typ\\'" . typst-ts-mode)
   :hook
   (typst-ts-mode . eglot-ensure)
+  :custom
+  (typst-ts-indent-offset 2)
   :init
   ;; eglot ships no entry for Typst, and typst-ts-mode deliberately does not
   ;; add one either (see typst-ts-lsp.el) to avoid clobbering a user's own.
