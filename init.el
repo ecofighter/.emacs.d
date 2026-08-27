@@ -957,7 +957,16 @@
   :ensure t
   :mode ("\\.md\\'" . gfm-mode)
   :custom
-  (markdown-command "pandoc --from gfm --to html5 --katex --standalone"))
+  (markdown-command '("pandoc" "--from=markdown" "--to=html5" "--mathml" "--highlight-style=pygments" "--standalone"))
+  :config
+  (when (featurep 'xwidget)
+    (require 'xwidget)
+    (defun my/markdown-live-preview-window-xwidget (file)
+      "Preview FILE with xwidget-webkit"
+      (let ((uri (format "file://%s" (expand-file-name file))))
+        (xwidget-webkit-browse-url uri)
+        xwidget-webkit-last-session-buffer))
+    (setq markdown-live-preview-window-function #'my/markdown-live-preview-window-xwidget)))
 ;; web
 (use-package web-mode
   :ensure t
