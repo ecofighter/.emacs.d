@@ -371,7 +371,7 @@
   (modus-themes-italic-constructs t)
   :init
   (add-to-list 'custom-theme-load-path (locate-user-emacs-file "theme/"))
-  (modus-themes-load-theme 'modus-operandi-tinted))
+  (modus-themes-load-theme 'modus-vivendi-tinted))
 (use-package fontaine
   :ensure t
   :autoload
