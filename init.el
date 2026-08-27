@@ -959,7 +959,7 @@
   :custom
   (markdown-command '("pandoc" "--from=markdown" "--to=html5" "--mathml" "--highlight-style=pygments" "--standalone"))
   :config
-  (when (featurep 'xwidget)
+  (when (featurep 'xwidget-internal)
     (require 'xwidget)
     (defun my/markdown-live-preview-window-xwidget (file)
       "Preview FILE with xwidget-webkit"
