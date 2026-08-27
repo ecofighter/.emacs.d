@@ -3,23 +3,21 @@
 ;;; Commentary:
 
 ;;; Code:
-(defconst is-linux `,(eq system-type 'gnu/linux))
-(defconst is-darwin `,(eq system-type 'darwin))
-(defconst is-windows `,(eq system-type 'windows-nt))
-(defconst is-wsl `,(and is-linux (getenv "WSL_DISTRO_NAME")))
+(defconst is-linux (eq system-type 'gnu/linux))
+(defconst is-darwin (eq system-type 'darwin))
+(defconst is-windows (eq system-type 'windows-nt))
+(defconst is-wsl (and is-linux (getenv "WSL_DISTRO_NAME")))
 ;; Packages come from outside `package-user-dir' -- Nix installs them into a
 ;; store path listed in `package-directory-list' -- so nothing here downloads
 ;; from ELPA and `package-archives' is left at its default.
 (require 'use-package)
 (use-package emacs
+  :ensure nil
   :custom
   (make-backup-files nil)
-  (backup-inhibited nil)
   (create-lockfiles nil)
   (fast-but-imprecise-scrolling t)
-  (process-adaptive-read-buffering t)
   (indent-tabs-mode nil)
-  (select-enable-clipboard t)
   (use-file-dialog nil)
   (use-short-answers t)
   (window-min-height 10)
@@ -29,9 +27,7 @@
   (vc-handled-backends '(Git))
   (fill-column 100)
   (tab-width 2)
-  (truncate-lines nil)
   (truncate-partial-width-windows nil)
-  (inhibit-startup-screen nil)
   (inhibit-x-resources t)
   (inhibit-startup-buffer-menu t)
   (blink-matching-paren nil)
@@ -41,6 +37,7 @@
   (completion-cycle-threshold 3)
   (tab-always-indent 'complete)
   (ring-bell-function 'ignore)
+  (inhibit-compacting-font-caches t)
   :config
   (defvaralias 'c-basic-offset 'tab-width)
   (defvaralias 'cperl-indent-level 'tab-width)
@@ -211,8 +208,9 @@
 
 (use-package alert
   :ensure t
+  :defer t
   :custom
-  (alert-default-style `,(cond
+  (alert-default-style (cond
                           ((and is-linux
                                 (not is-wsl))
                            'notifications)
@@ -236,7 +234,7 @@
   (if (display-graphic-p)
       (fcitx-aggressive-setup)
     (add-hook 'server-after-make-frame-hook #'fcitx-aggressive-setup)))
-`,(cond
+(cond
    ((and is-linux
          (not is-wsl))
     ;; credit: yorickvP on Github
@@ -278,9 +276,6 @@
       (declare-function my/browse-url-via-powershell "init")
       (setf browse-url-browser-function #'my/browse-url-via-powershell))))
 ;; theme
-(tool-bar-mode -1)
-(menu-bar-mode -1)
-(scroll-bar-mode -1)
 (use-package mood-line
   :ensure t
   :custom
@@ -307,7 +302,6 @@
 (use-package whitespace
   :ensure nil
   :custom
-  (show-trailing-whitespace t)
   (whitespace-style '(face trailing))
   :init
   (global-whitespace-mode +1))
@@ -379,8 +373,7 @@
    fontaine-set-preset
    fontaine-restore-latest-preset)
   :custom
-  (inhibit-compacting-font-caches t)
-  (fontaine-latest-state-file `,(locate-user-emacs-file "fontaine-latest-state.eld"))
+  (fontaine-latest-state-file (locate-user-emacs-file "fontaine-latest-state.eld"))
   (fontaine-presets '((source-han
                        :default-family "Source Han Code JP"
                        :variable-pitch-family "Source Han Sans")
@@ -408,23 +401,19 @@
   :init
   (fontaine-mode +1)
   :config
-  (if (or (display-graphic-p)
-          (daemonp))
-      (fontaine-set-preset (or (fontaine-restore-latest-preset) 'ibmplex))))
+  (when (or (display-graphic-p)
+            (daemonp))
+    (fontaine-set-preset (or (fontaine-restore-latest-preset) 'ibmplex))))
 (use-package exec-path-from-shell
   :ensure t
   :unless is-windows
   :hook (emacs-startup . exec-path-from-shell-initialize)
   :custom
   (exec-path-from-shell-arguments nil)
-  (exec-path-from-shell-check-startup-files nil)
   (exec-path-from-shell-variables '("PATH" "MANPATH" "LD_LIBRARY_PATH")))
 (use-package envrc
   :ensure t
   :hook (after-init . envrc-global-mode))
-(use-package eldoc
-  :init
-  (global-eldoc-mode +1))
 (use-package vertico
   :ensure t
   :bind
@@ -436,7 +425,6 @@
   :config
   (use-package vertico-directory
     :ensure nil
-    :after vertico
     :bind
     (:map vertico-directory-map
           ("C-h" . vertico-directory-up))
@@ -444,7 +432,6 @@
     (rfn-eshadow-update-overlay . vertico-directory-tidy))
   (use-package vertico-multiform
     :ensure nil
-    :after vertico
     :custom
     (vertico-multiform-categories '((file (:keymap . vertico-directory-map))))
     :config
@@ -482,7 +469,7 @@
                  (window-parameters (mode-line-format . none))))
   (use-package embark-consult
     :ensure t
-    :after (consult embark)))
+    :after consult))
 ;; completion
 (use-package orderless
   :ensure t
@@ -510,23 +497,19 @@
   (use-package corfu-terminal
     :ensure t
     :when (version< emacs-version "31")
-    :after corfu
     :unless (display-graphic-p)
     :config
     (corfu-terminal-mode +1))
   (use-package corfu-popupinfo
     :ensure nil
-    :after corfu
     :hook
     (corfu-mode . corfu-popupinfo-mode))
   (use-package corfu-history
     :ensure nil
-    :after corfu
     :init
     (corfu-history-mode))
   (use-package nerd-icons-corfu
     :ensure t
-    :after (corfu nerd-icons)
     :config
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
 (use-package cape
@@ -552,20 +535,19 @@
   :autoload (yas-expand)
   :bind
   (:map yas-minor-mode-map
-        ("C-<return>" . #'yas-expand))
+        ("C-<return>" . yas-expand))
   :init
   (yas-global-mode +1)
   :config
   (use-package yasnippet-snippets
-    :ensure t
-    :after yasnippet)
+    :ensure t)
   (use-package yasnippet-capf
     :ensure t
-    :after yasnippet
     :init
     (add-to-list 'completion-at-point-functions #'yasnippet-capf)))
 (use-package project
   :ensure nil
+  :defer t
   :custom
   (project-vc-extra-root-markers '(".project" "flake.nix")))
 (use-package tab-bar
@@ -577,7 +559,7 @@
 (use-package perspective
   :ensure t
   :custom
-  (persp-mode-prefix-key `,(kbd "C-x x"))
+  (persp-mode-prefix-key (kbd "C-x x"))
   (persp-sort 'created)
   :init
   (persp-mode +1)
@@ -587,7 +569,7 @@
 (use-package vundo
   :ensure t
   :bind
-  ("C-c u" . #'vundo))
+  ("C-c u" . vundo))
 (use-package avy
   :ensure t
   :bind
@@ -603,6 +585,7 @@
   (which-key-mode +1))
 (use-package tramp
   :ensure nil
+  :defer t
   :config
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 (use-package vterm
@@ -671,11 +654,12 @@
     ("C-c i e" . consult-flycheck)))
 (use-package ispell
   :ensure nil
+  :defer t
   :custom
   (ispell-program-name "hunspell")
   (ispell-really-hunspell t)
   (ispell-dictionary "en_US")
-  (ispell-personal-dictionary "~/Documents/ispell_persional.dict")
+  (ispell-personal-dictionary "~/Documents/ispell_personal.dict")
   :config
   (add-to-list 'ispell-skip-region-alist '("[^\000-\377]+")))
 (use-package paren
@@ -691,7 +675,7 @@
   :hook (vterm-mode . puni-disable-puni-mode)
   :bind
   ("C-c p w r" . puni-wrap-round)
-  ("C-c p w s" . puni-srap-square)
+  ("C-c p w s" . puni-wrap-square)
   ("C-c p w c" . puni-wrap-curly)
   ("C-c p w a" . puni-wrap-angle)
   ("C-c p s" . puni-splice)
@@ -714,11 +698,11 @@
 (use-package magit
   :ensure t
   :bind
-  ("C-x g" . #'magit)
+  ("C-x g" . magit)
   :config
   (use-package difftastic
     :ensure t
-    :after magit
+    :defer t
     :init
     (use-package transient
       :autoload (transient-get-suffix
@@ -727,20 +711,20 @@
       :ensure nil
       :bind
       (:map magit-blame-read-only-mode-map
-            ("M-RET" . #'difftastic-magit-show))
+            ("M-RET" . difftastic-magit-show))
       :config
       (let ((suffix '("M-RET" "Difftastic show" difftastic-magit-show)))
         (unless (equal (transient-parse-suffix 'magit-blame suffix)
                        (transient-get-suffix 'magit-blame "b"))
-          (transient-append-suffix 'magit-blame "b" suffix)))
-      (use-package magit-diff
-        :ensure magit
-        :config
-        (let ((suffix [("M-d" "Difftastic diff (dwim)" difftastic-magit-diff)
-                       ("M-c" "Difftastic show" difftastic-magit-show)]))
-          (unless (equal (transient-parse-suffix 'magit-diff suffix)
-                         (transient-get-suffix 'magit-diff '(-1 -1)))
-            (transient-append-suffix 'magit-diff '(-1 -1) suffix)))))))
+          (transient-append-suffix 'magit-blame "b" suffix))))
+    (use-package magit-diff
+      :ensure nil
+      :config
+      (let ((suffix [("M-d" "Difftastic diff (dwim)" difftastic-magit-diff)
+                     ("M-c" "Difftastic show" difftastic-magit-show)]))
+        (unless (equal (transient-parse-suffix 'magit-diff suffix)
+                       (transient-get-suffix 'magit-diff '(-1 -1)))
+          (transient-append-suffix 'magit-diff '(-1 -1) suffix))))))
 ;; org
 (defconst my/org-inbox-file "inbox.org"
   "Org file to use with `org-capture'.")
@@ -783,6 +767,7 @@
   :config
   (let ((inbox-file-name (expand-file-name my/org-inbox-file org-directory)))
     (unless (file-exists-p inbox-file-name)
+      (make-directory org-directory t)
       (with-temp-file inbox-file-name
         (insert "#+TITLE: inbox\n"))))
   (defun my/open-org-dir ()
@@ -793,8 +778,29 @@
     "Open the inbox file."
     (interactive)
     (find-file (expand-file-name my/org-inbox-file org-directory)))
+  (use-package org-modern
+    :ensure t
+    :custom
+    (org-modern-star t)
+    (org-modern-table nil)
+    :hook
+    (org-mode . org-modern-mode)
+    (org-agenda-finalize . org-modern-agenda))
+  (use-package valign
+    :ensure t
+    :custom
+    (valign-fancy-bar nil)
+    :hook
+    (org-mode . valign-mode))
+  (use-package org-tidy
+    :ensure t
+    :defer t)
+  (use-package org-web-tools
+    :ensure t
+    :defer t)
   (use-package org-agenda
     :ensure nil
+    :defer t
     :custom
     (org-agenda-span 'day)
     (org-agenda-files `(,(expand-file-name my/org-inbox-file org-directory)
@@ -805,33 +811,6 @@
     (org-agenda-block-separator nil)
     (org-agenda-compact-blocks t)
     :config
-    (use-package org-indent
-      :ensure nil
-      :after org
-      :hook
-      (org-mode . org-indent-mode))
-    (use-package org-modern
-      :ensure t
-      :after org
-      :custom
-      (org-modern-star t)
-      (org-modern-table nil)
-      :hook
-      (org-mode . org-modern-mode)
-      (org-agenda-finalize . org-modern-agenda))
-    (use-package valign
-      :ensure t
-      :after org
-      :custom
-      (valign-fancy-bar nil)
-      :hook
-      (org-mode . valign-mode))
-    (use-package org-tidy
-      :ensure t
-      :after org)
-    (use-package org-web-tools
-      :ensure t
-      :after org)
     (use-package org-super-agenda
       :ensure t
       :init
@@ -881,7 +860,7 @@
                                                  "%i %-12:c%?-12t% s")
                                                 (org-deadline-warning-days 28)
                                                 (org-super-agenda-groups
-                                                 '((:name "Finishied"
+                                                 '((:name "Finished"
                                                           :todo "DONE")
                                                    (:name "Past"
                                                           :scheduled past
@@ -897,10 +876,11 @@
   (use-package org-roam
     :ensure t
     :init
+    (make-directory (expand-file-name "roam" org-directory) t)
     (org-roam-db-autosync-mode +1)
     :custom
-    (org-roam-directory `,(expand-file-name "roam" org-directory))
-    (org-roam-db-location `,(locate-user-emacs-file "org-roam.db"))
+    (org-roam-directory (expand-file-name "roam" org-directory))
+    (org-roam-db-location (locate-user-emacs-file "org-roam.db"))
     (org-roam-capture-templates '(("p" "Permanent Note" plain "%?"
                                    :target (file+head
                                             "permanent/%<%Y%m%d%H%M%S>-${slug}.org"
@@ -913,21 +893,24 @@
                                    :target (file+head
                                             "literature/%<%Y%m%d%H%M%S>-${slug}.org"
                                             "#+title: ${title}\n#+filetags: :Literature:"))))
-    (org-roam-node-display-template `,(concat "${title:*} "
-                                              (propertize "${tags:10}" 'face 'org-tag)))))
+    (org-roam-node-display-template (concat "${title:*} "
+                                            (propertize "${tags:10}" 'face 'org-tag)))))
 (use-package graphviz-dot-mode
   :ensure t
-  :config
+  :defer t
+  :init
   (with-eval-after-load 'org
     (require 'ob-dot)))
 (use-package pdf-tools
   :ensure t
+  :defer t
   :custom
   (pdf-view-display-size 'fit-page)
   :init
   (pdf-loader-install))
 (use-package eglot
   :ensure nil
+  :defer t
   :config
   (use-package eglot-signature-eldoc-talkative
     :ensure t
@@ -950,12 +933,10 @@
   (lsp-auto-guess-root t)
   (lsp-enable-file-watchers t)
   (lsp-enable-folding nil)
-  (lsp-enable-snippet t)
   (lsp-enable-on-type-formatting t)
   (lsp-headerline-breadcrumb-enable nil)
   (lsp-document-sync-method nil)
   (lsp-response-timeout 5)
-  (lsp-use-plist t)
   (lsp-log-io nil)
   (lsp-semantic-tokens-enable t)
   (lsp-enable-snippet nil)
@@ -968,10 +949,9 @@
   (lsp-mode . lsp-enable-which-key-integration))
 (use-package devcontainer
   :ensure t
+  :defer t
   :custom
-  (devcontainer-engine 'podman)
-  :init
-  (devcontainer-mode +1))
+  (devcontainer-engine 'podman))
 ;; markdown
 (use-package markdown-mode
   :ensure t
@@ -1024,13 +1004,16 @@ this is never done automatically."
 (when (treesit-available-p)
   (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
   (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
-  (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode)))
+  (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode)))
 (use-package bison-mode
   :ensure t
+  :defer t
   :custom
   (bison-all-electricity-off t))
 (use-package cmake-mode
-  :ensure t)
+  :ensure t
+  :defer t)
 ;; haskell
 (use-package haskell-mode
   :ensure t
@@ -1038,14 +1021,16 @@ this is never done automatically."
   (haskell-mode . eglot-ensure))
 ;; ocaml
 (use-package tuareg
-  :ensure t)
+  :ensure t
+  :defer t)
 (use-package ocamlformat
   :ensure t
   :after tuareg
   :custom
   (ocamlformat-command '("ocamlformat")))
 (use-package dune
-  :ensure t)
+  :ensure t
+  :defer t)
 (use-package ocaml-eglot
   :ensure t
   :after tuareg
@@ -1062,7 +1047,8 @@ this is never done automatically."
   (nix-ts-mode . eglot-ensure))
 ;; standard ml
 (use-package sml-mode
-  :ensure t)
+  :ensure t
+  :defer t)
 (use-package smlfmt
   :ensure t
   :hook
@@ -1090,24 +1076,17 @@ this is never done automatically."
   :custom
   (go-ts-mode-indent-offset 2))
 ;; python
-(use-package python-mode
-  :ensure t
-  :config
-  (when (treesit-available-p)
-    (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode)))
-  (with-eval-after-load "lsp-pylsp"
-    (custom-set-variables
-     '(lsp-pylsp-plugins-black-enabled t)
-     '(lsp-pylsp-plugins-isort-enabled t)
-     '(lsp-pylsp-plugins-flake8-enabled t)
-     '(lsp-pylsp-plugins-mypy-enabled t))))
+(with-eval-after-load "lsp-pylsp"
+  (custom-set-variables
+   '(lsp-pylsp-plugins-black-enabled t)
+   '(lsp-pylsp-plugins-isort-enabled t)
+   '(lsp-pylsp-plugins-flake8-enabled t)
+   '(lsp-pylsp-plugins-mypy-enabled t)))
 ;; dotnet
 (use-package sharper
   :ensure t
   :bind
   ("C-c n" . sharper-main-transient))
-(use-package csharp-mode
-  :ensure nil)
 (use-package fsharp-mode
   :ensure t
   :hook

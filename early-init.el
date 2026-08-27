@@ -14,7 +14,9 @@
 
 (defun my/restore-variables-after-init ()
   "Restore variables changed in `early-init.el'."
-  (setopt file-name-handler-alist my/saved-file-name-handler-alist)
+  (setopt file-name-handler-alist
+          (delete-dups (append file-name-handler-alist
+                               my/saved-file-name-handler-alist)))
   (setopt gc-cons-threshold (* 128 1024 1024))
   (setopt gc-cons-percentage 0.2)
   (setopt inhibit-redisplay nil)
@@ -31,14 +33,13 @@
 
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)
-(push '(vertical-scroll-bars . 0) default-frame-alist)
+(push '(vertical-scroll-bars . nil) default-frame-alist)
 (push '(width . 130) default-frame-alist)
 (push '(height . 40) default-frame-alist)
 ;; (push '(undecorated . t) default-frame-alist)
 ;; (push '(fullscreen . maximized) default-frame-alist)
 
 (require 'package)
-(setopt package-enable-at-startup t)
 
 ;; Never use `package-quickstart'.  Packages are supplied from outside
 ;; `package-user-dir' -- under Nix, `emacsWithPackagesFromUsePackage' installs
