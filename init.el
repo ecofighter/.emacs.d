@@ -1176,6 +1176,9 @@ this is never done automatically."
    typst-preview-start
    typst-preview-stop
    typst-preview-restart)
+  :bind
+  (:map typst-preview-mode-map
+        ("C-c C-v" . typst-preview-send-position))
   :custom
   (typst-preview-browser "xwidget")
   (typst-preview-invert-colors "never"))
