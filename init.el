@@ -365,7 +365,7 @@
   (modus-themes-italic-constructs t)
   :init
   (add-to-list 'custom-theme-load-path (locate-user-emacs-file "theme/"))
-  (modus-themes-load-theme 'modus-vivendi-tinted))
+  (modus-themes-load-theme 'kanagawa-wave))
 (use-package fontaine
   :ensure t
   :autoload
@@ -1178,7 +1178,7 @@ this is never done automatically."
    typst-preview-restart)
   :custom
   (typst-preview-browser "xwidget")
-  (typst-preview-partial-rendering nil))
+  (typst-preview-invert-colors "never"))
 
 (provide 'init)
 ;;; init.el ends here
