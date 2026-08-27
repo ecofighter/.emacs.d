@@ -955,7 +955,7 @@
 ;; markdown
 (use-package markdown-mode
   :ensure t
-  :mode ("\\.md\\'" . gfm-mode)
+  :mode ("README\\.md\\'" . gfm-mode)
   :custom
   (markdown-command '("pandoc" "--from=markdown" "--to=html5" "--mathml" "--highlight-style=pygments" "--standalone"))
   :config
