@@ -443,6 +443,7 @@
   :bind
   ("C-c i i" . consult-imenu)
   ("C-c i l" . consult-line)
+  ("C-c i o" . consult-outline)
   ("C-c i p" . consult-yank-from-kill-ring)
   ("C-c i b" . consult-buffer)
   ("C-c i g" . consult-ripgrep))
