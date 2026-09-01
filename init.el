@@ -3,6 +3,9 @@
 ;;; Commentary:
 
 ;;; Code:
+
+;;; Core defaults
+
 (defconst is-linux (eq system-type 'gnu/linux))
 (defconst is-darwin (eq system-type 'darwin))
 (defconst is-windows (eq system-type 'windows-nt))
@@ -38,6 +41,9 @@
   (tab-always-indent 'complete)
   (ring-bell-function 'ignore)
   (inhibit-compacting-font-caches t)
+  ;; `my/split-window-sensibly-prefer-horizontally' is defined in :config below;
+  ;; the symbol is only called later, so the forward reference is fine.
+  (split-window-preferred-function #'my/split-window-sensibly-prefer-horizontally)
   :config
   (defvaralias 'c-basic-offset 'tab-width)
   (defvaralias 'cperl-indent-level 'tab-width)
@@ -73,8 +79,10 @@
 	           (when (window-splittable-p window t)
 	             (with-selected-window window
 	               (split-window-right))))))))
-  (declare-function my/split-window-sensibly-prefer-horizontally "init")
-  (advice-add #'split-window-sensibly :override #'my/split-window-sensibly-prefer-horizontally))
+  (declare-function my/split-window-sensibly-prefer-horizontally "init"))
+
+;;; Modal editing
+
 (use-package meow
   :ensure t
   :demand t
@@ -90,31 +98,16 @@
      '("j" . meow-next)
      '("k" . meow-prev)
      '("<escape>" . ignore))
+    (dolist (n (number-sequence 0 9))
+      ;; Use SPC (0-9) for digit arguments.
+      (meow-leader-define-key
+       (cons (number-to-string n) #'meow-digit-argument))
+      (meow-normal-define-key
+       (cons (number-to-string n) (intern (format "meow-expand-%d" n)))))
     (meow-leader-define-key
-     ;; Use SPC (0-9) for digit arguments.
-     '("1" . meow-digit-argument)
-     '("2" . meow-digit-argument)
-     '("3" . meow-digit-argument)
-     '("4" . meow-digit-argument)
-     '("5" . meow-digit-argument)
-     '("6" . meow-digit-argument)
-     '("7" . meow-digit-argument)
-     '("8" . meow-digit-argument)
-     '("9" . meow-digit-argument)
-     '("0" . meow-digit-argument)
      '("/" . meow-keypad-describe-key)
      '("?" . meow-cheatsheet))
     (meow-normal-define-key
-     '("0" . meow-expand-0)
-     '("9" . meow-expand-9)
-     '("8" . meow-expand-8)
-     '("7" . meow-expand-7)
-     '("6" . meow-expand-6)
-     '("5" . meow-expand-5)
-     '("4" . meow-expand-4)
-     '("3" . meow-expand-3)
-     '("2" . meow-expand-2)
-     '("1" . meow-expand-1)
      '("-" . negative-argument)
      '(";" . meow-reverse)
      '("," . meow-inner-of-thing)
@@ -170,6 +163,9 @@
   (declare-function meow-setup "init")
   (meow-setup)
   (meow-global-mode +1))
+
+;;; Built-in conveniences
+
 (use-package repeat
   :ensure nil
   :init
@@ -182,7 +178,6 @@
   :ensure nil
   :custom
   (recentf-exclude `(,(locate-user-emacs-file "bookmarks")
-                     ,(locate-user-emacs-file "elpa")
                      "/tmp.*"))
   :init
   (recentf-mode +1))
@@ -196,7 +191,7 @@
   (global-auto-revert-mode +1))
 (use-package editorconfig
   :ensure nil
-  :config
+  :init
   (editorconfig-mode +1))
 (use-package reformatter
   :ensure t)
@@ -205,6 +200,8 @@
   :when (treesit-available-p)
   :custom
   (treesit-font-lock-level 4))
+
+;;; Platform integration
 
 (use-package alert
   :ensure t
@@ -215,15 +212,15 @@
                                 (not is-wsl))
                            'notifications)
                           (is-darwin
-                           'osx-notifier)))
-  :config
-  (use-package alert-toast
-    :when (or is-windows
-              is-wsl)
-    :ensure t
-    :demand t
-    :custom
-    (alert-default-style 'toast)))
+                           'osx-notifier))))
+(use-package alert-toast
+  :when (or is-windows
+            is-wsl)
+  :ensure t
+  :after alert
+  :demand t
+  :custom
+  (alert-default-style 'toast))
 (use-package fcitx
   :ensure t
   :when is-linux
@@ -262,9 +259,8 @@
       (setq interprogram-cut-function 'wl-copy)
       (setq interprogram-paste-function 'wl-paste)))
    (is-darwin
-    (custom-set-variables
-     '(ns-command-modifier 'meta)
-     '(ns-alternate-modifier 'option)))
+    (setopt ns-command-modifier 'meta
+            ns-alternate-modifier 'option))
    ((or is-windows
         is-wsl)
     (when is-windows
@@ -275,27 +271,27 @@
         (shell-command (concat "powershell.exe start \"" url "\"")))
       (declare-function my/browse-url-via-powershell "init")
       (setf browse-url-browser-function #'my/browse-url-via-powershell))))
-;; theme
+;;; Appearance
+
 (use-package mood-line
   :ensure t
   :custom
   (mood-line-glyph-alist mood-line-glyphs-fira-code)
-  :config
+  :init
   (mood-line-mode +1))
 (use-package nerd-icons
   :ensure t
   :custom
-  (nerd-icons-font-family "Symbols Nerd Font Mono")
-  :config
-  (use-package nerd-icons-completion
-    :ensure t
-    :hook
-    (marginalia-mode . nerd-icons-completion-marginalia-setup)
-    :init
-    (nerd-icons-completion-mode +1))
-  (use-package nerd-icons-dired
-    :ensure t
-    :hook (dired-mode . nerd-icons-dired-mode)))
+  (nerd-icons-font-family "Symbols Nerd Font Mono"))
+(use-package nerd-icons-completion
+  :ensure t
+  :hook
+  (marginalia-mode . nerd-icons-completion-marginalia-setup)
+  :init
+  (nerd-icons-completion-mode +1))
+(use-package nerd-icons-dired
+  :ensure t
+  :hook (dired-mode . nerd-icons-dired-mode))
 (use-package rainbow-delimiters
   :ensure t
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -327,7 +323,7 @@
                     pdf-outline-buffer-mode-hook
                     proced-mode-hook
                     tabulated-list-mode-hook))
-  :config
+  :init
   (lin-global-mode +1))
 (use-package hl-todo
   :ensure t
@@ -351,11 +347,11 @@
                                           :mode-line-inactive spacious-padding-line-inactive
                                           :header-line-active spacious-padding-line-active
                                           :header-line-inactive spacious-padding-line-inactive))
-  :config
+  :init
   (spacious-padding-mode +1))
 (use-package breadcrumb
   :ensure t
-  :config
+  :init
   (breadcrumb-mode +1))
 (use-package modus-themes
   :ensure t
@@ -404,6 +400,8 @@
   (when (or (display-graphic-p)
             (daemonp))
     (fontaine-set-preset (or (fontaine-restore-latest-preset) 'ibmplex))))
+;;; Environment
+
 (use-package exec-path-from-shell
   :ensure t
   :unless is-windows
@@ -414,6 +412,9 @@
 (use-package envrc
   :ensure t
   :hook (after-init . envrc-global-mode))
+
+;;; Minibuffer and completion
+
 (use-package vertico
   :ensure t
   :bind
@@ -421,21 +422,22 @@
         ("C-m" . vertico-exit)
         ("C-j" . vertico-exit-input))
   :init
-  (vertico-mode +1)
+  (vertico-mode +1))
+(use-package vertico-directory
+  :ensure nil
+  :after vertico
+  :bind
+  (:map vertico-directory-map
+        ("C-h" . vertico-directory-up))
+  :hook
+  (rfn-eshadow-update-overlay . vertico-directory-tidy))
+(use-package vertico-multiform
+  :ensure nil
+  :after vertico
+  :custom
+  (vertico-multiform-categories '((file (:keymap . vertico-directory-map))))
   :config
-  (use-package vertico-directory
-    :ensure nil
-    :bind
-    (:map vertico-directory-map
-          ("C-h" . vertico-directory-up))
-    :hook
-    (rfn-eshadow-update-overlay . vertico-directory-tidy))
-  (use-package vertico-multiform
-    :ensure nil
-    :custom
-    (vertico-multiform-categories '((file (:keymap . vertico-directory-map))))
-    :config
-    (vertico-multiform-mode +1)))
+  (vertico-multiform-mode +1))
 (use-package consult
   :ensure t
   :bind
@@ -443,16 +445,15 @@
   ("C-c i l" . consult-line)
   ("C-c i p" . consult-yank-from-kill-ring)
   ("C-c i b" . consult-buffer)
-  ("C-c i g" . consult-ripgrep)
-  :config
-  (use-package consult-eglot
-    :ensure t
-    :after (consult eglot)
-    :bind
-    ("C-c i s" . consult-eglot-symbols)))
+  ("C-c i g" . consult-ripgrep))
+(use-package consult-eglot
+  :ensure t
+  :after (consult eglot)
+  :bind
+  ("C-c i s" . consult-eglot-symbols))
 (use-package marginalia
   :ensure t
-  :config
+  :init
   (marginalia-mode +1))
 (use-package embark
   :ensure t
@@ -466,11 +467,10 @@
   (add-to-list 'display-buffer-alist
                '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
                  nil
-                 (window-parameters (mode-line-format . none))))
-  (use-package embark-consult
-    :ensure t
-    :after consult))
-;; completion
+                 (window-parameters (mode-line-format . none)))))
+(use-package embark-consult
+  :ensure t
+  :after (embark consult))
 (use-package orderless
   :ensure t
   :demand t
@@ -492,26 +492,30 @@
   (corfu-quit-no-match t)
   (corfu-on-exact-match 'show)
   :init
-  (global-corfu-mode +1)
+  (global-corfu-mode +1))
+;; corfu-terminal decides per display at popup time whether to take over, so it
+;; is safe (and necessary for daemon use, where the first frame's type is
+;; unknown at startup) to enable it unconditionally.
+(use-package corfu-terminal
+  :ensure t
+  :when (version< emacs-version "31")
+  :after corfu
   :config
-  (use-package corfu-terminal
-    :ensure t
-    :when (version< emacs-version "31")
-    :unless (display-graphic-p)
-    :config
-    (corfu-terminal-mode +1))
-  (use-package corfu-popupinfo
-    :ensure nil
-    :hook
-    (corfu-mode . corfu-popupinfo-mode))
-  (use-package corfu-history
-    :ensure nil
-    :init
-    (corfu-history-mode))
-  (use-package nerd-icons-corfu
-    :ensure t
-    :config
-    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)))
+  (corfu-terminal-mode +1))
+(use-package corfu-popupinfo
+  :ensure nil
+  :hook
+  (corfu-mode . corfu-popupinfo-mode))
+(use-package corfu-history
+  :ensure nil
+  :after corfu
+  :config
+  (corfu-history-mode))
+(use-package nerd-icons-corfu
+  :ensure t
+  :after corfu
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 (use-package cape
   :ensure t
   :custom
@@ -530,21 +534,31 @@
     (advice-add 'lsp-completion-at-point :around #'cape-wrap-buster)
     (advice-add 'lsp-completion-at-point :around #'cape-wrap-nonexclusive)
     (advice-add 'lsp-completion-at-point :around #'cape-wrap-noninterruptible)))
+;;; Snippets
+
+;; `yas-minor-mode' on a hook instead of `yas-global-mode' keeps yasnippet (and
+;; its snippet tables) out of startup; `yas-reload-all' compiles the tables on
+;; first use.
 (use-package yasnippet
   :ensure t
   :autoload (yas-expand)
   :bind
   (:map yas-minor-mode-map
         ("C-<return>" . yas-expand))
-  :init
-  (yas-global-mode +1)
+  :hook
+  ((prog-mode conf-mode text-mode) . yas-minor-mode)
   :config
-  (use-package yasnippet-snippets
-    :ensure t)
-  (use-package yasnippet-capf
-    :ensure t
-    :init
-    (add-to-list 'completion-at-point-functions #'yasnippet-capf)))
+  (yas-reload-all))
+(use-package yasnippet-snippets
+  :ensure t
+  :after yasnippet)
+(use-package yasnippet-capf
+  :ensure t
+  :after yasnippet
+  :init
+  (add-to-list 'completion-at-point-functions #'yasnippet-capf))
+;;; Projects, windows, navigation
+
 (use-package project
   :ensure nil
   :defer t
@@ -588,70 +602,22 @@
   :defer t
   :config
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
-(use-package vterm
-  :disabled t
-  :unless is-windows
-  :ensure t)
 (use-package eshell
   :ensure nil
   :bind
   ("C-c '" . eshell))
-(use-package ddskk
-  :disabled t
-  :ensure t
-  :bind
-  ("C-x j" . skk-mode)
-  ("C-x J" . skk-auto-fill-mode)
-  :custom
-  (skk-kutouten-type '("．" . "，"))
-  (skk-use-azik t)
-  (skk-isearch-start-mode 'latin)
-  (skk-isearch-mode-enable t)
-  (default-input-method "japanese-skk")
-  (skk-status-indicator nil)
-  (skk-show-tooltip t)
-  (skk-show-inline nil)
-  (skk-show-mode-show t)
-  (skk-show-mode-style 'inline)
-  (skk-inline-show-face nil)
-  :custom-face
-  (skk-show-mode-inline-face . '((t (:inherit default :background "white smoke" :foreground "SlateGray4"))))
-  :init
-  (use-package ddskk-posframe
-    :ensure t
-    :hook (skk-mode . ddskk-posframe-mode))
-  :config
-  (eval-when-compile
-    (when (package-installed-p 'ddskk)
-      (require 'skk-vars)))
-  (with-eval-after-load 'skk-vars
-    (setq skk-get-jisyo-directory (locate-user-emacs-file "skk-get-jisyo/"))
-    (setq skk-large-jisyo (expand-file-name "SKK-JISYO.L" skk-get-jisyo-directory))
-    (setq skk-itaiji-jisyo (expand-file-name "SKK-JISYO.itaiji" skk-get-jisyo-directory))
-    (setq skk-cdb-large-jisyo (expand-file-name "SKK-JISYO.L.cdb" skk-get-jisyo-directory)))
-  (use-package skk-isearch
-    :ensure nil
-    :autoload (skk-isearch-mode-setup
-               skk-isearch-mode-cleanup)
-    :config
-    (add-hook 'isearch-mode-hook #'(lambda ()
-                                     (when (and (boundp 'skk-mode)
-                                                skk-mode
-                                                skk-isearch-mode-enable)
-                                       (skk-isearch-mode-setup))))
-    (add-hook 'isearch-mode-end-hook #'(lambda ()
-                                         (when (and (featurep 'skk-isearch)
-                                                    skk-isearch-mode-enable)
-                                           (skk-isearch-mode-cleanup))))))
+
+;;; Checking and spelling
+
 (use-package flycheck
   :ensure t
   :hook
-  (after-init . global-flycheck-mode)
-  :config
-  (use-package consult-flycheck
-    :ensure t
-    :bind
-    ("C-c i e" . consult-flycheck)))
+  (after-init . global-flycheck-mode))
+(use-package consult-flycheck
+  :ensure t
+  :after flycheck
+  :bind
+  ("C-c i e" . consult-flycheck))
 (use-package ispell
   :ensure nil
   :defer t
@@ -662,6 +628,9 @@
   (ispell-personal-dictionary "~/Documents/ispell_personal.dict")
   :config
   (add-to-list 'ispell-skip-region-alist '("[^\000-\377]+")))
+
+;;; Editing aids
+
 (use-package paren
   :ensure nil
   :init
@@ -672,7 +641,6 @@
   (electric-pair-mode +1))
 (use-package puni
   :ensure t
-  :hook (vterm-mode . puni-disable-puni-mode)
   :bind
   ("C-c p w r" . puni-wrap-round)
   ("C-c p w s" . puni-wrap-square)
@@ -695,37 +663,41 @@
   (highlight-indent-guides-auto-enabled t)
   (highlight-indent-guides-responsive 'stack)
   (highlight-indent-guides-method 'fill))
+;;; Version control
+
 (use-package magit
   :ensure t
   :bind
-  ("C-x g" . magit)
+  ("C-x g" . magit))
+(use-package difftastic
+  :ensure t
+  :defer t)
+(use-package transient
+  :ensure nil
+  :autoload (transient-get-suffix
+             transient-parse-suffix))
+(use-package magit-blame
+  :ensure nil
+  :after magit
+  :bind
+  (:map magit-blame-read-only-mode-map
+        ("M-RET" . difftastic-magit-show))
   :config
-  (use-package difftastic
-    :ensure t
-    :defer t
-    :init
-    (use-package transient
-      :autoload (transient-get-suffix
-                 transient-parse-suffix))
-    (use-package magit-blame
-      :ensure nil
-      :bind
-      (:map magit-blame-read-only-mode-map
-            ("M-RET" . difftastic-magit-show))
-      :config
-      (let ((suffix '("M-RET" "Difftastic show" difftastic-magit-show)))
-        (unless (equal (transient-parse-suffix 'magit-blame suffix)
-                       (transient-get-suffix 'magit-blame "b"))
-          (transient-append-suffix 'magit-blame "b" suffix))))
-    (use-package magit-diff
-      :ensure nil
-      :config
-      (let ((suffix [("M-d" "Difftastic diff (dwim)" difftastic-magit-diff)
-                     ("M-c" "Difftastic show" difftastic-magit-show)]))
-        (unless (equal (transient-parse-suffix 'magit-diff suffix)
-                       (transient-get-suffix 'magit-diff '(-1 -1)))
-          (transient-append-suffix 'magit-diff '(-1 -1) suffix))))))
-;; org
+  (let ((suffix '("M-RET" "Difftastic show" difftastic-magit-show)))
+    (unless (equal (transient-parse-suffix 'magit-blame suffix)
+                   (transient-get-suffix 'magit-blame "b"))
+      (transient-append-suffix 'magit-blame "b" suffix))))
+(use-package magit-diff
+  :ensure nil
+  :after magit
+  :config
+  (let ((suffix [("M-d" "Difftastic diff (dwim)" difftastic-magit-diff)
+                 ("M-c" "Difftastic show" difftastic-magit-show)]))
+    (unless (equal (transient-parse-suffix 'magit-diff suffix)
+                   (transient-get-suffix 'magit-diff '(-1 -1)))
+      (transient-append-suffix 'magit-diff '(-1 -1) suffix))))
+
+;;; Org
 (defconst my/org-inbox-file "inbox.org"
   "Org file to use with `org-capture'.")
 (defvar my/org-prefix nil
@@ -777,124 +749,128 @@
   (defun my/open-org-inbox ()
     "Open the inbox file."
     (interactive)
-    (find-file (expand-file-name my/org-inbox-file org-directory)))
-  (use-package org-modern
-    :ensure t
-    :custom
-    (org-modern-star t)
-    (org-modern-table nil)
-    :hook
-    (org-mode . org-modern-mode)
-    (org-agenda-finalize . org-modern-agenda))
-  (use-package valign
-    :ensure t
-    :custom
-    (valign-fancy-bar nil)
-    :hook
-    (org-mode . valign-mode))
-  (use-package org-tidy
-    :ensure t
-    :defer t)
-  (use-package org-web-tools
-    :ensure t
-    :defer t)
-  (use-package org-agenda
-    :ensure nil
-    :defer t
-    :custom
-    (org-agenda-span 'day)
-    (org-agenda-files `(,(expand-file-name my/org-inbox-file org-directory)
-                        ,(file-name-as-directory (expand-file-name "tasks/" org-directory))))
-    (org-agenda-skip-scheduled-if-done t)
-    (org-agenda-include-deadlines t)
-    (org-agenda-include-diary t)
-    (org-agenda-block-separator nil)
-    (org-agenda-compact-blocks t)
-    :config
-    (use-package org-super-agenda
-      :ensure t
-      :init
-      (org-super-agenda-mode +1)
-      :custom
-      (org-super-agenda-groups '((:name "Past"
-                                        :scheduled past
-                                        :deadline past)
-                                 (:name "Due Today"
-                                        :and (:deadline today :scheduled nil))
-                                 (:name "Today"
-                                        :scheduled today
-                                        :time-grid t)
-                                 (:name "Future"
-                                        :scheduled future)
-                                 (:name "Not Scheduled"
-                                        :scheduled nil)))
-      (org-agenda-custom-commands '(("n" "Agenda and all TODOs"
-                                     ((agenda "")
-                                      (alltodo "")))
-                                    ("d" "Day agenda"
-                                     ((agenda "" ((org-agenda-span 'day)))))
-                                    ("w" "Week agenda"
-                                     ((agenda "" ((org-agenda-span 'week)))))
-                                    ("q" "4 Weeks agenda"
-                                     ((agenda "" ((org-agenda-span 28)
-                                                  (org-deadline-warning-days 56)))))
-                                    ("c" "Super"
-                                     ((agenda ""
-                                              ((org-agenda-span 'day)
-                                               (org-agenda-prefix-format
-                                                "%i %-12:c%?-12t% s")
-                                               (org-deadline-warning-days 28)
-                                               (org-super-agenda-groups
-                                                '((:name "Past but not finished"
-                                                         :scheduled past
-                                                         :deadline past)
-                                                  (:name "Today"
-                                                         :time-grid t
-                                                         :deadline today
-                                                         :scheduled today)
-                                                  (:name "Soon"
-                                                         :anything t)))))
-                                      (alltodo ""
-                                               ((org-agenda-overriding-header "")
-                                                (org-agenda-prefix-format
-                                                 "%i %-12:c%?-12t% s")
-                                                (org-deadline-warning-days 28)
-                                                (org-super-agenda-groups
-                                                 '((:name "Finished"
-                                                          :todo "DONE")
-                                                   (:name "Past"
-                                                          :scheduled past
-                                                          :deadline past)
-                                                   (:name "Due Today"
-                                                          :deadline today)
-                                                   (:name "Not scheduled"
-                                                          :and (:scheduled nil :deadline t))
-                                                   (:name "No Deadline"
-                                                          :and (:scheduled nil :deadline nil))
-                                                   (:name "Future"
-                                                          :scheduled future)))))))))))
-  (use-package org-roam
-    :ensure t
-    :init
-    (make-directory (expand-file-name "roam" org-directory) t)
-    (org-roam-db-autosync-mode +1)
-    :custom
-    (org-roam-directory (expand-file-name "roam" org-directory))
-    (org-roam-db-location (locate-user-emacs-file "org-roam.db"))
-    (org-roam-capture-templates '(("p" "Permanent Note" plain "%?"
-                                   :target (file+head
-                                            "permanent/%<%Y%m%d%H%M%S>-${slug}.org"
-                                            "#+title: ${title}\n#+filetags: :Permanent:"))
-                                  ("f" "Fleet Note" plain "%?"
-                                   :target (file+head
-                                            "fleet/%<%Y%m%d%H%M%S>-${slug}.org"
-                                            "#+title: ${title}\n#+filetags: :Fleet:"))
-                                  ("l" "Literature Note" plain "%?"
-                                   :target (file+head
-                                            "literature/%<%Y%m%d%H%M%S>-${slug}.org"
-                                            "#+title: ${title}\n#+filetags: :Literature:"))))
-    (org-roam-node-display-template (concat "${title:*} "
-                                            (propertize "${tags:10}" 'face 'org-tag)))))
+    (find-file (expand-file-name my/org-inbox-file org-directory))))
+(use-package org-modern
+  :ensure t
+  :custom
+  (org-modern-star t)
+  (org-modern-table nil)
+  :hook
+  (org-mode . org-modern-mode)
+  (org-agenda-finalize . org-modern-agenda))
+(use-package valign
+  :ensure t
+  :custom
+  (valign-fancy-bar nil)
+  :hook
+  (org-mode . valign-mode))
+(use-package org-tidy
+  :ensure t
+  :defer t)
+(use-package org-web-tools
+  :ensure t
+  :defer t)
+;; :after org, because the :custom values below read `org-directory'.
+(use-package org-agenda
+  :ensure nil
+  :defer t
+  :after org
+  :custom
+  (org-agenda-span 'day)
+  (org-agenda-files `(,(expand-file-name my/org-inbox-file org-directory)
+                      ,(file-name-as-directory (expand-file-name "tasks/" org-directory))))
+  (org-agenda-skip-scheduled-if-done t)
+  (org-agenda-include-deadlines t)
+  (org-agenda-include-diary t)
+  (org-agenda-block-separator nil)
+  (org-agenda-compact-blocks t))
+(use-package org-super-agenda
+  :ensure t
+  :after org-agenda
+  :config
+  (org-super-agenda-mode +1)
+  :custom
+  (org-super-agenda-groups '((:name "Past"
+                                    :scheduled past
+                                    :deadline past)
+                             (:name "Due Today"
+                                    :and (:deadline today :scheduled nil))
+                             (:name "Today"
+                                    :scheduled today
+                                    :time-grid t)
+                             (:name "Future"
+                                    :scheduled future)
+                             (:name "Not Scheduled"
+                                    :scheduled nil)))
+  (org-agenda-custom-commands '(("n" "Agenda and all TODOs"
+                                 ((agenda "")
+                                  (alltodo "")))
+                                ("d" "Day agenda"
+                                 ((agenda "" ((org-agenda-span 'day)))))
+                                ("w" "Week agenda"
+                                 ((agenda "" ((org-agenda-span 'week)))))
+                                ("q" "4 Weeks agenda"
+                                 ((agenda "" ((org-agenda-span 28)
+                                              (org-deadline-warning-days 56)))))
+                                ("c" "Super"
+                                 ((agenda ""
+                                          ((org-agenda-span 'day)
+                                           (org-agenda-prefix-format
+                                            "%i %-12:c%?-12t% s")
+                                           (org-deadline-warning-days 28)
+                                           (org-super-agenda-groups
+                                            '((:name "Past but not finished"
+                                                     :scheduled past
+                                                     :deadline past)
+                                              (:name "Today"
+                                                     :time-grid t
+                                                     :deadline today
+                                                     :scheduled today)
+                                              (:name "Soon"
+                                                     :anything t)))))
+                                  (alltodo ""
+                                           ((org-agenda-overriding-header "")
+                                            (org-agenda-prefix-format
+                                             "%i %-12:c%?-12t% s")
+                                            (org-deadline-warning-days 28)
+                                            (org-super-agenda-groups
+                                             '((:name "Finished"
+                                                      :todo "DONE")
+                                               (:name "Past"
+                                                      :scheduled past
+                                                      :deadline past)
+                                               (:name "Due Today"
+                                                      :deadline today)
+                                               (:name "Not scheduled"
+                                                      :and (:scheduled nil :deadline t))
+                                               (:name "No Deadline"
+                                                      :and (:scheduled nil :deadline nil))
+                                               (:name "Future"
+                                                      :scheduled future))))))))))
+;; :after org, because :init and the :custom values read `org-directory'.
+(use-package org-roam
+  :ensure t
+  :after org
+  :init
+  (make-directory (expand-file-name "roam" org-directory) t)
+  (org-roam-db-autosync-mode +1)
+  :custom
+  (org-roam-directory (expand-file-name "roam" org-directory))
+  (org-roam-db-location (locate-user-emacs-file "org-roam.db"))
+  (org-roam-capture-templates '(("p" "Permanent Note" plain "%?"
+                                 :target (file+head
+                                          "permanent/%<%Y%m%d%H%M%S>-${slug}.org"
+                                          "#+title: ${title}\n#+filetags: :Permanent:"))
+                                ("f" "Fleet Note" plain "%?"
+                                 :target (file+head
+                                          "fleet/%<%Y%m%d%H%M%S>-${slug}.org"
+                                          "#+title: ${title}\n#+filetags: :Fleet:"))
+                                ("l" "Literature Note" plain "%?"
+                                 :target (file+head
+                                          "literature/%<%Y%m%d%H%M%S>-${slug}.org"
+                                          "#+title: ${title}\n#+filetags: :Literature:"))))
+  (org-roam-node-display-template (concat "${title:*} "
+                                          (propertize "${tags:10}" 'face 'org-tag))))
 (use-package graphviz-dot-mode
   :ensure t
   :defer t
@@ -908,25 +884,28 @@
   (pdf-view-display-size 'fit-page)
   :init
   (pdf-loader-install))
+;;; LSP
+
 (use-package eglot
   :ensure nil
-  :defer t
+  :defer t)
+(use-package eglot-signature-eldoc-talkative
+  :ensure t
+  :autoload eglot-signature-eldoc-talkative
+  :after (eglot eldoc)
+  :init
+  (defun my/eglot-specific-eldoc ()
+    "Add `eglot-signature-eldoc-talkative' to `eldoc-documentation-functions'."
+    (add-to-list 'eldoc-documentation-functions #'eglot-signature-eldoc-talkative))
+  (declare-function my/eglot-specific-eldoc "init")
+  (add-hook 'eglot-managed-mode-hook #'my/eglot-specific-eldoc))
+(use-package flycheck-eglot
+  :ensure t
+  :after (flycheck eglot)
   :config
-  (use-package eglot-signature-eldoc-talkative
-    :ensure t
-    :autoload eglot-signature-eldoc-talkative
-    :after (eglot eldoc)
-    :init
-    (defun my/eglot-specific-eldoc ()
-      "Add `eglot-signature-eldoc-talkative' to `eldoc-documentation-functions'."
-      (add-to-list 'eldoc-documentation-functions #'eglot-signature-eldoc-talkative))
-    (declare-function my/eglot-specific-eldoc "init")
-    (add-hook 'eglot-managed-mode-hook #'my/eglot-specific-eldoc))
-  (use-package flycheck-eglot
-    :ensure t
-    :after (flycheck eglot)
-    :config
-    (global-flycheck-eglot-mode +1)))
+  (global-flycheck-eglot-mode +1))
+;; lsp-mode stays around solely because `lean4-mode' is built on it; everything
+;; else in this config speaks eglot.
 (use-package lsp-mode
   :ensure t
   :custom
@@ -952,6 +931,8 @@
   :defer t
   :custom
   (devcontainer-engine 'podman))
+;;; Languages
+
 ;; markdown
 (use-package markdown-mode
   :ensure t
@@ -1085,12 +1066,11 @@ this is never done automatically."
   :custom
   (go-ts-mode-indent-offset 2))
 ;; python
-(with-eval-after-load "lsp-pylsp"
-  (custom-set-variables
-   '(lsp-pylsp-plugins-black-enabled t)
-   '(lsp-pylsp-plugins-isort-enabled t)
-   '(lsp-pylsp-plugins-flake8-enabled t)
-   '(lsp-pylsp-plugins-mypy-enabled t)))
+(use-package python
+  :ensure nil
+  :defer t
+  :hook
+  ((python-mode python-ts-mode) . eglot-ensure))
 ;; dotnet
 (use-package sharper
   :ensure t
@@ -1099,16 +1079,15 @@ this is never done automatically."
 (use-package fsharp-mode
   :ensure t
   :hook
-  (fsharp-mode . eglot-ensure)
+  (fsharp-mode . eglot-ensure))
+(use-package eglot-fsharp
+  :ensure t
+  :after (fsharp-mode eglot)
   :config
-  (use-package eglot-fsharp
-    :ensure t
-    :after eglot
-    :config
-    (when-let* ((executable (executable-find "fsautocomplete"))
-                (bindir (file-name-directory executable)))
-      (setq-default eglot-fsharp-server-path bindir)
-      (setq-default eglot-fsharp-server-install-dir nil))))
+  (when-let* ((executable (executable-find "fsautocomplete"))
+              (bindir (file-name-directory executable)))
+    (setq-default eglot-fsharp-server-path bindir)
+    (setq-default eglot-fsharp-server-install-dir nil)))
 ;; lean4
 (use-package lean4-mode
   :ensure nil
@@ -1193,6 +1172,13 @@ this is never done automatically."
   :custom
   (typst-preview-browser "xwidget")
   (typst-preview-invert-colors "never"))
+
+;;; Custom file
+
+;; Loaded last, once every package above has had its say.  `custom-file' itself
+;; is set in early-init.el.
+(when (file-exists-p custom-file)
+  (load custom-file))
 
 (provide 'init)
 ;;; init.el ends here

@@ -1,9 +1,9 @@
 ;;; early-init.el --- my early-init-file -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
+;; `custom-file' is loaded at the very end of init.el, after every package has
+;; been set up.
 (setopt custom-file (locate-user-emacs-file "custom.el"))
-(when (file-exists-p custom-file)
-  (load custom-file))
 
 (defconst my/saved-file-name-handler-alist file-name-handler-alist)
 (setopt file-name-handler-alist nil)
