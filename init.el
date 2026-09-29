@@ -564,7 +564,8 @@
   :ensure nil
   :defer t
   :custom
-  (project-vc-extra-root-markers '(".project" "flake.nix")))
+  (project-vc-extra-root-markers '(".project" "flake.nix"))
+  (project-vc-ignores '(".direnv/" "result")))
 (use-package tab-bar
   :ensure nil
   :custom
